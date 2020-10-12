@@ -1759,6 +1759,20 @@ class ProgressPageTests(ProgressPageBaseTests):
         self.assertEqual(response.cert_status, 'requesting')
         self.assertEqual(response.title, "Congratulations, you qualified for a certificate!")
 
+    def test_earned_but_not_available_get_cert_data(self):
+        """
+        Verify that earned but not available cert data is returned if cert has been earned, but isn't available.
+        """
+        self.generate_certificate(
+            "http://www.example.com/certificate.pdf", "verified"
+        )
+        with patch('lms.djangoapps.certificates.api.certificate_downloadable_status',
+                   return_value=self.mock_certificate_downloadable_status(earned_but_not_available=True)):
+            response = views.get_cert_data(self.user, self.course, CourseMode.VERIFIED, MagicMock(passed=True))
+
+        self.assertEqual(response.cert_status, 'earned_but_not_available')
+        self.assertEqual(response.title, "Your certificate will be available soon!")
+
     def assert_invalidate_certificate(self, certificate):
         """ Dry method to mark certificate as invalid. And assert the response. """
         CertificateInvalidationFactory.create(
@@ -1790,7 +1804,8 @@ class ProgressPageTests(ProgressPageBaseTests):
         return generated_certificate
 
     def mock_certificate_downloadable_status(
-            self, is_downloadable=False, is_generating=False, is_unverified=False, uuid=None, download_url=None
+            self, is_downloadable=False, is_generating=False, is_unverified=False, uuid=None, download_url=None,
+            earned_but_not_available=None,
     ):
         """Dry method to mock certificate downloadable status response."""
         return {
@@ -1799,6 +1814,7 @@ class ProgressPageTests(ProgressPageBaseTests):
             'is_unverified': is_unverified,
             'download_url': uuid,
             'uuid': download_url,
+            'earned_but_not_available': earned_but_not_available,
         }
 
 
@@ -3120,8 +3136,8 @@ class DatesTabTestCase(ModuleStoreTestCase):
         self.assertEqual(response.status_code, 200)
 
     @RELATIVE_DATES_FLAG.override(active=True)
-    @patch('edx_django_utils.monitoring.set_custom_metric')
-    def test_defaults(self, mock_set_custom_metric):
+    @patch('edx_django_utils.monitoring.set_custom_attribute')
+    def test_defaults(self, mock_set_custom_attribute):
         enrollment = CourseEnrollmentFactory(course_id=self.course.id, user=self.user, mode=CourseMode.VERIFIED)
         now = datetime.now(utc)
         with self.store.bulk_operations(self.course.id):
@@ -3169,7 +3185,7 @@ class DatesTabTestCase(ModuleStoreTestCase):
 
             response = self._get_response(self.course)
 
-            mock_set_custom_metric.assert_has_calls(expected_calls, any_order=True)
+            mock_set_custom_attribute.assert_has_calls(expected_calls, any_order=True)
             self.assertContains(response, subsection.display_name)
             # Don't show the Verification Deadline for audit
             self.assertNotContains(response, 'Verification Deadline')

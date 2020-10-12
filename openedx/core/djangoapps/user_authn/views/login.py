@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_http_methods
-from edx_django_utils.monitoring import set_custom_metric
+from edx_django_utils.monitoring import set_custom_attribute
 from ratelimit.decorators import ratelimit
 from ratelimitbackend.exceptions import RateLimitException
 from rest_framework.views import APIView
@@ -31,6 +31,7 @@ from rest_framework.views import APIView
 from edxmako.shortcuts import render_to_response
 from openedx.core.djangoapps.password_policy import compliance as password_policy_compliance
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangoapps.user_api.accounts.toggles import should_redirect_to_logistration_mircrofrontend
 from openedx.core.djangoapps.user_authn.views.login_form import get_login_session_form
 from openedx.core.djangoapps.user_authn.cookies import refresh_jwt_cookies, set_logged_in_cookies
 from openedx.core.djangoapps.user_authn.exceptions import AuthFailedError
@@ -87,7 +88,7 @@ def _do_third_party_auth(request):
             )
         )
 
-        raise AuthFailedError(message)
+        raise AuthFailedError(message, error_code='third-party-auth-with-no-linked-account')
 
 
 def _get_user_by_email(request):
@@ -143,39 +144,6 @@ def _enforce_password_policy_compliance(request, user):
         raise AuthFailedError(HTML(six.text_type(e)))
 
 
-def _generate_not_activated_message(user):
-    """
-    Generates the message displayed on the sign-in screen when a learner attempts to access the
-    system with an inactive account.
-    """
-
-    support_url = configuration_helpers.get_value(
-        'SUPPORT_SITE_LINK',
-        settings.SUPPORT_SITE_LINK
-    )
-
-    platform_name = configuration_helpers.get_value(
-        'PLATFORM_NAME',
-        settings.PLATFORM_NAME
-    )
-    not_activated_message = Text(_(
-        u'In order to sign in, you need to activate your account.{blank_lines}'
-        u'We just sent an activation link to {email_strong}. If '
-        u'you do not receive an email, check your spam folders or '
-        u'{link_start}contact {platform_name} Support{link_end}.'
-    )).format(
-        platform_name=platform_name,
-        blank_lines=HTML('<br/><br/>'),
-        email_strong=HTML('<strong>{email}</strong>').format(email=user.email),
-        link_start=HTML(u'<a href="{support_url}">').format(
-            support_url=support_url,
-        ),
-        link_end=HTML("</a>"),
-    )
-
-    return not_activated_message
-
-
 def _log_and_raise_inactive_user_auth_error(unauthenticated_user):
     """
     Depending on Django version we can get here a couple of ways, but this takes care of logging an auth attempt
@@ -194,7 +162,7 @@ def _log_and_raise_inactive_user_auth_error(unauthenticated_user):
     profile = UserProfile.objects.get(user=unauthenticated_user)
     compose_and_send_activation_email(unauthenticated_user, profile)
 
-    raise AuthFailedError(_generate_not_activated_message(unauthenticated_user))
+    raise AuthFailedError(error_code='inactive-user')
 
 
 def _authenticate_first_party(request, unauthenticated_user, third_party_auth_requested):
@@ -331,7 +299,7 @@ def _check_user_auth_flow(site, user):
             # User has a nonstandard email so we record their id.
             # we don't record their e-mail in case there is sensitive info accidentally
             # in there.
-            set_custom_metric('login_tpa_domain_shortcircuit_user_id', user.id)
+            set_custom_attribute('login_tpa_domain_shortcircuit_user_id', user.id)
             log.warn("User %s has nonstandard e-mail. Shortcircuiting THIRD_PART_AUTH_ONLY_DOMAIN check.", user.id)
             return
         user_domain = email_parts[1].strip().lower()
@@ -357,7 +325,7 @@ def _check_user_auth_flow(site, user):
 
 @login_required
 @require_http_methods(['GET'])
-def finish_auth(request):  # pylint: disable=unused-argument
+def finish_auth(request):
     """ Following logistration (1st or 3rd party), handle any special query string params.
 
     See FinishAuthView.js for details on the query string params.
@@ -434,7 +402,7 @@ def login_user(request):
     first_party_auth_requested = bool(request.POST.get('email')) or bool(request.POST.get('password'))
     is_user_third_party_authenticated = False
 
-    set_custom_metric('login_user_course_id', request.POST.get('course_id'))
+    set_custom_attribute('login_user_course_id', request.POST.get('course_id'))
 
     try:
         if third_party_auth_requested and not first_party_auth_requested:
@@ -448,14 +416,13 @@ def login_user(request):
             try:
                 user = _do_third_party_auth(request)
                 is_user_third_party_authenticated = True
-                set_custom_metric('login_user_tpa_success', True)
+                set_custom_attribute('login_user_tpa_success', True)
             except AuthFailedError as e:
-                set_custom_metric('login_user_tpa_success', False)
-                set_custom_metric('login_user_tpa_failure_msg', e.value)
+                set_custom_attribute('login_user_tpa_success', False)
+                set_custom_attribute('login_user_tpa_failure_msg', e.value)
 
                 # user successfully authenticated with a third party provider, but has no linked Open edX account
                 response_content = e.get_response()
-                response_content['error_code'] = 'third-party-auth-with-no-linked-account'
                 return JsonResponse(response_content, status=403)
         else:
             user = _get_user_by_email(request)
@@ -479,7 +446,7 @@ def login_user(request):
         if is_user_third_party_authenticated:
             running_pipeline = pipeline.get(request)
             redirect_url = pipeline.get_complete_url(backend_name=running_pipeline['backend'])
-        elif settings.FEATURES.get('ENABLE_LOGIN_MICROFRONTEND'):
+        elif should_redirect_to_logistration_mircrofrontend():
             redirect_url = get_next_url_for_login_page(request)
 
         response = JsonResponse({
@@ -490,15 +457,19 @@ def login_user(request):
         # Ensure that the external marketing site can
         # detect that the user is logged in.
         response = set_logged_in_cookies(request, response, possibly_authenticated_user)
-        set_custom_metric('login_user_auth_failed_error', False)
-        set_custom_metric('login_user_response_status', response.status_code)
-        set_custom_metric('login_user_redirect_url', redirect_url)
+        set_custom_attribute('login_user_auth_failed_error', False)
+        set_custom_attribute('login_user_response_status', response.status_code)
+        set_custom_attribute('login_user_redirect_url', redirect_url)
         return response
     except AuthFailedError as error:
-        log.exception(error.get_response())
-        response = JsonResponse(error.get_response(), status=400)
-        set_custom_metric('login_user_auth_failed_error', True)
-        set_custom_metric('login_user_response_status', response.status_code)
+        response_content = error.get_response()
+        log.exception(response_content)
+        if response_content.get('error_code') == 'inactive-user':
+            response_content['email'] = user.email
+
+        response = JsonResponse(response_content, status=400)
+        set_custom_attribute('login_user_auth_failed_error', True)
+        set_custom_attribute('login_user_response_status', response.status_code)
         return response
 
 
@@ -572,12 +543,12 @@ def _parse_analytics_param_for_course_id(request):
         # Works for an HttpRequest but not a rest_framework.request.Request.
         # Note: This case seems to be used for tests only.
         request.POST = modified_request
-        set_custom_metric('login_user_request_type', 'django')
+        set_custom_attribute('login_user_request_type', 'django')
     else:
         # The request must be a rest_framework.request.Request.
         # Note: Only DRF seems to be used in Production.
         request._data = modified_request  # pylint: disable=protected-access
-        set_custom_metric('login_user_request_type', 'drf')
+        set_custom_attribute('login_user_request_type', 'drf')
 
     # Include the course ID if it's specified in the analytics info
     # so it can be included in analytics events.
@@ -587,7 +558,7 @@ def _parse_analytics_param_for_course_id(request):
             if "enroll_course_id" in analytics:
                 modified_request["course_id"] = analytics.get("enroll_course_id")
         except (ValueError, TypeError):
-            set_custom_metric('shim_analytics_course_id', 'parse-error')
+            set_custom_attribute('shim_analytics_course_id', 'parse-error')
             log.error(
                 u"Could not parse analytics object sent to user API: {analytics}".format(
                     analytics=analytics

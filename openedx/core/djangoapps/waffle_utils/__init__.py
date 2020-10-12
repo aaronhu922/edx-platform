@@ -11,9 +11,9 @@ namespace.  For example::
    WAFFLE_FLAG_NAMESPACE = WaffleFlagNamespace(name='my_namespace')
 
    # Use CourseWaffleFlag when you are in the context of a course.
-   SOME_COURSE_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'some_course_feature')
+   SOME_COURSE_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'some_course_feature', __name__)
    # Use WaffleFlag when outside the context of a course.
-   SOME_FLAG = WaffleFlag(WAFFLE_FLAG_NAMESPACE, 'some_feature')
+   SOME_FLAG = WaffleFlag(WAFFLE_FLAG_NAMESPACE, 'some_feature', __name__)
 
 You can check these flags in code using the following::
 
@@ -48,7 +48,7 @@ For long-lived flags, you may want to change the default for devstack, sandboxes
 or new Open edX releases. For help with this, see:
 openedx/core/djangoapps/waffle_utils/docs/decisions/0001-refactor-waffle-flag-default.rst
 
-Also see ``WAFFLE_FLAG_CUSTOM_METRICS`` and docstring for _set_waffle_flag_metric
+Also see ``WAFFLE_FLAG_CUSTOM_ATTRIBUTES`` and docstring for _set_waffle_flag_attribute
 for temporarily instrumenting/monitoring waffle flag usage.
 
 """
@@ -63,7 +63,7 @@ from weakref import WeakSet
 import crum
 import six
 from django.conf import settings
-from edx_django_utils.monitoring import set_custom_metric
+from edx_django_utils.monitoring import set_custom_attribute
 from opaque_keys.edx.keys import CourseKey
 from waffle import flag_is_active, switch_is_active
 
@@ -188,18 +188,20 @@ class WaffleSwitch(object):
     # use a WeakSet so these instances can be garbage collected if need be
     _class_instances = WeakSet()
 
-    def __init__(self, waffle_namespace, switch_name):
+    def __init__(self, waffle_namespace, switch_name, module_name=None):
         """
         Arguments:
             waffle_namespace (WaffleSwitchNamespace | String): Namespace for this switch.
             switch_name (String): The name of the switch (without namespacing).
+            module_name (String): The name of the module where the flag is created. This should be ``__name__`` in most
+            cases.
         """
         if isinstance(waffle_namespace, six.string_types):
             waffle_namespace = WaffleSwitchNamespace(name=waffle_namespace)
 
         self.waffle_namespace = waffle_namespace
         self.switch_name = switch_name
-        self._module_name = _get_instance_module_name(self)
+        self._module_name = module_name or ""
         self._class_instances.add(self)
 
     @classmethod
@@ -283,12 +285,12 @@ class WaffleFlagNamespace(six.with_metaclass(ABCMeta, WaffleNamespace)):
             if value is not None:
                 # Do not cache value for the callback, because the key might be different.
                 # The callback needs to handle its own caching if it wants it.
-                self._set_waffle_flag_metric(namespaced_flag_name, value)
+                self._set_waffle_flag_attribute(namespaced_flag_name, value)
                 return value
 
         value = self._cached_flags.get(namespaced_flag_name)
         if value is not None:
-            self._set_waffle_flag_metric(namespaced_flag_name, value)
+            self._set_waffle_flag_attribute(namespaced_flag_name, value)
             return value
 
         request = crum.get_current_request()
@@ -299,14 +301,14 @@ class WaffleFlagNamespace(six.with_metaclass(ABCMeta, WaffleNamespace)):
             # in a normal request context. This case seems to occur when
             # a page redirects to a 404, or for celery workers.
             value = self._is_flag_active_for_everyone(namespaced_flag_name)
-            self._set_waffle_flag_metric(namespaced_flag_name, value)
-            set_custom_metric('warn_flag_no_request_return_value', value)
+            self._set_waffle_flag_attribute(namespaced_flag_name, value)
+            set_custom_attribute('warn_flag_no_request_return_value', value)
             return value
 
         value = flag_is_active(request, namespaced_flag_name)
         self._cached_flags[namespaced_flag_name] = value
 
-        self._set_waffle_flag_metric(namespaced_flag_name, value)
+        self._set_waffle_flag_attribute(namespaced_flag_name, value)
         return value
 
     def _is_flag_active_for_everyone(self, namespaced_flag_name):
@@ -323,14 +325,14 @@ class WaffleFlagNamespace(six.with_metaclass(ABCMeta, WaffleNamespace)):
         except Flag.DoesNotExist:
             return False
 
-    def _set_waffle_flag_metric(self, name, value):
+    def _set_waffle_flag_attribute(self, name, value):
         """
-        For any flag name in _WAFFLE_FLAG_CUSTOM_METRIC_SET, add name/value
-        to cached values and set custom metric if the value changed.
+        For any flag name in _WAFFLE_FLAG_CUSTOM_ATTRIBUTE_SET, add name/value
+        to cached values and set custom attribute if the value changed.
 
-        The name of the custom metric will have the prefix ``flag_`` and the
+        The name of the custom attribute will have the prefix ``flag_`` and the
         suffix will match the name of the flag.
-        The value of the custom metric could be False, True, or Both.
+        The value of the custom attribute could be False, True, or Both.
 
           The value Both would mean that the flag had both a True and False
           value at different times during the transaction. This is most
@@ -345,52 +347,49 @@ class WaffleFlagNamespace(six.with_metaclass(ABCMeta, WaffleNamespace)):
           WHERE flag_my.waffle.flag IS NOT NULL
           FACET appName, flag_my.waffle.flag
 
-        Important: Remember to configure ``WAFFLE_FLAG_CUSTOM_METRICS`` for
+        Important: Remember to configure ``WAFFLE_FLAG_CUSTOM_ATTRIBUTES`` for
           LMS, Studio and Workers in order to see waffle flag usage in all
           edx-platform environments.
 
         """
-        if name not in _WAFFLE_FLAG_CUSTOM_METRIC_SET:
+        if name not in _WAFFLE_FLAG_CUSTOM_ATTRIBUTE_SET:
             return
 
-        flag_metric_data = self._get_request_cache().setdefault('flag_metric', {})
+        flag_attribute_data = self._get_request_cache().setdefault('flag_attribute', {})
         is_value_change = False
-        if name not in flag_metric_data:
-            flag_metric_data[name] = str(value)
+        if name not in flag_attribute_data:
+            flag_attribute_data[name] = str(value)
             is_value_change = True
         else:
-            if flag_metric_data[name] != str(value):
-                flag_metric_data[name] = 'Both'
+            if flag_attribute_data[name] != str(value):
+                flag_attribute_data[name] = 'Both'
                 is_value_change = True
 
         if is_value_change:
-            metric_name = 'flag_{}'.format(name)
-            set_custom_metric(metric_name, flag_metric_data[name])
+            attribute_name = 'flag_{}'.format(name)
+            set_custom_attribute(attribute_name, flag_attribute_data[name])
 
 
-def _get_waffle_flag_custom_metrics_set():
+def _get_waffle_flag_custom_attributes_set():
     """
-    Returns a set based on the Django setting WAFFLE_FLAG_CUSTOM_METRICS (list).
+    Returns a set based on the Django setting WAFFLE_FLAG_CUSTOM_ATTRIBUTES (list).
     """
-    waffle_flag_custom_metrics = getattr(settings, _WAFFLE_FLAG_CUSTOM_METRICS, None)
-    waffle_flag_custom_metrics = waffle_flag_custom_metrics if waffle_flag_custom_metrics else []
-    return set(waffle_flag_custom_metrics)
+    waffle_flag_custom_attributes = getattr(settings, _WAFFLE_FLAG_CUSTOM_ATTRIBUTES, None)
+    waffle_flag_custom_attributes = waffle_flag_custom_attributes if waffle_flag_custom_attributes else []
+    return set(waffle_flag_custom_attributes)
 
-    # .. toggle_name: WAFFLE_FLAG_CUSTOM_METRICS
-    # .. toggle_implementation: DjangoSetting
-    # .. toggle_default: False
-    # .. toggle_description: A list of waffle flag to track with custom metrics having values of (True, False, or Both).
-    # .. toggle_category: monitoring
-    # .. toggle_use_cases: opt_in
-    # .. toggle_creation_date: 2020-06-17
-    # .. toggle_expiration_date: None
-    # .. toggle_tickets: None
-    # .. toggle_status: supported
-    # .. toggle_warnings: Intent is for temporary research (1 day - several weeks) of a flag's usage.
-_WAFFLE_FLAG_CUSTOM_METRICS = 'WAFFLE_FLAG_CUSTOM_METRICS'
+# .. toggle_name: WAFFLE_FLAG_CUSTOM_ATTRIBUTES
+# .. toggle_implementation: DjangoSetting
+# .. toggle_default: False
+# .. toggle_description: A list of waffle flags to track with custom attributes having
+#   values of (True, False, or Both).
+# .. toggle_use_cases: opt_in
+# .. toggle_creation_date: 2020-06-17
+# .. toggle_warnings: Intent is for temporary research (1 day - several weeks) of a flag's usage.
+_WAFFLE_FLAG_CUSTOM_ATTRIBUTES = 'WAFFLE_FLAG_CUSTOM_ATTRIBUTES'
 
-# set of waffle flags that should be instrumented with custom metrics
-_WAFFLE_FLAG_CUSTOM_METRIC_SET = _get_waffle_flag_custom_metrics_set()
+# set of waffle flags that should be instrumented with custom attributes
+_WAFFLE_FLAG_CUSTOM_ATTRIBUTE_SET = _get_waffle_flag_custom_attributes_set()
 
 
 class WaffleFlag(object):
@@ -400,14 +399,15 @@ class WaffleFlag(object):
     # use a WeakSet so these instances can be garbage collected if need be
     _class_instances = WeakSet()
 
-    def __init__(self, waffle_namespace, flag_name):
+    def __init__(self, waffle_namespace, flag_name, module_name=None):
         """
         Initializes the waffle flag instance.
 
         Arguments:
             waffle_namespace (WaffleFlagNamespace | String): Namespace for this flag.
             flag_name (String): The name of the flag (without namespacing).
-
+            module_name (String): The name of the module where the flag is created. This should be ``__name__`` in most
+            cases.
         """
         if isinstance(waffle_namespace, six.string_types):
             waffle_namespace = WaffleFlagNamespace(name=waffle_namespace)
@@ -415,7 +415,7 @@ class WaffleFlag(object):
         self.waffle_namespace = waffle_namespace
         self.waffle_namespace = waffle_namespace
         self.flag_name = flag_name
-        self._module_name = _get_instance_module_name(self)
+        self._module_name = module_name or ""
         self._class_instances.add(self)
 
     @classmethod
@@ -516,43 +516,3 @@ class CourseWaffleFlag(WaffleFlag):
             self.flag_name,
             check_before_waffle_callback=self._get_course_override_callback(course_key),
         )
-
-
-def _get_instance_module_name(instance_object):
-    """
-    Returns the module in which the passed instance object was defined.
-
-    This must be called from the ``__init__`` method of the instance class.
-    """
-    try:
-        stack = traceback.extract_stack()
-        # Example: 'openedx.core.djangoapps.waffle_utils'
-        instance_class_module = instance_object.__class__.__module__
-        # Example: 'openedx/core/djangoapps/waffle_utils'
-        class_module_as_path = instance_class_module.replace('.', '/')
-        module_string_index = -1
-        # start searching at -2, because -1 starts in this function.
-        # search up the stack to max of -10, because the class hierarchy
-        # shouldn't be that deep.
-        for stack_index in range(-2, -10, -1):
-            # Example: '/edx/app/edxapp/edx-platform/openedx/core/djangoapps/waffle_utils/__init__.py'
-            class_file_name = stack[stack_index].filename
-            if module_string_index == -1:
-                module_string_index = class_file_name.find(class_module_as_path)
-            if stack[stack_index].name != '__init__':
-                # assumes the instance is being defined as soon as we are
-                # no longer in any __init__ method of the class hierarchy.
-                break
-        # Example: '/edx/app/edxapp/edx-platform/openedx/core/djangoapps/programs/__init__.py'
-        instance_file_name = stack[stack_index].filename
-        # Example: 'openedx/core/djangoapps/programs/__init__.py'
-        instance_module_name = instance_file_name[module_string_index:]
-        # Example: 'openedx.core.djangoapps.programs.__init__.py'
-        instance_module_name = instance_module_name.replace('/', '.')
-        # Example: 'openedx.core.djangoapps.programs.__init__'
-        instance_module_name = re.sub(r'\.py$', '', instance_module_name)
-        # Example: 'openedx.core.djangoapps.programs'
-        instance_module_name = re.sub(r'\.__init__$', '', instance_module_name)
-        return instance_module_name
-    except Exception:  # pylint: disable=broad-except
-        return 'error.parsing.module'

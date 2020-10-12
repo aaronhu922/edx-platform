@@ -172,7 +172,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2020-08-23 20:42+0000\n"
+"POT-Creation-Date: 2020-09-27 20:43+0000\n"
 "PO-Revision-Date: 2019-01-20 20:43+0000\n"
 "Last-Translator: Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2019\n"
 "Language-Team: German (Germany) (https://www.transifex.com/open-edx/teams/6205/de_DE/)\n"
@@ -3801,18 +3801,6 @@ msgstr ""
 "durchlaufen."
 
 #: common/lib/xmodule/xmodule/course_module.py
-msgid "Bypass Course Home"
-msgstr "Umgehung der Kursstartseite"
-
-#: common/lib/xmodule/xmodule/course_module.py
-msgid ""
-"Bypass the course home tab when students arrive from the dashboard, sending "
-"them directly to course content."
-msgstr ""
-"Die Kursstartseite umgehen, wenn Teilnehmer von der Übersichtsseite kommen, "
-"damit diese direkt zu den Kursinhalten gelangen."
-
-#: common/lib/xmodule/xmodule/course_module.py
 msgid "Enable Subsection Prerequisites"
 msgstr "Unterabschnittsvoraussetzungen aktivieren"
 
@@ -6376,6 +6364,12 @@ msgstr "Erkunden Sie den Kurs"
 msgid "Not sure yet"
 msgstr "Noch nicht sicher"
 
+#: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
+msgid "({number} Question)"
+msgid_plural "({number} Questions)"
+msgstr[0] "({number} Frage)"
+msgstr[1] "({number} Fragen)"
+
 #: lms/djangoapps/course_home_api/outline/v1/views.py
 msgid ""
 "Please contact your degree administrator or edX Support if you have "
@@ -6392,6 +6386,18 @@ msgstr ""
 
 #: lms/djangoapps/course_home_api/outline/v1/views.py
 msgid "Welcome message successfully dismissed."
+msgstr ""
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "'goal_key' is required."
+msgstr ""
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "Your course goal has been successfully set."
+msgstr ""
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "Course goal updated successfully."
 msgstr ""
 
 #: lms/djangoapps/course_wiki/tab.py lms/djangoapps/course_wiki/views.py
@@ -7377,6 +7383,12 @@ msgstr ""
 "Die Anzahl der Sekunden bis zur Verzögerung / Timeout-Wartezeit, um Cookie-"
 "Werte von sailthru zu erhalten."
 
+#: lms/djangoapps/grades/rest_api/v1/gradebook_views.py
+msgid ""
+"Cannot override subsection grade: subsection is not available for target "
+"learner."
+msgstr ""
+
 #: lms/djangoapps/instructor/services.py
 #, python-brace-format
 msgid "Proctored Exam Review: {review_status}"
@@ -7702,6 +7714,10 @@ msgstr ""
 #: lms/djangoapps/instructor_task/api_helper.py
 msgid "ORA data"
 msgstr "ORA Daten"
+
+#: lms/djangoapps/instructor/views/api.py
+msgid "Attachments archive is being created."
+msgstr ""
 
 #: lms/djangoapps/instructor/views/api.py
 #: lms/djangoapps/instructor_task/api_helper.py
@@ -8158,6 +8174,10 @@ msgstr "Zertifikate erstellt"
 #: lms/djangoapps/instructor_task/tasks.py
 msgid "cohorted"
 msgstr "cohortet"
+
+#: lms/djangoapps/instructor_task/tasks.py
+msgid "compressed"
+msgstr ""
 
 #: lms/djangoapps/instructor_task/views.py
 msgid "No status information available"
@@ -11022,6 +11042,10 @@ msgid "Learning Sequences"
 msgstr "Lernsequenzen"
 
 #: openedx/core/djangoapps/content_libraries/api.py
+msgid "Cannot change or remove the access level for the only admin."
+msgstr ""
+
+#: openedx/core/djangoapps/content_libraries/api.py
 msgid "Library cannot have more than {} XBlocks"
 msgstr ""
 
@@ -11040,6 +11064,14 @@ msgstr "Nur Lesezugriff"
 #: openedx/core/djangoapps/content_libraries/models.py
 msgid "One and only one of 'user' and 'group' must be set."
 msgstr "Es muss entweder ein 'Benutzer' oder eine 'Gruppe' festgelegt werden."
+
+#: openedx/core/djangoapps/content_libraries/views.py
+msgid "We could not find a user with that email address."
+msgstr ""
+
+#: openedx/core/djangoapps/content_libraries/views.py
+msgid "This user already has access to this library."
+msgstr ""
 
 #: openedx/core/djangoapps/cors_csrf/models.py
 msgid ""
@@ -12206,27 +12238,12 @@ msgstr "Sie besitzen nicht die Berechtigung ein Konto zu eröffnen."
 #, python-brace-format
 msgid ""
 "You've successfully signed in to your {provider_name} account, but this "
-"account isn't linked with your {platform_name} account yet. {blank_lines}Use"
-" your {platform_name} username and password to sign in to {platform_name} "
-"below, and then link your {platform_name} account with {provider_name} from "
-"your dashboard. {blank_lines}If you don't have an account on {platform_name}"
-" yet, click {register_label_strong} at the top of the page."
+"account isn't linked with your {platform_name} account yet.Use your "
+"{platform_name} username and password to sign in to {platform_name} below, "
+"and then link your {platform_name} account with {provider_name} from your "
+"dashboard.If you don't have an account on {platform_name} yet, click "
+"{register_label_strong} at the top of the page."
 msgstr ""
-"Du hast dich erfolgreich in deinem {provider_name} Konto angemeldet, aber "
-"dieses Konto ist noch nicht mit deinem {platform_name} Konto verknüpft. "
-"{blank_lines}Verwenden Sie Ihren {platform_name} Benutzernamen und Ihr "
-"Passwort, um sich unten bei {platform_name} anzumelden, und verknüpfen Sie "
-"dann Ihr {platform_name} Konto mit {provider_name} aus Ihrer 'Meine Kurse' "
-"Übersicht. {blank_lines}Wenn Sie noch kein Konto bei {platform_name} haben, "
-"klicken Sie auf {register_label_strong} oben auf der Seite."
-
-#: openedx/core/djangoapps/user_authn/views/login.py
-#: lms/templates/header/navbar-not-authenticated.html
-#: lms/templates/navigation/navbar-not-authenticated.html
-#: themes/edx.org/lms/templates/header/navbar-not-authenticated.html
-#: themes/stanford-style/lms/templates/register-form.html
-msgid "Register"
-msgstr "Registrieren"
 
 #: openedx/core/djangoapps/user_authn/views/login.py
 msgid "There was an error receiving your login information. Please email us."
@@ -12245,19 +12262,6 @@ msgstr ""
 "{locked_out_period} Minuten können Sie erneut versuchen sich einzuloggen. "
 "{li_start}Um auf der sicheren Seite zu sein, können Sie Ihr Passwort "
 "{link_start}hier{link_end}zurücksetzen."
-
-#: openedx/core/djangoapps/user_authn/views/login.py
-#, python-brace-format
-msgid ""
-"In order to sign in, you need to activate your account.{blank_lines}We just "
-"sent an activation link to {email_strong}. If you do not receive an email, "
-"check your spam folders or {link_start}contact {platform_name} "
-"Support{link_end}."
-msgstr ""
-"Um sich anzumelden, müssen Sie Ihr Konto aktivieren.{blank_lines}Wir haben "
-"gerade einen Aktivierungslink an {email_strong} geschickt. Wenn Sie keine "
-"E-Mail erhalten, überprüfen Sie Ihre Spam-Ordner oder "
-"{link_start}kontaktieren Sie den {platform_name} Support{link_end}."
 
 #: openedx/core/djangoapps/user_authn/views/login.py
 msgid "Too many failed login attempts. Try again later."
@@ -15380,6 +15384,10 @@ msgstr ""
 #: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
 msgid "{subsection_format} due {{date}}"
 msgstr "{subsection_format} fällig am {{date}}"
+
+#: lms/templates/vert_module.html
+msgid "Due {date}"
+msgstr ""
 
 #: lms/templates/video.html
 msgid "Loading video player"
@@ -19093,7 +19101,6 @@ msgid "Sysadmin"
 msgstr "Systemadministrator"
 
 #: lms/templates/header/navbar-logo-header.html
-#: lms/templates/header/user_dropdown.html
 msgid "{name} Dashboard"
 msgstr ""
 
@@ -19111,6 +19118,13 @@ msgstr "Wie es funktioniert"
 #: lms/templates/navigation/navbar-not-authenticated.html
 msgid "Schools"
 msgstr "Schulen"
+
+#: lms/templates/header/navbar-not-authenticated.html
+#: lms/templates/navigation/navbar-not-authenticated.html
+#: themes/edx.org/lms/templates/header/navbar-not-authenticated.html
+#: themes/stanford-style/lms/templates/register-form.html
+msgid "Register"
+msgstr "Registrieren"
 
 #: lms/templates/header/user_dropdown.html
 msgid "Resume your last course"
@@ -19221,6 +19235,7 @@ msgstr ""
 #: lms/templates/instructor/instructor_dashboard_2/certificates.html
 #: lms/templates/instructor/instructor_dashboard_2/course_info.html
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 #: lms/templates/instructor/instructor_dashboard_2/send_email.html
 #: lms/templates/instructor/instructor_dashboard_2/student_admin.html
 msgid "Pending Tasks"
@@ -19229,6 +19244,7 @@ msgstr "Offene Aufgaben"
 #: lms/templates/instructor/instructor_dashboard_2/certificates.html
 #: lms/templates/instructor/instructor_dashboard_2/course_info.html
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 #: lms/templates/instructor/instructor_dashboard_2/student_admin.html
 msgid "The status for any active tasks appears in a table below."
 msgstr "Der Status für alle aktiven Aufgaben erscheint in der Tabelle unten."
@@ -19497,10 +19513,12 @@ msgstr ""
 " in einem Abschnitt machen."
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
 msgid "NOTE"
 msgstr "HINWEIS"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
 msgid ""
 "The generated report is limited to {max_entries} responses. If you expect "
 "more than {max_entries} responses, try generating the report on a chapter-"
@@ -19513,6 +19531,7 @@ msgstr ""
 "sich an Ihren Websiteadministrator, um das Limit zu erhöhen."
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/certificates.html
 msgid "Click to list certificates that are issued for this course:"
 msgstr ""
 "Klicken Sie hier für eine Liste aller ausgegebenen Zertifikate für diesen "
@@ -19539,6 +19558,7 @@ msgid "List enrolled students' profile information"
 msgstr "Profilinformationen der eingeschriebenen Teilnehmer auflisten"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/grading.html
 msgid ""
 "Click to generate a CSV grade report for all currently enrolled students."
 msgstr ""
@@ -19558,10 +19578,22 @@ msgid "Generate ORA Data Report"
 msgstr "ORA-Datenbericht generieren"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+msgid ""
+"Click to generate a ZIP file that contains all submission texts and "
+"attachments."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download.html
+msgid "Generate Submission Files Archive"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 msgid "Reports Available for Download"
 msgstr "Verfügbare Reports"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 msgid ""
 "The reports listed below are available for download, identified by UTC date "
 "and time of generation."
@@ -19598,6 +19630,24 @@ msgstr ""
 "90 Tage nach der Erstellung gelöscht. Wenn Sie Zugriff auf alte Berichte "
 "benötigen, laden Sie die Dateien herunter und speichern Sie sie gemäß den "
 "Datenschutzrichtlinien Ihrer Einrichtung.{li_end}{ul_end}"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
+msgid ""
+"The answer distribution report listed below is generated periodically by an "
+"automated background process.         The report is cumulative, so answers "
+"submitted after the process starts are included in a subsequent report."
+"         The report is generated several times per day."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
+msgid ""
+"{strong_start}Note{strong_end}: {ul_start}{li_start}To keep student data "
+"secure, you cannot save or         email these links for direct access. "
+"Copies of links expire within 5 minutes.{li_end}{li_start}Report files"
+"         are deleted 90 days after generation. If you will need access to "
+"old reports, download and store the files,         in accordance with your "
+"institution's data security policies.{li_end}{ul_end}"
+msgstr ""
 
 #: lms/templates/instructor/instructor_dashboard_2/edit_coupon_modal.html
 msgid "Edit Coupon Code"
@@ -20556,6 +20606,91 @@ msgid "Show the status for the tasks that you submitted for this problem."
 msgstr ""
 "Zeigt den Status für die Aufgaben an, die Sie für dieses Problem eingereicht"
 " haben."
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/certificates.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/grading.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid "Note"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
+msgid ""
+"Select a problem to generate a CSV         file that lists all student "
+"answers to the problem. You also select a section or chapter to include"
+"         results of all problems in that section or chapter."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to display the grading configuration for the                 course. "
+"The grading configuration is the breakdown of graded subsections of the "
+"course                 (such as exams and problem sets), and can be changed "
+"on the 'Grading'                 page (under 'Settings') in Studio."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid "Click to download a CSV of                 anonymized student IDs:"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"For large courses, generating some reports can take                 several "
+"hours. When report generation is complete, a                 link that "
+"includes the date and time of generation appears in the table below. These "
+"reports are                 generated in the background, meaning it is OK to"
+" navigate away from this page while your report is                 "
+"generating."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Please be patient and do not click these buttons                 multiple "
+"times. Clicking these buttons multiple times will significantly slow the "
+"generation                 process."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"For smaller courses, click to list                 profile information for "
+"enrolled students directly on this page:"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file of                 all students enrolled in "
+"this course, along with profile information such as email address and"
+"                 username:"
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file                 that lists learners who can "
+"enroll in the course but have not yet done so."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file                 of all proctored exam results "
+"in this course."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file of                 survey results for this "
+"course."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV                 ORA grade report for all currently "
+"enrolled students."
+msgstr ""
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV                 problem grade report for all "
+"currently enrolled students."
+msgstr ""
 
 #: lms/templates/learner_dashboard/_dashboard_navigation_courses.html
 #: themes/edx.org/lms/templates/dashboard.html
@@ -21695,12 +21830,6 @@ msgid "Expand All"
 msgstr "Alles erweitern"
 
 #: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
-msgid "({number} Question)"
-msgid_plural "({number} Questions)"
-msgstr[0] "({number} Frage)"
-msgstr[1] "({number} Fragen)"
-
-#: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
 msgid "Prerequisite: "
 msgstr "Voraussetzung: "
 
@@ -22832,6 +22961,27 @@ msgstr ""
 #: cms/templates/course_outline.html
 msgid "Unsupported Advance Modules"
 msgstr "NIcht unterstützte fortgeschrittene Module"
+
+#: cms/templates/course_outline.html cms/templates/settings_advanced.html
+msgid ""
+"This course has proctored exam settings that are incomplete or invalid."
+msgstr ""
+
+#: cms/templates/course_outline.html
+msgid ""
+"To update these settings go to the {link_start}Proctored Exam Settings "
+"page{link_end}."
+msgstr ""
+
+#: cms/templates/course_outline.html
+msgid ""
+"To update these settings go to the {link_start}Advanced Settings "
+"page{link_end}."
+msgstr ""
+
+#: cms/templates/course_outline.html cms/templates/settings_advanced.html
+msgid "Proctoring Settings Errors"
+msgstr ""
 
 #: cms/templates/course_outline.html
 msgid "Click to add a new section"
@@ -25247,6 +25397,18 @@ msgstr ""
 "Ihres Kurses. Diese Informationen beinhalten die Kursübersicht, das "
 "Kursbild, das Einleitungsvideo und die erwartete Zeit. Teilnehmer verwenden "
 "die  Informationsseite um neue Kurse auszuwählen, die sie belegen möchten. "
+
+#: cms/templates/settings_advanced.html
+msgid ""
+"You will be unable to make changes until the errors are resolved. To update "
+"these settings go to the {link_start}Proctored Exam Settings page{link_end}."
+msgstr ""
+
+#: cms/templates/settings_advanced.html
+msgid ""
+"You will be unable to make changes until the following settings are updated "
+"on the page below."
+msgstr ""
 
 #: cms/templates/settings_advanced.html
 msgid "Your policy changes have been saved."

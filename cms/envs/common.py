@@ -48,7 +48,7 @@ from datetime import timedelta
 import lms.envs.common
 # Although this module itself may not use these imported variables, other dependent modules may.
 from lms.envs.common import (
-    USE_TZ, ALL_LANGUAGES, update_module_store_settings, ASSET_IGNORE_REGEX,
+    USE_TZ, ALL_LANGUAGES, ASSET_IGNORE_REGEX,
     PARENTAL_CONSENT_AGE_LIMIT, REGISTRATION_EMAIL_PATTERNS_ALLOWED,
     # The following PROFILE_IMAGE_* settings are included as they are
     # indirectly accessed through the email opt-in API, which is
@@ -75,6 +75,7 @@ from lms.envs.common import (
     HEARTBEAT_CHECKS,
     HEARTBEAT_EXTENDED_CHECKS,
     HEARTBEAT_CELERY_TIMEOUT,
+    HEARTBEAT_CELERY_ROUTING_KEY,
 
     # Default site to use if no site exists matching request headers
     SITE_ID,
@@ -160,6 +161,12 @@ PLATFORM_TWITTER_ACCOUNT = "@YourPlatformTwitterAccount"
 # Dummy secret key for dev/test
 SECRET_KEY = 'dev key'
 FAVICON_PATH = 'images/favicon.ico'
+
+
+# .. setting_name: STUDIO_NAME
+# .. setting_default: Your Platform Studio
+# .. setting_description: The name that will appear on the landing page of Studio, as well as in various emails and
+#   templates.
 STUDIO_NAME = _("Your Platform Studio")
 STUDIO_SHORT_NAME = _("Studio")
 FEATURES = {
@@ -170,9 +177,10 @@ FEATURES = {
     'ENABLE_DISCUSSION_SERVICE': True,
     'ENABLE_TEXTBOOK': True,
 
+    # When True, all courses will be active, regardless of start date
     # DO NOT SET TO True IN THIS FILE
     # Doing so will cause all courses to be released on production
-    'DISABLE_START_DATES': False,  # When True, all courses will be active, regardless of start date
+    'DISABLE_START_DATES': False,
 
     # email address for studio staff (eg to request course creation)
     'STUDIO_REQUEST_EMAIL': '',
@@ -303,8 +311,6 @@ FEATURES = {
     # Whether or not the dynamic EnrollmentTrackUserPartition should be registered.
     'ENABLE_ENROLLMENT_TRACK_USER_PARTITION': True,
 
-    # Whether to send an email for failed password reset attempts or not. This is mainly useful for notifying users
-    # that they don't have an account associated with email addresses they believe they've registered with.
     'ENABLE_PASSWORD_RESET_FAILURE_EMAIL': False,
 
     # Whether archived courses (courses with end dates in the past) should be
@@ -338,14 +344,11 @@ FEATURES = {
     # .. toggle_name: ENABLE_CHANGE_USER_PASSWORD_ADMIN
     # .. toggle_implementation: DjangoSetting
     # .. toggle_default: False
-    # .. toggle_description: Set to True to enable changing a user password through django admin. This is disabled by default because enabling allows a method to bypass password policy.
-    # .. toggle_category: admin
+    # .. toggle_description: Set to True to enable changing a user password through django admin. This is disabled by
+    #   default because enabling allows a method to bypass password policy.
     # .. toggle_use_cases: open_edx
     # .. toggle_creation_date: 2020-02-21
-    # .. toggle_expiration_date: None
     # .. toggle_tickets: 'https://github.com/edx/edx-platform/pull/21616'
-    # .. toggle_status: supported
-    # .. toggle_warnings: None
     'ENABLE_CHANGE_USER_PASSWORD_ADMIN': False,
 
     ### ORA Feature Flags ###
@@ -354,42 +357,36 @@ FEATURES = {
     # .. toggle_implementation: DjangoSetting
     # .. toggle_default: False
     # .. toggle_description: Set to True to enable team-based ORA submissions.
-    # .. toggle_category: ora
-    # .. toggle_use_cases: incremental_release
+    # .. toggle_use_cases: temporary
     # .. toggle_creation_date: 2020-03-03
-    # .. toggle_expiration_date: None
+    # .. toggle_target_removal_date: None
     # .. toggle_tickets: https://openedx.atlassian.net/browse/EDUCATOR-4951
-    # .. toggle_status: supported
-    # .. toggle_warnings: None
+    # .. toggle_warnings: This temporary feature toggle does not have a target removal date.
     'ENABLE_ORA_TEAM_SUBMISSIONS': False,
 
     # .. toggle_name: ENABLE_ORA_ALL_FILE_URLS
     # .. toggle_implementation: DjangoSetting
     # .. toggle_default: False
     # .. toggle_description: A "work-around" feature toggle meant to help in cases where some file uploads are not
-    #      discoverable.  If enabled, will iterate through all possible file key suffixes up to the max for displaying
-    #      file metadata in staff assessments.
-    # .. toggle_category: ora
-    # .. toggle_use_cases: graceful_degradation
+    #   discoverable. If enabled, will iterate through all possible file key suffixes up to the max for displaying file
+    #   metadata in staff assessments.
+    # .. toggle_use_cases: temporary
     # .. toggle_creation_date: 2020-03-03
-    # .. toggle_expiration_date: None
+    # .. toggle_target_removal_date: None
     # .. toggle_tickets: https://openedx.atlassian.net/browse/EDUCATOR-4951
-    # .. toggle_status: supported
-    # .. toggle_warnings: None
+    # .. toggle_warnings: This temporary feature toggle does not have a target removal date.
     'ENABLE_ORA_ALL_FILE_URLS': False,
 
     # .. toggle_name: ENABLE_ORA_USER_STATE_UPLOAD_DATA
     # .. toggle_implementation: DjangoSetting
     # .. toggle_default: False
     # .. toggle_description: A "work-around" feature toggle meant to help in cases where some file uploads are not
-    #      discoverable.  If enabled, will pull file metadata from StudentModule.state for display in staff assessments.
-    # .. toggle_category: ora
-    # .. toggle_use_cases: graceful_degradation
+    #   discoverable. If enabled, will pull file metadata from StudentModule.state for display in staff assessments.
+    # .. toggle_use_cases: temporary
     # .. toggle_creation_date: 2020-03-03
-    # .. toggle_expiration_date: None
+    # .. toggle_target_removal_date: None
     # .. toggle_tickets: https://openedx.atlassian.net/browse/EDUCATOR-4951
-    # .. toggle_status: supported
-    # .. toggle_warnings: None
+    # .. toggle_warnings: This temporary feature toggle does not have a target removal date.
     'ENABLE_ORA_USER_STATE_UPLOAD_DATA': False,
 
     # .. toggle_name: DEPRECATE_OLD_COURSE_KEYS_IN_STUDIO
@@ -400,26 +397,24 @@ FEATURES = {
     #      To disable, set to False.
     #      To enable with a custom support deadline, set to an ISO-8601 date string:
     #        eg: '2020-09-01'
-    # .. toggle_category: n/a
-    # .. toggle_use_cases: incremental_release
+    # .. toggle_use_cases: temporary
     # .. toggle_creation_date: 2020-06-12
-    # .. toggle_expiration_date: 2020-12-01
-    # .. toggle_warnings: This can be removed once support is removed for deprecated course keys.
+    # .. toggle_target_removal_date: 2020-12-01
+    # .. toggle_warnings: This can be removed once support is removed for deprecated
+    #   course keys.
     # .. toggle_tickets: https://openedx.atlassian.net/browse/DEPR-58
-    # .. toggle_status: supported
     'DEPRECATE_OLD_COURSE_KEYS_IN_STUDIO': True,
 
     # .. toggle_name: ENABLE_LIBRARY_AUTHORING_MICROFRONTEND
     # .. toggle_implementation: DjangoSetting
     # .. toggle_default: False
     # .. toggle_description: Set to True to enable the Library Authoring MFE
-    # .. toggle_category: micro-frontend
-    # .. toggle_use_cases: incremental_release
+    # .. toggle_use_cases: temporary
     # .. toggle_creation_date: 2020-06-20
-    # .. toggle_expiration_date: 2020-12-31
+    # .. toggle_target_removal_date: 2020-12-31
     # .. toggle_tickets: https://openedx.atlassian.net/wiki/spaces/COMM/pages/1545011241/BD-14+Blockstore+Powered+Content+Libraries+Taxonomies
-    # .. toggle_status: supported
-    # .. toggle_warnings: Also set settings.LIBRARY_AUTHORING_MICROFRONTEND_URL and see REDIRECT_TO_LIBRARY_AUTHORING_MICROFRONTEND for rollout.
+    # .. toggle_warnings: Also set settings.LIBRARY_AUTHORING_MICROFRONTEND_URL and see
+    #   REDIRECT_TO_LIBRARY_AUTHORING_MICROFRONTEND for rollout.
     'ENABLE_LIBRARY_AUTHORING_MICROFRONTEND': False,
 }
 
@@ -673,7 +668,7 @@ MIDDLEWARE = [
     'edx_django_utils.monitoring.middleware.MonitoringMemoryMiddleware',
 
     # Cookie monitoring
-    'openedx.core.lib.request_utils.CookieMetricsMiddleware',
+    'openedx.core.lib.request_utils.CookieMonitoringMiddleware',
 
     'openedx.core.djangoapps.header_control.middleware.HeaderControlMiddleware',
     'django.middleware.cache.UpdateCacheMiddleware',
@@ -736,8 +731,8 @@ MIDDLEWARE = [
     # Enables force_django_cache_miss functionality for TieredCache.
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
 
-    # Outputs monitoring metrics for a request.
-    'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
+    # Adds monitoring attributes to requests.
+    'edx_rest_framework_extensions.middleware.RequestCustomAttributesMiddleware',
 
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
 
@@ -1220,6 +1215,7 @@ CELERY_IMPORTS = (
     'cms.djangoapps.contentstore.tasks',
     'openedx.core.djangoapps.bookmarks.tasks',
     'openedx.core.djangoapps.ccxcon.tasks',
+    'openedx.core.djangoapps.programs.tasks.v1.tasks',
 )
 
 # Message configuration
@@ -1321,7 +1317,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
+    'django_celery_results',
     'method_override',
 
     # Common Initialization
@@ -1451,7 +1447,7 @@ INSTALLED_APPS = [
     # by installed apps.
     'openedx.core.djangoapps.oauth_dispatch.apps.OAuthDispatchAppConfig',
     'lms.djangoapps.courseware',
-    'coursewarehistoryextended',
+    'lms.djangoapps.coursewarehistoryextended',
     'survey.apps.SurveyConfig',
     'lms.djangoapps.verify_student.apps.VerifyStudentConfig',
     'completion',
@@ -1510,7 +1506,7 @@ INSTALLED_APPS = [
     'openedx.features.course_duration_limits',
     'openedx.features.content_type_gating',
     'openedx.features.discounts',
-    'experiments',
+    'lms.djangoapps.experiments',
 
     'openedx.core.djangoapps.external_user_ids',
     # so sample_task is available to celery workers
@@ -1666,7 +1662,9 @@ OPTIONAL_APPS = (
     ('integrated_channels.sap_success_factors', None),
     ('integrated_channels.xapi', None),
     ('integrated_channels.cornerstone', None),
+    ('integrated_channels.blackboard', None),
     ('integrated_channels.canvas', None),
+    ('integrated_channels.moodle', None),
 )
 
 
@@ -2270,26 +2268,22 @@ EDXAPP_PARSE_KEYS = {}
 # .. toggle_implementation: DjangoSetting
 # .. toggle_default: False
 # .. toggle_description: Toggle for removing the deprecated /signin url.
-# .. toggle_category: n/a
-# .. toggle_use_cases: incremental_release
+# .. toggle_use_cases: temporary
 # .. toggle_creation_date: 2019-12-02
-# .. toggle_expiration_date: 2020-06-01
+# .. toggle_target_removal_date: 2020-06-01
 # .. toggle_warnings: This url can be removed once it no longer has any real traffic.
 # .. toggle_tickets: ARCH-1253
-# .. toggle_status: supported
 DISABLE_DEPRECATED_SIGNIN_URL = False
 
 # .. toggle_name: DISABLE_DEPRECATED_SIGNUP_URL
 # .. toggle_implementation: DjangoSetting
 # .. toggle_default: False
 # .. toggle_description: Toggle for removing the deprecated /signup url.
-# .. toggle_category: n/a
-# .. toggle_use_cases: incremental_release
+# .. toggle_use_cases: temporary
 # .. toggle_creation_date: 2019-12-02
-# .. toggle_expiration_date: 2020-06-01
+# .. toggle_target_removal_date: 2020-06-01
 # .. toggle_warnings: This url can be removed once it no longer has any real traffic.
 # .. toggle_tickets: ARCH-1253
-# .. toggle_status: supported
 DISABLE_DEPRECATED_SIGNUP_URL = False
 
 ##### LOGISTRATION RATE LIMIT SETTINGS #####

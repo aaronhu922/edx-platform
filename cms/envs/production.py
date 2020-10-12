@@ -109,7 +109,7 @@ BROKER_POOL_LIMIT = 0
 BROKER_CONNECTION_TIMEOUT = 1
 
 # For the Result Store, use the django cache named 'celery'
-CELERY_RESULT_BACKEND = 'djcelery.backends.cache:CacheBackend'
+CELERY_RESULT_BACKEND = 'django-cache'
 
 # When the broker is behind an ELB, use a heartbeat to refresh the
 # connection and to detect if it has been dropped.
@@ -293,6 +293,9 @@ STUDIO_SHORT_NAME = ENV_TOKENS.get('STUDIO_SHORT_NAME') or STUDIO_SHORT_NAME
 # Event Tracking
 if "TRACKING_IGNORE_URL_PATTERNS" in ENV_TOKENS:
     TRACKING_IGNORE_URL_PATTERNS = ENV_TOKENS.get("TRACKING_IGNORE_URL_PATTERNS")
+
+# Heartbeat
+HEARTBEAT_CELERY_ROUTING_KEY = ENV_TOKENS.get('HEARTBEAT_CELERY_ROUTING_KEY', HEARTBEAT_CELERY_ROUTING_KEY)
 
 LOGIN_REDIRECT_WHITELIST = [reverse_lazy('home')]
 

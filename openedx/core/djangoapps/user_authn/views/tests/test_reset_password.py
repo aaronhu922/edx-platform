@@ -2,7 +2,6 @@
 Test the various password reset flows
 """
 
-
 import json
 import re
 import unicodedata
@@ -39,7 +38,7 @@ from openedx.core.djangoapps.user_authn.views.password_reset import (
     SETTING_CHANGE_INITIATED, password_reset,
     PasswordResetConfirmWrapper)
 from openedx.core.djangolib.testing.utils import CacheIsolationTestCase
-from student.tests.factories import UserFactory
+from student.tests.factories import TEST_PASSWORD, UserFactory
 from student.tests.test_configuration_overrides import fake_get_value
 from student.tests.test_email import mock_render_to_string
 
@@ -77,6 +76,28 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         self.user_bad_passwd.is_active = False
         self.user_bad_passwd.password = UNUSABLE_PASSWORD_PREFIX
         self.user_bad_passwd.save()
+
+    def setup_request_session_with_token(self, request):
+        """
+        Internal helper to setup request session and add token in session.
+        """
+        process_request(request)
+        request.session[INTERNAL_RESET_SESSION_TOKEN] = self.token
+
+    @property
+    def password_reset_confirm_url(self):
+        """
+        Returns Password reset confirm URL
+        """
+        return reverse("password_reset_confirm", kwargs={"uidb36": self.uidb36, "token": self.token})
+
+    def send_password_reset_request(self):
+        """
+        Sends GET request on password reset url.
+        """
+        request = self.request_factory.get(self.password_reset_confirm_url)
+        self.setup_request_session_with_token(request)
+        return request
 
     @patch(
         'openedx.core.djangoapps.user_authn.views.password_reset.render_to_string',
@@ -163,6 +184,20 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
 
         cache.clear()
 
+    def assert_email_sent_successfully(self, expected):
+        """
+        Verify that the password confirm email has been sent to the user.
+        """
+        from_email = configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
+        sent_message = mail.outbox[0]
+        body = sent_message.body
+
+        self.assertIn(expected['subject'], sent_message.subject)
+        self.assertIn(expected['body'], body)
+        self.assertEqual(sent_message.from_email, from_email)
+        self.assertEqual(len(sent_message.to), 1)
+        self.assertIn(self.user.email, sent_message.to)
+
     def test_ratelimitted_from_same_ip_with_different_email(self):
         """
         Test that password reset endpoint allow only one request per minute per IP.
@@ -191,14 +226,14 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         self.request_password_reset(200)
         # now reset the time to 1 min from now in future and change the email and
         # verify that it will allow another request from same IP
-        for status in [200, 403]:
-            reset_time = datetime.now(UTC) + timedelta(seconds=61)
-            with freeze_time(reset_time):
+        reset_time = datetime.now(UTC) + timedelta(seconds=61)
+        with freeze_time(reset_time):
+            for status in [200, 403]:
                 self.request_password_reset(status)
 
-        # Even changing the IP will not allow more than two requests for same email.
-        new_ip = "8.8.8.8"
-        self.request_password_reset(403, new_ip=new_ip)
+            # Even changing the IP will not allow more than two requests for same email.
+            new_ip = "8.8.8.8"
+            self.request_password_reset(403, new_ip=new_ip)
 
         cache.clear()
 
@@ -388,31 +423,51 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
 
     def test_reset_password_good_token(self):
         """
-        Tests good token and uidb36 in password reset
+        Tests good token and uidb36 in password reset.
+
+        Scenario:
+        When the password reset url is opened
+        Then the page is redirected to url without token
+        And token gets set in session
+        When the redirected page is visited with token in session
+        Then reset password page renders
+        And inactive user is set to active
         """
-        url = reverse(
-            "password_reset_confirm",
-            kwargs={"uidb36": self.uidb36, "token": self.token}
-        )
-        good_reset_req = self.request_factory.get(url)
-        process_request(good_reset_req)
+        good_reset_req = self.send_password_reset_request()
         good_reset_req.user = self.user
-        PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token=self.token)
+        redirect_response = PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token=self.token)
+
+        good_reset_req = self.request_factory.get(redirect_response.url)
+        self.setup_request_session_with_token(good_reset_req)
+        good_reset_req.user = self.user
+        # set-password is the new token representation in the redirect url
+        PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token='set-password')
+
         self.user = User.objects.get(pk=self.user.pk)
         self.assertTrue(self.user.is_active)
 
     def test_reset_password_good_token_with_anonymous_user(self):
         """
-        Tests good token and uidb36 in password reset for anonymous user
+        Tests good token and uidb36 in password reset for anonymous user.
+
+        Scenario:
+        When the password reset url is opened with anonymous user in request
+        Then the page is redirected to url without token
+        And token gets set in session
+        When the redirected page is visited with token in session
+        Then reset password page renders
+        And inactive user associated with token is set to active
         """
-        url = reverse(
-            "password_reset_confirm",
-            kwargs={"uidb36": self.uidb36, "token": self.token}
-        )
-        good_reset_req = self.request_factory.get(url)
-        process_request(good_reset_req)
+        good_reset_req = self.send_password_reset_request()
         good_reset_req.user = AnonymousUser()
-        PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token=self.token)
+        redirect_response = PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token=self.token)
+
+        good_reset_req = self.request_factory.get(redirect_response.url)
+        self.setup_request_session_with_token(good_reset_req)
+        good_reset_req.user = AnonymousUser()
+        # set-password is the new token representation in the redirect url
+        PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token='set-password')
+
         self.user = User.objects.get(pk=self.user.pk)
         self.assertTrue(self.user.is_active)
 
@@ -422,13 +477,9 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         """
         self.assertFalse(self.user.is_active)
 
-        url = reverse(
-            'password_reset_confirm',
-            kwargs={'uidb36': self.uidb36, 'token': self.token}
-        )
         request_params = {'new_password1': 'password1', 'new_password2': 'password2'}
-        confirm_request = self.request_factory.post(url, data=request_params)
-        process_request(confirm_request)
+        confirm_request = self.request_factory.post(self.password_reset_confirm_url, data=request_params)
+        self.setup_request_session_with_token(confirm_request)
         confirm_request.user = self.user
 
         # Make a password reset request with mismatching passwords.
@@ -448,11 +499,7 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         # Retire the user.
         UserRetirementRequest.create_retirement_request(self.user)
 
-        url = reverse(
-            'password_reset_confirm',
-            kwargs={'uidb36': self.uidb36, 'token': self.token}
-        )
-        reset_req = self.request_factory.get(url)
+        reset_req = self.request_factory.get(self.password_reset_confirm_url)
         reset_req.user = self.user
         resp = PasswordResetConfirmWrapper.as_view()(reset_req, uidb36=self.uidb36, token=self.token)
 
@@ -468,23 +515,24 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         method of NFKC.
         In this test, the input password is u'p\u212bssword'. It should be normalized to u'p\xc5ssword'
         """
-        url = reverse(
-            "password_reset_confirm",
-            kwargs={"uidb36": self.uidb36, "token": self.token}
-        )
-
         password = u'p\u212bssword'
         request_params = {'new_password1': password, 'new_password2': password}
-        confirm_request = self.request_factory.post(url, data=request_params)
+        confirm_request = self.request_factory.post(self.password_reset_confirm_url, data=request_params)
         process_request(confirm_request)
         confirm_request.session[INTERNAL_RESET_SESSION_TOKEN] = self.token
         confirm_request.user = self.user
+        confirm_request.site = Mock(domain='example.com')
         __ = PasswordResetConfirmWrapper.as_view()(confirm_request, uidb36=self.uidb36, token=self.token)
 
         user = User.objects.get(pk=self.user.pk)
         salt_val = user.password.split('$')[1]
         expected_user_password = make_password(unicodedata.normalize('NFKC', u'p\u212bssword'), salt_val)
         self.assertEqual(expected_user_password, user.password)
+
+        self.assert_email_sent_successfully({
+            'subject': 'Password reset completed',
+            'body': 'This is to confirm that you have successfully changed your password'
+        })
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=[
         create_validator_config('util.password_policy_validators.MinimumLengthValidator', {'min_length': 2}),
@@ -505,13 +553,9 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         Tests that if we provide password characters less then PASSWORD_MIN_LENGTH,
         or more than PASSWORD_MAX_LENGTH, password reset will fail with error message.
         """
-
-        url = reverse(
-            'password_reset_confirm',
-            kwargs={'uidb36': self.uidb36, 'token': self.token}
-        )
         request_params = {'new_password1': password_dict['password'], 'new_password2': password_dict['password']}
-        confirm_request = self.request_factory.post(url, data=request_params)
+        confirm_request = self.request_factory.post(self.password_reset_confirm_url, data=request_params)
+        self.setup_request_session_with_token(confirm_request)
         confirm_request.user = self.user
 
         # Make a password reset request with minimum/maximum passwords characters.
@@ -525,12 +569,7 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         """
         Tests password reset confirmation page for site configuration override.
         """
-        url = reverse(
-            "password_reset_confirm",
-            kwargs={"uidb36": self.uidb36, "token": self.token}
-        )
-        good_reset_req = self.request_factory.get(url)
-        process_request(good_reset_req)
+        good_reset_req = self.send_password_reset_request()
         good_reset_req.user = self.user
         PasswordResetConfirmWrapper.as_view()(good_reset_req, uidb36=self.uidb36, token=self.token)
         confirm_kwargs = reset_confirm.call_args[1]
@@ -561,11 +600,7 @@ class ResetPasswordTests(EventTestMixin, CacheIsolationTestCase):
         """
         Tests that user should not be able to reset password through other user's token
         """
-        reset_url = reverse(
-            "password_reset_confirm",
-            kwargs={"uidb36": self.uidb36, "token": self.token}
-        )
-        reset_request = self.request_factory.get(reset_url)
+        reset_request = self.request_factory.get(self.password_reset_confirm_url)
         reset_request.user = UserFactory.create()
 
         self.assertRaises(Http404, PasswordResetConfirmWrapper.as_view(), reset_request, uidb36=self.uidb36,
@@ -629,3 +664,52 @@ class PasswordResetViewTest(UserAPITestCase):
                 "supplementalLink": "",
             }
         ])
+
+
+@skip_unless_lms
+class PasswordResetTokenValidateViewTest(UserAPITestCase):
+    """Tests of the user API's password reset endpoint. """
+
+    def setUp(self):
+        super(PasswordResetTokenValidateViewTest, self).setUp()
+        self.user = UserFactory.create()
+        self.user.is_active = False
+        self.user.save()
+        self.token = '{uidb36}-{token}'.format(
+            uidb36=int_to_base36(self.user.id),
+            token=default_token_generator.make_token(self.user)
+        )
+        self.url = reverse("user_api_password_reset_token_validate")
+
+    def test_reset_password_valid_token(self):
+        """
+        Verify that API valid token response and activate user if not active.
+        """
+        response = self.client.post(self.url, data={'token': self.token})
+        json_response = json.loads(response.content.decode('utf-8'))
+        self.assertTrue(json_response.get('is_valid'))
+
+        self.user = User.objects.get(pk=self.user.pk)
+        self.assertTrue(self.user.is_active)
+
+    def test_reset_password_invalid_token(self):
+        """
+        Verify that API invalid token response if token is invalid.
+        """
+        response = self.client.post(self.url, data={'token': 'invalid-token'})
+        json_response = json.loads(response.content.decode('utf-8'))
+        self.assertFalse(json_response.get('is_valid'))
+
+    def test_reset_password_token_with_other_user(self):
+        """
+        Verify that API returns invalid token response if the user different.
+        """
+        different_user = UserFactory.create(password=TEST_PASSWORD)
+        self.client.login(username=different_user.username, password=TEST_PASSWORD)
+
+        response = self.client.post(self.url, {'token': self.token})
+        json_response = json.loads(response.content.decode('utf-8'))
+        self.assertFalse(json_response.get('is_valid'))
+
+        self.user = User.objects.get(pk=self.user.pk)
+        self.assertFalse(self.user.is_active)

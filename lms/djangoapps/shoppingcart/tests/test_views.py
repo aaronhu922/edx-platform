@@ -34,8 +34,8 @@ from course_modes.tests.factories import CourseModeFactory
 from lms.djangoapps.courseware.tests.factories import InstructorFactory
 from edxmako.shortcuts import render_to_response
 from openedx.core.djangoapps.embargo.test_utils import restrict_course
-from shoppingcart.admin import SoftDeleteCouponAdmin
-from shoppingcart.models import (
+from ..admin import SoftDeleteCouponAdmin
+from ..models import (
     CertificateItem,
     Coupon,
     CouponRedemption,
@@ -46,10 +46,10 @@ from shoppingcart.models import (
     PaidCourseRegistration,
     RegistrationCodeRedemption
 )
-from shoppingcart.processors import render_purchase_form_html
-from shoppingcart.processors.CyberSource2 import sign
-from shoppingcart.tests.payment_fake import PaymentFakeView
-from shoppingcart.views import _can_download_report, _get_date_from_str, initialize_report
+from ..processors import render_purchase_form_html
+from ..processors.CyberSource2 import sign
+from ..tests.payment_fake import PaymentFakeView
+from ..views import _can_download_report, _get_date_from_str, initialize_report
 from student.models import CourseEnrollment
 from student.roles import CourseSalesAdminRole
 from student.tests.factories import AdminFactory, UserFactory
@@ -204,7 +204,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         resp = self.client.post(reverse('add_course_to_cart', args=[text_type(self.course_key)]))
         self.assertEqual(resp.status_code, 403)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_billing_details(self):
         billing_url = reverse('billing_details')
         self.login_user()
@@ -235,7 +235,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         resp = self.client.post(billing_url, data)
         self.assertEqual(resp.status_code, 200)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     @override_settings(PAID_COURSE_REGISTRATION_CURRENCY=['PKR', 'Rs'])
     def test_billing_details_with_override_currency_settings(self):
         billing_url = reverse('billing_details')
@@ -668,7 +668,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         current_enrollment, __ = CourseEnrollment.enrollment_mode_for_user(self.user, self.course_key)
         self.assertEqual('verified', current_enrollment)
 
-    @patch('shoppingcart.views.log.debug')
+    @patch('lms.djangoapps.shoppingcart.views.log.debug')
     def test_non_existing_coupon_redemption_on_removing_item(self, debug_log):
 
         reg_item = self.add_course_to_user_cart(self.course_key)
@@ -682,7 +682,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.cart.orderitem_set.count(), 0)
 
-    @patch('shoppingcart.views.log.info')
+    @patch('lms.djangoapps.shoppingcart.views.log.info')
     def test_existing_coupon_redemption_on_removing_item(self, info_log):
 
         self.add_coupon(self.course_key, True, self.coupon_code)
@@ -703,7 +703,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
             str(reg_item.id)
         )
 
-    @patch('shoppingcart.views.log.info')
+    @patch('lms.djangoapps.shoppingcart.views.log.info')
     def test_reset_redemption_for_coupon(self, info_log):
 
         self.add_coupon(self.course_key, True, self.coupon_code)
@@ -721,7 +721,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
             reg_item.id
         )
 
-    @patch('shoppingcart.views.log.info')
+    @patch('lms.djangoapps.shoppingcart.views.log.info')
     def test_coupon_discount_for_multiple_courses_in_cart(self, info_log):
 
         reg_item = self.add_course_to_user_cart(self.course_key)
@@ -756,7 +756,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
             str(reg_item.id)
         )
 
-    @patch('shoppingcart.views.log.info')
+    @patch('lms.djangoapps.shoppingcart.views.log.info')
     def test_delete_certificate_item(self, info_log):
 
         self.add_course_to_user_cart(self.course_key)
@@ -772,7 +772,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(self.cart.orderitem_set.count(), 1)
         info_log.assert_called_with(u"order item %s removed for user %s", str(cert_item.id), self.user)
 
-    @patch('shoppingcart.views.log.info')
+    @patch('lms.djangoapps.shoppingcart.views.log.info')
     def test_remove_coupon_redemption_on_clear_cart(self, info_log):
 
         reg_item = self.add_course_to_user_cart(self.course_key)
@@ -815,8 +815,8 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(PaidCourseRegistration.contained_in_order(self.cart, self.course_key))
 
-    @patch('shoppingcart.views.render_purchase_form_html', form_mock)
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_purchase_form_html', form_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_cart(self):
         self.login_user()
         reg_item = PaidCourseRegistration.add_to_order(
@@ -848,8 +848,8 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(context['currency'], 'usd')
         self.assertEqual(context['currency_symbol'], '$')
 
-    @patch('shoppingcart.views.render_purchase_form_html', form_mock)
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_purchase_form_html', form_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     @override_settings(PAID_COURSE_REGISTRATION_CURRENCY=['PKR', 'Rs'])
     def test_show_cart_with_override_currency_settings(self):
         self.login_user()
@@ -876,7 +876,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.cart.orderitem_set.count(), 0)
 
-    @patch('shoppingcart.views.log.exception')
+    @patch('lms.djangoapps.shoppingcart.views.log.exception')
     def test_remove_item(self, exception_log):
         self.login_user()
         reg_item = PaidCourseRegistration.add_to_order(self.cart, self.course_key)
@@ -906,7 +906,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
             '-1'
         )
 
-    @patch('shoppingcart.views.process_postpay_callback', postpay_mock)
+    @patch('lms.djangoapps.shoppingcart.views.process_postpay_callback', postpay_mock)
     def test_postpay_callback_success(self):
         postpay_mock.return_value = {'success': True, 'order': self.cart}
         self.login_user()
@@ -915,8 +915,8 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(urlparse(resp.__getitem__('location')).path,
                          reverse('shoppingcart.views.show_receipt', args=[self.cart.id]))
 
-    @patch('shoppingcart.views.process_postpay_callback', postpay_mock)
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.process_postpay_callback', postpay_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_postpay_callback_failure(self):
         postpay_mock.return_value = {'success': False, 'order': self.cart, 'error_html': 'ERROR_TEST!!!'}
         self.login_user()
@@ -977,7 +977,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         resp = self.client.get(url)
         self.assert_no_xss(resp, '<script>alert("XSS")</script>')
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_reg_code_xss(self):
         self.add_reg_code(self.xss_course_key)
 
@@ -1099,7 +1099,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         total_amount = PaidCourseRegistration.get_total_amount_of_purchased_item(self.course_key)
         self.assertEqual(total_amount, 76)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_with_valid_coupon_code(self):
         self.add_course_to_user_cart(self.course_key)
         self.add_coupon(self.course_key, True, self.coupon_code)
@@ -1112,7 +1112,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertContains(resp, 'FirstNameTesting123')
         self.assertContains(resp, str(self.get_discount(self.cost)))
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_reg_code_and_course_registration_scenario(self):
         self.add_reg_code(self.course_key)
 
@@ -1133,7 +1133,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         response = self.client.post(redeem_url)
         self.assertEqual(response.status_code, 200)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_reg_code_with_multiple_courses_and_checkout_scenario(self):
         self.add_reg_code(self.course_key)
 
@@ -1182,7 +1182,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertIsNotNone(item2.course_enrollment)
         self.assertEqual(item2.course_enrollment.course_id, self.testing_course.id)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_with_valid_reg_code(self):
         self.add_course_to_user_cart(self.course_key)
         self.add_reg_code(self.course_key)
@@ -1194,7 +1194,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         resp = self.client.get(reverse('shoppingcart.views.show_receipt', args=[self.cart.id]))
         self.assertContains(resp, '0.00')
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success(self):
         reg_item = PaidCourseRegistration.add_to_order(
             self.cart,
@@ -1220,7 +1220,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(context['currency'], 'usd')
 
     @override_settings(PAID_COURSE_REGISTRATION_CURRENCY=['PKR', 'Rs'])
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_with_override_currency_settings(self):
         reg_item = PaidCourseRegistration.add_to_order(self.cart, self.course_key)
         cert_item = CertificateItem.add_to_order(self.cart, self.verified_course_key, self.cost, 'honor')
@@ -1239,7 +1239,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertEqual(context['currency_symbol'], 'Rs')
         self.assertEqual(context['currency'], 'PKR')
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_with_upgrade(self):
 
         reg_item = PaidCourseRegistration.add_to_order(
@@ -1268,7 +1268,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertIn(cert_item, context['shoppingcart_items'][1])
         self.assertFalse(context['any_refunds'])
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_refund(self):
         reg_item = PaidCourseRegistration.add_to_order(
             self.cart,
@@ -1291,7 +1291,7 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self.assertIn(cert_item, context['shoppingcart_items'][1])
         self.assertTrue(context['any_refunds'])
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_show_receipt_success_custom_receipt_page(self):
         cert_item = CertificateItem.add_to_order(self.cart, self.course_key, self.cost, 'honor')
         self.cart.purchase()
@@ -1328,61 +1328,6 @@ class ShoppingCartViewsTests(SharedModuleStoreTestCase, XssTestMixin):
         self._assert_404(reverse('shoppingcart.views.reset_code_redemption', args=[]), use_post=True)
         self._assert_404(reverse('billing_details', args=[]))
 
-    def test_upgrade_postpay_callback_emits_ga_event(self):
-        # Enroll as honor in the course with the current user.
-
-        CourseEnrollment.enroll(self.user, self.course_key)
-
-        # add verified mode
-        CourseMode.objects.create(
-            course_id=self.verified_course_key,
-            mode_slug="verified",
-            mode_display_name="verified cert",
-            min_price=self.cost
-        )
-
-        # Purchase a verified certificate
-        self.cart = Order.get_cart_for_user(self.user)
-        CertificateItem.add_to_order(self.cart, self.verified_course_key, self.cost, 'verified')
-        self.cart.start_purchase()
-
-        self.login_user()
-        # setting the attempting upgrade session value.
-        session = self.client.session
-        session['attempting_upgrade'] = True
-        session.save()
-
-        ordered_params = OrderedDict([
-            ('amount', self.cost),
-            ('currency', 'usd'),
-            ('transaction_type', 'sale'),
-            ('orderNumber', str(self.cart.id)),
-            ('access_key', '123456789'),
-            ('merchantID', 'edx'),
-            ('djch', '012345678912'),
-            ('orderPage_version', 2),
-            ('orderPage_serialNumber', '1234567890'),
-            ('profile_id', "00000001"),
-            ('reference_number', str(self.cart.id)),
-            ('locale', 'en'),
-            ('signed_date_time', '2014-08-18T13:59:31Z'),
-        ])
-
-        resp_params = PaymentFakeView.response_post_params(sign(ordered_params))
-        self.assertTrue(self.client.session.get('attempting_upgrade'))
-        url = reverse('shoppingcart.views.postpay_callback')
-        self.client.post(url, resp_params, follow=True)
-        self.assertFalse(self.client.session.get('attempting_upgrade'))
-
-        self.mock_tracker.emit.assert_any_call(
-            'edx.course.enrollment.upgrade.succeeded',
-            {
-                'user_id': self.user.id,
-                'course_id': text_type(self.verified_course_key),
-                'mode': 'verified'
-            }
-        )
-
 
 class ReceiptRedirectTest(SharedModuleStoreTestCase):
     """Test special-case redirect from the receipt page. """
@@ -1413,40 +1358,6 @@ class ReceiptRedirectTest(SharedModuleStoreTestCase):
             username=self.user.username,
             password=self.PASSWORD
         )
-
-    def test_postpay_callback_redirect_to_verify_student(self):
-        # Create other carts first
-        # This ensures that the order ID and order item IDs do not match
-        Order.get_cart_for_user(self.user).start_purchase()
-        Order.get_cart_for_user(self.user).start_purchase()
-        Order.get_cart_for_user(self.user).start_purchase()
-
-        # Purchase a verified certificate
-        self.cart = Order.get_cart_for_user(self.user)
-        CertificateItem.add_to_order(
-            self.cart,
-            self.course_key,
-            self.COST,
-            'verified'
-        )
-        self.cart.start_purchase()
-
-        # Simulate hitting the post-pay callback
-        with patch('shoppingcart.views.process_postpay_callback') as mock_process:
-            mock_process.return_value = {'success': True, 'order': self.cart}
-            url = reverse('shoppingcart.views.postpay_callback')
-            resp = self.client.post(url, follow=True)
-
-        # Expect to be redirected to the payment confirmation
-        # page in the verify_student app
-        redirect_url = reverse(
-            'verify_student_payment_confirmation',
-            kwargs={'course_id': six.text_type(self.course_key)}
-        )
-        redirect_url += '?payment-order-num={order_num}'.format(
-            order_num=self.cart.id
-        )
-        self.assertIn(redirect_url, resp.redirect_chain[0][0])
 
 
 @patch.dict('django.conf.settings.FEATURES', {'ENABLE_PAID_COURSE_REGISTRATION': True})
@@ -1510,7 +1421,7 @@ class ShoppingcartViewsClosedEnrollment(ModuleStoreTestCase):
         """
         self.client.login(username=self.user.username, password="password")
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_to_check_that_cart_item_enrollment_is_closed(self):
         self.login_user()
         reg_item1 = PaidCourseRegistration.add_to_order(self.cart, self.course_key)
@@ -1911,7 +1822,7 @@ class CSVReportViewsTest(SharedModuleStoreTestCase):
         response = self.client.put(reverse('payment_csv_report'))
         self.assertEqual(response.status_code, 400)
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_report_csv_get(self):
         self.login_user()
         self.add_to_download_group(self.user)
@@ -1923,7 +1834,7 @@ class CSVReportViewsTest(SharedModuleStoreTestCase):
         self.assertFalse(context['date_fmt_error'])
         self.assertContains(response, "Download CSV Reports")
 
-    @patch('shoppingcart.views.render_to_response', render_mock)
+    @patch('lms.djangoapps.shoppingcart.views.render_to_response', render_mock)
     def test_report_csv_bad_date(self):
         self.login_user()
         self.add_to_download_group(self.user)

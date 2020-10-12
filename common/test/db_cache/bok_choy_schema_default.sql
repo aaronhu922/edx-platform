@@ -431,7 +431,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2908 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2932 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `auth_registration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -885,6 +885,24 @@ CREATE TABLE `canvas_canvasenterprisecustomerconfiguration` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `enterprise_customer_id` (`enterprise_customer_id`),
   CONSTRAINT `canvas_canvasenterpr_enterprise_customer__b2e73393_fk_enterpris` FOREIGN KEY (`enterprise_customer_id`) REFERENCES `enterprise_enterprisecustomer` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `canvas_canvaslearnerdatatransmissionaudit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `canvas_canvaslearnerdatatransmissionaudit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `canvas_user_email` varchar(255) NOT NULL,
+  `enterprise_course_enrollment_id` int(10) unsigned NOT NULL,
+  `course_id` varchar(255) NOT NULL,
+  `course_completed` tinyint(1) NOT NULL,
+  `completed_timestamp` varchar(10) NOT NULL,
+  `status` varchar(100) NOT NULL,
+  `error_message` longtext NOT NULL,
+  `created` datetime(6) NOT NULL,
+  `grade` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `canvas_canvaslearnerdatatra_enterprise_course_enrollmen_c2a9800c` (`enterprise_course_enrollment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `canvas_historicalcanvasenterprisecustomerconfiguration`;
@@ -1387,6 +1405,7 @@ CREATE TABLE `content_libraries_contentlibrary` (
   `allow_public_learning` tinyint(1) NOT NULL,
   `allow_public_read` tinyint(1) NOT NULL,
   `org_id` int(11) NOT NULL,
+  `type` varchar(25) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `bundle_uuid` (`bundle_uuid`),
   UNIQUE KEY `content_libraries_contentlibrary_org_id_slug_2b964108_uniq` (`org_id`,`slug`),
@@ -2616,6 +2635,33 @@ CREATE TABLE `django_admin_log` (
   CONSTRAINT `django_admin_log_user_id_c564eba6_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `django_celery_results_taskresult`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_celery_results_taskresult` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `content_type` varchar(128) NOT NULL,
+  `content_encoding` varchar(64) NOT NULL,
+  `result` longtext,
+  `date_done` datetime(6) NOT NULL,
+  `traceback` longtext,
+  `meta` longtext,
+  `task_args` longtext,
+  `task_kwargs` longtext,
+  `task_name` varchar(255) DEFAULT NULL,
+  `worker` varchar(100) DEFAULT NULL,
+  `date_created` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_id` (`task_id`),
+  KEY `django_celery_results_taskresult_date_done_49edada6` (`date_done`),
+  KEY `django_celery_results_taskresult_status_cbbed23a` (`status`),
+  KEY `django_celery_results_taskresult_task_name_90987df3` (`task_name`),
+  KEY `django_celery_results_taskresult_worker_f8711389` (`worker`),
+  KEY `django_celery_results_taskresult_date_created_099f3424` (`date_created`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `django_comment_client_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2709,7 +2755,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=828 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=834 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `django_migrations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -2720,7 +2766,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=760 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=778 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `django_openid_auth_association`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -3274,6 +3320,9 @@ CREATE TABLE `enterprise_enterprisecustomer` (
   `enable_portal_subscription_management_screen` tinyint(1) NOT NULL,
   `enable_slug_login` tinyint(1) NOT NULL,
   `enable_portal_saml_configuration_screen` tinyint(1) NOT NULL,
+  `default_contract_discount` decimal(8,5) DEFAULT NULL,
+  `enable_analytics_screen` tinyint(1) NOT NULL,
+  `enable_integrated_customer_learner_portal_search` tinyint(1) NOT NULL,
   PRIMARY KEY (`uuid`),
   UNIQUE KEY `enterprise_enterprisecustomer_slug_80411f46_uniq` (`slug`),
   KEY `enterprise_enterprisecustomer_site_id_947ed084_fk_django_site_id` (`site_id`),
@@ -3530,6 +3579,9 @@ CREATE TABLE `enterprise_historicalenterprisecustomer` (
   `enable_portal_subscription_management_screen` tinyint(1) NOT NULL,
   `enable_slug_login` tinyint(1) NOT NULL,
   `enable_portal_saml_configuration_screen` tinyint(1) NOT NULL,
+  `default_contract_discount` decimal(8,5) DEFAULT NULL,
+  `enable_analytics_screen` tinyint(1) NOT NULL,
+  `enable_integrated_customer_learner_portal_search` tinyint(1) NOT NULL,
   PRIMARY KEY (`history_id`),
   KEY `enterprise_historica_history_user_id_bbd9b0d6_fk_auth_user` (`history_user_id`),
   KEY `enterprise_historicalenterprisecustomer_uuid_75c3528e` (`uuid`),
@@ -3615,6 +3667,27 @@ CREATE TABLE `enterprise_historicalpendingenrollment` (
   CONSTRAINT `enterprise_historica_history_user_id_894ad7d0_fk_auth_user` FOREIGN KEY (`history_user_id`) REFERENCES `auth_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `enterprise_historicalpendingenterprisecustomeradminuser`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `enterprise_historicalpendingenterprisecustomeradminuser` (
+  `id` int(11) NOT NULL,
+  `created` datetime(6) NOT NULL,
+  `modified` datetime(6) NOT NULL,
+  `user_email` varchar(254) NOT NULL,
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `history_date` datetime(6) NOT NULL,
+  `history_change_reason` varchar(100) DEFAULT NULL,
+  `history_type` varchar(1) NOT NULL,
+  `enterprise_customer_id` char(32) DEFAULT NULL,
+  `history_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  KEY `enterprise_historica_history_user_id_3a051cc8_fk_auth_user` (`history_user_id`),
+  KEY `enterprise_historicalpendin_id_46b9ceba` (`id`),
+  KEY `enterprise_historicalpendin_enterprise_customer_id_885a7c1b` (`enterprise_customer_id`),
+  CONSTRAINT `enterprise_historica_history_user_id_3a051cc8_fk_auth_user` FOREIGN KEY (`history_user_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `enterprise_historicalpendingenterprisecustomeruser`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -3671,6 +3744,20 @@ CREATE TABLE `enterprise_pendingenrollment` (
   KEY `enterprise_pendingen_source_id_7b6fed0c_fk_enterpris` (`source_id`),
   CONSTRAINT `enterprise_pendingen_source_id_7b6fed0c_fk_enterpris` FOREIGN KEY (`source_id`) REFERENCES `enterprise_enterpriseenrollmentsource` (`id`),
   CONSTRAINT `enterprise_pendingen_user_id_12d21b1a_fk_enterpris` FOREIGN KEY (`user_id`) REFERENCES `enterprise_pendingenterprisecustomeruser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `enterprise_pendingenterprisecustomeradminuser`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `enterprise_pendingenterprisecustomeradminuser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` datetime(6) NOT NULL,
+  `modified` datetime(6) NOT NULL,
+  `user_email` varchar(254) NOT NULL,
+  `enterprise_customer_id` char(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `enterprise_pendingenterp_enterprise_customer_id_u_3b1fae93_uniq` (`enterprise_customer_id`,`user_email`),
+  CONSTRAINT `enterprise_pendingen_enterprise_customer__aae02661_fk_enterpris` FOREIGN KEY (`enterprise_customer_id`) REFERENCES `enterprise_enterprisecustomer` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `enterprise_pendingenterprisecustomeruser`;
@@ -4541,6 +4628,59 @@ CREATE TABLE `mobile_api_mobileapiconfig` (
   PRIMARY KEY (`id`),
   KEY `mobile_api_mobileapi_changed_by_id_8799981a_fk_auth_user` (`changed_by_id`),
   CONSTRAINT `mobile_api_mobileapi_changed_by_id_8799981a_fk_auth_user` FOREIGN KEY (`changed_by_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `moodle_historicalmoodleenterprisecustomerconfiguration`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `moodle_historicalmoodleenterprisecustomerconfiguration` (
+  `id` int(11) NOT NULL,
+  `created` datetime(6) NOT NULL,
+  `modified` datetime(6) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `transmission_chunk_size` int(11) NOT NULL,
+  `channel_worker_username` varchar(255) DEFAULT NULL,
+  `catalogs_to_transmit` longtext,
+  `moodle_base_url` varchar(255) NOT NULL,
+  `service_short_name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `history_date` datetime(6) NOT NULL,
+  `history_change_reason` varchar(100) DEFAULT NULL,
+  `history_type` varchar(1) NOT NULL,
+  `enterprise_customer_id` char(32) DEFAULT NULL,
+  `history_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  KEY `moodle_historicalmoo_history_user_id_22017ee9_fk_auth_user` (`history_user_id`),
+  KEY `moodle_historicalmoodleente_id_71ddc422` (`id`),
+  KEY `moodle_historicalmoodleente_enterprise_customer_id_a816d974` (`enterprise_customer_id`),
+  CONSTRAINT `moodle_historicalmoo_history_user_id_22017ee9_fk_auth_user` FOREIGN KEY (`history_user_id`) REFERENCES `auth_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `moodle_moodleenterprisecustomerconfiguration`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `moodle_moodleenterprisecustomerconfiguration` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` datetime(6) NOT NULL,
+  `modified` datetime(6) NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `transmission_chunk_size` int(11) NOT NULL,
+  `channel_worker_username` varchar(255) DEFAULT NULL,
+  `catalogs_to_transmit` longtext,
+  `moodle_base_url` varchar(255) NOT NULL,
+  `service_short_name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `enterprise_customer_id` char(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `enterprise_customer_id` (`enterprise_customer_id`),
+  CONSTRAINT `moodle_moodleenterpr_enterprise_customer__6668537b_fk_enterpris` FOREIGN KEY (`enterprise_customer_id`) REFERENCES `enterprise_enterprisecustomer` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `notes_note`;
@@ -6889,6 +7029,7 @@ CREATE TABLE `third_party_auth_samlconfiguration` (
   `changed_by_id` int(11) DEFAULT NULL,
   `site_id` int(11) NOT NULL,
   `slug` varchar(30) NOT NULL,
+  `is_public` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `third_party_auth_sam_changed_by_id_c9343fb9_fk_auth_user` (`changed_by_id`),
   KEY `third_party_auth_sam_site_id_8fab01ee_fk_django_si` (`site_id`),

@@ -38,8 +38,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2020-08-30 20:49+0000\n"
-"PO-Revision-Date: 2020-08-30 20:49:39.838611\n"
+"POT-Creation-Date: 2020-10-04 20:51+0000\n"
+"PO-Revision-Date: 2020-10-04 20:51:26.026355\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "Language: eo\n"
@@ -59,6 +59,17 @@ msgstr ""
 #: lms/templates/ux/reference/bootstrap/course-skeleton.html
 msgid "Discussion"
 msgstr "Dïsçüssïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: cms/djangoapps/contentstore/views/component.py
+#: openedx/core/djangoapps/content_libraries/constants.py
+msgid "Problem"
+msgstr "Prößlém Ⱡ'σяєм ιρѕυм #"
+
+#: cms/djangoapps/contentstore/views/component.py
+#: openedx/core/djangoapps/content_libraries/constants.py
+#: lms/templates/video.html
+msgid "Video"
+msgstr "Vïdéö Ⱡ'σяєм ιρѕ#"
 
 #: cms/djangoapps/contentstore/views/component.py
 #: common/lib/xmodule/xmodule/video_module/video_module.py
@@ -4097,18 +4108,6 @@ msgstr ""
 " ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ησ#"
 
 #: common/lib/xmodule/xmodule/course_module.py
-msgid "Bypass Course Home"
-msgstr "Býpäss Çöürsé Hömé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: common/lib/xmodule/xmodule/course_module.py
-msgid ""
-"Bypass the course home tab when students arrive from the dashboard, sending "
-"them directly to course content."
-msgstr ""
-"Býpäss thé çöürsé hömé täß whén stüdénts ärrïvé fröm thé däshßöärd, séndïng "
-"thém dïréçtlý tö çöürsé çöntént. Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: common/lib/xmodule/xmodule/course_module.py
 msgid "Enable Subsection Prerequisites"
 msgstr "Énäßlé Süßséçtïön Préréqüïsïtés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
@@ -6988,6 +6987,14 @@ msgstr "Éxplöré thé çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α
 msgid "Not sure yet"
 msgstr "Nöt süré ýét Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
+#: lms/djangoapps/course_home_api/outline/v1/serializers.py
+#: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
+#, python-brace-format
+msgid "({number} Question)"
+msgid_plural "({number} Questions)"
+msgstr[0] "({number} Qüéstïön) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+msgstr[1] "({number} Qüéstïöns) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
 #: lms/djangoapps/course_home_api/outline/v1/views.py
 msgid ""
 "Please contact your degree administrator or edX Support if you have "
@@ -7009,6 +7016,21 @@ msgid "Welcome message successfully dismissed."
 msgstr ""
 "Wélçömé méssägé süççéssfüllý dïsmïsséd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "'goal_key' is required."
+msgstr "'göäl_kéý' ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "Your course goal has been successfully set."
+msgstr ""
+"Ýöür çöürsé göäl häs ßéén süççéssfüllý sét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: lms/djangoapps/course_home_api/outline/v1/views.py
+msgid "Course goal updated successfully."
+msgstr ""
+"Çöürsé göäl üpdätéd süççéssfüllý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: lms/djangoapps/course_wiki/tab.py lms/djangoapps/course_wiki/views.py
 #: lms/templates/wiki/base.html
@@ -7527,6 +7549,20 @@ msgid ""
 msgstr ""
 "Ýöü hävé nöt réçéïvéd ä çértïfïçäté ßéçäüsé ýöü dö nöt hävé ä çürrént "
 "{platform_name} vérïfïéd ïdéntïtý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: lms/djangoapps/courseware/views/views.py
+msgid "Your certificate will be available soon!"
+msgstr ""
+"Ýöür çértïfïçäté wïll ßé äväïläßlé söön! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: lms/djangoapps/courseware/views/views.py
+msgid ""
+"After this course officially ends, you will receive an email notification "
+"with your certificate."
+msgstr ""
+"Àftér thïs çöürsé öffïçïällý énds, ýöü wïll réçéïvé än émäïl nötïfïçätïön "
+"wïth ýöür çértïfïçäté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: lms/djangoapps/courseware/views/views.py
 msgid "Your certificate is available"
@@ -8096,6 +8132,14 @@ msgid ""
 msgstr ""
 "Thé nümßér öf séçönds tö déläý/tïméöüt wäït tö gét çöökïé välüés fröm "
 "säïlthrü. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: lms/djangoapps/grades/rest_api/v1/gradebook_views.py
+msgid ""
+"Cannot override subsection grade: subsection is not available for target "
+"learner."
+msgstr ""
+"Çännöt övérrïdé süßséçtïön grädé: süßséçtïön ïs nöt äväïläßlé för tärgét "
+"léärnér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: lms/djangoapps/instructor/services.py
 #, python-brace-format
@@ -10462,10 +10506,6 @@ msgid "Make payment"
 msgstr "Mäké päýmént Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: lms/djangoapps/verify_student/views.py
-msgid "Payment confirmation"
-msgstr "Päýmént çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: lms/djangoapps/verify_student/views.py
 msgid "Take photo"
 msgstr "Täké phötö Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
@@ -12153,10 +12193,39 @@ msgid "Learning Sequences"
 msgstr "Léärnïng Séqüénçés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
 #: openedx/core/djangoapps/content_libraries/api.py
+msgid "Cannot change or remove the access level for the only admin."
+msgstr ""
+"Çännöt çhängé ör rémövé thé äççéss lévél för thé önlý ädmïn. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: openedx/core/djangoapps/content_libraries/api.py
+#, python-brace-format
+msgid ""
+"You can only set a library to {library_type} if all existing blocks are of "
+"that type. Found incompatible block {block_id} with type {block_type}."
+msgstr ""
+"Ýöü çän önlý sét ä lïßrärý tö {library_type} ïf äll éxïstïng ßlöçks äré öf "
+"thät týpé. Föünd ïnçömpätïßlé ßlöçk {block_id} wïth týpé {block_type}. "
+"Ⱡ'σяєм ιρѕυм #"
+
+#: openedx/core/djangoapps/content_libraries/api.py
+#, python-brace-format
+msgid ""
+"Block type \"{block_type}\" is not compatible with library type "
+"\"{library_type}\"."
+msgstr ""
+"Blöçk týpé \"{block_type}\" ïs nöt çömpätïßlé wïth lïßrärý týpé "
+"\"{library_type}\". Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: openedx/core/djangoapps/content_libraries/api.py
 msgid "Library cannot have more than {} XBlocks"
 msgstr ""
 "Lïßrärý çännöt hävé möré thän {} XBlöçks Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
+
+#: openedx/core/djangoapps/content_libraries/constants.py
+msgid "Complex"
+msgstr "Çömpléx Ⱡ'σяєм ιρѕυм #"
 
 #: openedx/core/djangoapps/content_libraries/models.py
 msgid "Administer users and author content"
@@ -12176,6 +12245,18 @@ msgid "One and only one of 'user' and 'group' must be set."
 msgstr ""
 "Öné änd önlý öné öf 'üsér' änd 'gröüp' müst ßé sét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
+
+#: openedx/core/djangoapps/content_libraries/views.py
+msgid "We could not find a user with that email address."
+msgstr ""
+"Wé çöüld nöt fïnd ä üsér wïth thät émäïl äddréss. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: openedx/core/djangoapps/content_libraries/views.py
+msgid "This user already has access to this library."
+msgstr ""
+"Thïs üsér älréädý häs äççéss tö thïs lïßrärý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
 
 #: openedx/core/djangoapps/cors_csrf/models.py
 msgid ""
@@ -13562,24 +13643,6 @@ msgstr ""
 "ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢#"
 
 #: openedx/core/djangoapps/user_authn/views/login.py
-#, python-brace-format
-msgid ""
-"In order to sign in, you need to activate your account.{blank_lines}We just "
-"sent an activation link to {email_strong}. If you do not receive an email, "
-"check your spam folders or {link_start}contact {platform_name} "
-"Support{link_end}."
-msgstr ""
-"Ìn ördér tö sïgn ïn, ýöü nééd tö äçtïväté ýöür äççöünt.{blank_lines}Wé jüst "
-"sént än äçtïvätïön lïnk tö {email_strong}. Ìf ýöü dö nöt réçéïvé än émäïl, "
-"çhéçk ýöür späm földérs ör {link_start}çöntäçt {platform_name} "
-"Süppört{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg "
-"єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт "
-"єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт "
-"αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη "
-"νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт "
-"σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕ#"
-
-#: openedx/core/djangoapps/user_authn/views/login.py
 msgid "Too many failed login attempts. Try again later."
 msgstr ""
 "Töö mäný fäïléd lögïn ättémpts. Trý ägäïn lätér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
@@ -13956,23 +14019,6 @@ msgid "The course key for the course we would like to be auto-cohorted."
 msgstr ""
 "Thé çöürsé kéý för thé çöürsé wé wöüld lïké tö ßé äütö-çöhörtéd. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: openedx/core/djangoapps/video_pipeline/models.py
-msgid "Oauth client name of video pipeline service."
-msgstr ""
-"Öäüth çlïént nämé öf vïdéö pïpélïné sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя #"
-
-#: openedx/core/djangoapps/video_pipeline/models.py
-msgid "edx-video-pipeline API URL."
-msgstr "édx-vïdéö-pïpélïné ÀPÌ ÛRL. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
-
-#: openedx/core/djangoapps/video_pipeline/models.py
-msgid ""
-"Username created for Video Pipeline Integration, e.g. veda_service_user."
-msgstr ""
-"Ûsérnämé çréätéd för Vïdéö Pïpélïné Ìntégrätïön, é.g. védä_sérvïçé_üsér. "
-"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
 #: openedx/core/djangoapps/video_pipeline/models.py
 msgid "Oauth client name of VEM service."
@@ -14879,14 +14925,6 @@ msgstr "{platform_name} Süppört Lévéls: Ⱡ'σяєм ιρѕυм ∂σłσя 
 #: cms/djangoapps/contentstore/views/component.py
 msgid "HTML"
 msgstr "HTML Ⱡ'σяєм ι#"
-
-#: cms/djangoapps/contentstore/views/component.py
-msgid "Problem"
-msgstr "Prößlém Ⱡ'σяєм ιρѕυм #"
-
-#: cms/djangoapps/contentstore/views/component.py lms/templates/video.html
-msgid "Video"
-msgstr "Vïdéö Ⱡ'σяєм ιρѕ#"
 
 #: cms/djangoapps/contentstore/views/component.py
 msgid "Blank"
@@ -17089,6 +17127,10 @@ msgstr ""
 #: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
 msgid "{subsection_format} due {{date}}"
 msgstr "{subsection_format} düé {{date}} Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: lms/templates/vert_module.html
+msgid "Due {date}"
+msgstr "Düé {date} Ⱡ'σяєм ιρѕυм #"
 
 #: lms/templates/video.html
 msgid "Loading video player"
@@ -21119,7 +21161,6 @@ msgid "Sysadmin"
 msgstr "Sýsädmïn Ⱡ'σяєм ιρѕυм ∂#"
 
 #: lms/templates/header/navbar-logo-header.html
-#: lms/templates/header/user_dropdown.html
 msgid "{name} Dashboard"
 msgstr "{name} Däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
@@ -21264,6 +21305,7 @@ msgstr ""
 #: lms/templates/instructor/instructor_dashboard_2/certificates.html
 #: lms/templates/instructor/instructor_dashboard_2/course_info.html
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 #: lms/templates/instructor/instructor_dashboard_2/send_email.html
 #: lms/templates/instructor/instructor_dashboard_2/student_admin.html
 msgid "Pending Tasks"
@@ -21272,6 +21314,7 @@ msgstr "Péndïng Täsks Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 #: lms/templates/instructor/instructor_dashboard_2/certificates.html
 #: lms/templates/instructor/instructor_dashboard_2/course_info.html
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 #: lms/templates/instructor/instructor_dashboard_2/student_admin.html
 msgid "The status for any active tasks appears in a table below."
 msgstr ""
@@ -21581,10 +21624,12 @@ msgstr ""
 " ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂є#"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
 msgid "NOTE"
 msgstr "NÖTÉ Ⱡ'σяєм ι#"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
 msgid ""
 "The generated report is limited to {max_entries} responses. If you expect "
 "more than {max_entries} responses, try generating the report on a chapter-"
@@ -21601,6 +21646,7 @@ msgstr ""
 "νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυg#"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/certificates.html
 msgid "Click to list certificates that are issued for this course:"
 msgstr ""
 "Çlïçk tö lïst çértïfïçätés thät äré ïssüéd för thïs çöürsé: Ⱡ'σяєм ιρѕυм "
@@ -21630,6 +21676,7 @@ msgstr ""
 "¢σηѕє¢тєтυя #"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/grading.html
 msgid ""
 "Click to generate a CSV grade report for all currently enrolled students."
 msgstr ""
@@ -21662,10 +21709,12 @@ msgstr ""
 "Généräté Süßmïssïön Fïlés Àrçhïvé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 msgid "Reports Available for Download"
 msgstr "Répörts Àväïläßlé för Döwnlöäd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: lms/templates/instructor/instructor_dashboard_2/data_download.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
 msgid ""
 "The reports listed below are available for download, identified by UTC date "
 "and time of generation."
@@ -21704,6 +21753,38 @@ msgstr ""
 "störé thé fïlés, ïn äççördänçé wïth ýöür ïnstïtütïön's dätä séçürïtý "
 "pölïçïés.{li_end}{ul_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
 "α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υ#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
+msgid ""
+"The answer distribution report listed below is generated periodically by an "
+"automated background process.         The report is cumulative, so answers "
+"submitted after the process starts are included in a subsequent report."
+"         The report is generated several times per day."
+msgstr ""
+"Thé änswér dïstrïßütïön répört lïstéd ßélöw ïs générätéd pérïödïçällý ßý än "
+"äütömätéd ßäçkgröünd pröçéss.         Thé répört ïs çümülätïvé, sö änswérs "
+"süßmïttéd äftér thé pröçéss stärts äré ïnçlüdéd ïn ä süßséqüént répört."
+"         Thé répört ïs générätéd sévéräl tïmés pér däý. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт "
+"łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ "
+"єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2.html
+msgid ""
+"{strong_start}Note{strong_end}: {ul_start}{li_start}To keep student data "
+"secure, you cannot save or         email these links for direct access. "
+"Copies of links expire within 5 minutes.{li_end}{li_start}Report files"
+"         are deleted 90 days after generation. If you will need access to "
+"old reports, download and store the files,         in accordance with your "
+"institution's data security policies.{li_end}{ul_end}"
+msgstr ""
+"{strong_start}Nöté{strong_end}: {ul_start}{li_start}Tö kéép stüdént dätä "
+"séçüré, ýöü çännöt sävé ör         émäïl thésé lïnks för dïréçt äççéss. "
+"Çöpïés öf lïnks éxpïré wïthïn 5 mïnütés.{li_end}{li_start}Répört fïlés"
+"         äré délétéd 90 däýs äftér générätïön. Ìf ýöü wïll nééd äççéss tö "
+"öld répörts, döwnlöäd änd störé thé fïlés,         ïn äççördänçé wïth ýöür "
+"ïnstïtütïön's dätä séçürïtý pölïçïés.{li_end}{ul_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
+" αмєт, ¢σ#"
 
 #: lms/templates/instructor/instructor_dashboard_2/edit_coupon_modal.html
 msgid "Edit Coupon Code"
@@ -22748,6 +22829,143 @@ msgid "Show the status for the tasks that you submitted for this problem."
 msgstr ""
 "Shöw thé stätüs för thé täsks thät ýöü süßmïttéd för thïs prößlém. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/certificates.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/grading.html
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid "Note"
+msgstr "Nöté Ⱡ'σяєм ι#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/problem_report.html
+msgid ""
+"Select a problem to generate a CSV         file that lists all student "
+"answers to the problem. You also select a section or chapter to include"
+"         results of all problems in that section or chapter."
+msgstr ""
+"Séléçt ä prößlém tö généräté ä ÇSV         fïlé thät lïsts äll stüdént "
+"änswérs tö thé prößlém. Ýöü älsö séléçt ä séçtïön ör çhäptér tö ïnçlüdé"
+"         résülts öf äll prößléms ïn thät séçtïön ör çhäptér. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя "
+"ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ "
+"ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
+"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
+"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to display the grading configuration for the                 course. "
+"The grading configuration is the breakdown of graded subsections of the "
+"course                 (such as exams and problem sets), and can be changed "
+"on the 'Grading'                 page (under 'Settings') in Studio."
+msgstr ""
+"Çlïçk tö dïspläý thé grädïng çönfïgürätïön för thé                 çöürsé. "
+"Thé grädïng çönfïgürätïön ïs thé ßréäkdöwn öf grädéd süßséçtïöns öf thé "
+"çöürsé                 (süçh äs éxäms änd prößlém séts), änd çän ßé çhängéd "
+"ön thé 'Grädïng'                 pägé (ündér 'Séttïngs') ïn Stüdïö. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя "
+"ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ "
+"ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ η#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid "Click to download a CSV of                 anonymized student IDs:"
+msgstr ""
+"Çlïçk tö döwnlöäd ä ÇSV öf                 änönýmïzéd stüdént ÌDs: Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"For large courses, generating some reports can take                 several "
+"hours. When report generation is complete, a                 link that "
+"includes the date and time of generation appears in the table below. These "
+"reports are                 generated in the background, meaning it is OK to"
+" navigate away from this page while your report is                 "
+"generating."
+msgstr ""
+"För lärgé çöürsés, générätïng sömé répörts çän täké                 sévéräl "
+"höürs. Whén répört générätïön ïs çömplété, ä                 lïnk thät "
+"ïnçlüdés thé däté änd tïmé öf générätïön äppéärs ïn thé täßlé ßélöw. Thésé "
+"répörts äré                 générätéd ïn thé ßäçkgröünd, méänïng ït ïs ÖK tö"
+" nävïgäté äwäý fröm thïs pägé whïlé ýöür répört ïs                 "
+"générätïng.#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Please be patient and do not click these buttons                 multiple "
+"times. Clicking these buttons multiple times will significantly slow the "
+"generation                 process."
+msgstr ""
+"Pléäsé ßé pätïént änd dö nöt çlïçk thésé ßüttöns                 mültïplé "
+"tïmés. Çlïçkïng thésé ßüttöns mültïplé tïmés wïll sïgnïfïçäntlý slöw thé "
+"générätïön                 pröçéss. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя"
+" α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє "
+"мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ "
+"łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυ#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"For smaller courses, click to list                 profile information for "
+"enrolled students directly on this page:"
+msgstr ""
+"För smällér çöürsés, çlïçk tö lïst                 pröfïlé ïnförmätïön för "
+"énrölléd stüdénts dïréçtlý ön thïs pägé: Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file of                 all students enrolled in "
+"this course, along with profile information such as email address and"
+"                 username:"
+msgstr ""
+"Çlïçk tö généräté ä ÇSV fïlé öf                 äll stüdénts énrölléd ïn "
+"thïs çöürsé, älöng wïth pröfïlé ïnförmätïön süçh äs émäïl äddréss änd"
+"                 üsérnämé: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι "
+"σƒƒ#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file                 that lists learners who can "
+"enroll in the course but have not yet done so."
+msgstr ""
+"Çlïçk tö généräté ä ÇSV fïlé                 thät lïsts léärnérs whö çän "
+"énröll ïn thé çöürsé ßüt hävé nöt ýét döné sö. Ⱡ'σяєм ιρѕυм#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file                 of all proctored exam results "
+"in this course."
+msgstr ""
+"Çlïçk tö généräté ä ÇSV fïlé                 öf äll pröçtöréd éxäm résülts "
+"ïn thïs çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV file of                 survey results for this "
+"course."
+msgstr ""
+"Çlïçk tö généräté ä ÇSV fïlé öf                 sürvéý résülts för thïs "
+"çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV                 ORA grade report for all currently "
+"enrolled students."
+msgstr ""
+"Çlïçk tö généräté ä ÇSV                 ÖRÀ grädé répört för äll çürréntlý "
+"énrölléd stüdénts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: lms/templates/instructor/instructor_dashboard_2/data_download_2/reports.html
+msgid ""
+"Click to generate a CSV                 problem grade report for all "
+"currently enrolled students."
+msgstr ""
+"Çlïçk tö généräté ä ÇSV                 prößlém grädé répört för äll "
+"çürréntlý énrölléd stüdénts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: lms/templates/learner_dashboard/_dashboard_navigation_courses.html
 #: themes/edx.org/lms/templates/dashboard.html
@@ -23821,10 +24039,6 @@ msgstr ""
 "¢σηѕє¢тє#"
 
 #: lms/templates/verify_student/pay_and_verify.html
-msgid "Receipt For {course_name}"
-msgstr "Réçéïpt För {course_name} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
-
-#: lms/templates/verify_student/pay_and_verify.html
 msgid "Verify For {course_name}"
 msgstr "Vérïfý För {course_name} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
@@ -23998,12 +24212,6 @@ msgstr "Ûpgrädé ({price}) Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 #: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
 msgid "Expand All"
 msgstr "Éxpänd Àll Ⱡ'σяєм ιρѕυм ∂σłσ#"
-
-#: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
-msgid "({number} Question)"
-msgid_plural "({number} Questions)"
-msgstr[0] "({number} Qüéstïön) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
-msgstr[1] "({number} Qüéstïöns) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: openedx/features/course_experience/templates/course_experience/course-outline-fragment.html
 msgid "Prerequisite: "
@@ -25295,6 +25503,33 @@ msgstr ""
 #: cms/templates/course_outline.html
 msgid "Unsupported Advance Modules"
 msgstr "Ûnsüppörtéd Àdvänçé Mödülés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: cms/templates/course_outline.html cms/templates/settings_advanced.html
+msgid ""
+"This course has proctored exam settings that are incomplete or invalid."
+msgstr ""
+"Thïs çöürsé häs pröçtöréd éxäm séttïngs thät äré ïnçömplété ör ïnvälïd. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: cms/templates/course_outline.html
+msgid ""
+"To update these settings go to the {link_start}Proctored Exam Settings "
+"page{link_end}."
+msgstr ""
+"Tö üpdäté thésé séttïngs gö tö thé {link_start}Pröçtöréd Éxäm Séttïngs "
+"pägé{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: cms/templates/course_outline.html
+msgid ""
+"To update these settings go to the {link_start}Advanced Settings "
+"page{link_end}."
+msgstr ""
+"Tö üpdäté thésé séttïngs gö tö thé {link_start}Àdvänçéd Séttïngs "
+"pägé{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: cms/templates/course_outline.html cms/templates/settings_advanced.html
+msgid "Proctoring Settings Errors"
+msgstr "Pröçtörïng Séttïngs Érrörs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: cms/templates/course_outline.html
 msgid "Click to add a new section"
@@ -28115,6 +28350,28 @@ msgstr ""
 "єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт "
 "αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη "
 "νσłυρтα#"
+
+#: cms/templates/settings_advanced.html
+msgid ""
+"You will be unable to make changes until the errors are resolved. To update "
+"these settings go to the {link_start}Proctored Exam Settings page{link_end}."
+msgstr ""
+"Ýöü wïll ßé ünäßlé tö mäké çhängés üntïl thé érrörs äré résölvéd. Tö üpdäté "
+"thésé séttïngs gö tö thé {link_start}Pröçtöréd Éxäm Séttïngs pägé{link_end}."
+" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ "
+"тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм,"
+" qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
+"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
+"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
+"ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łαвσя#"
+
+#: cms/templates/settings_advanced.html
+msgid ""
+"You will be unable to make changes until the following settings are updated "
+"on the page below."
+msgstr ""
+"Ýöü wïll ßé ünäßlé tö mäké çhängés üntïl thé föllöwïng séttïngs äré üpdätéd "
+"ön thé pägé ßélöw. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: cms/templates/settings_advanced.html
 msgid "Your policy changes have been saved."
