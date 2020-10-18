@@ -8,15 +8,15 @@ $learn-more-horizontal-position: calc(50% - 100px); // calculate the left positi
   @include outer-container;
 
   @media screen and (min-width: 1024px) {
-    section.courses{
-      ul.courses-listing {
-        padding: 0 30px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        li.courses-listing-item{
-          width: 20%;
-          margin: 30px;
+    .courses{
+      .courses-listing {
+        padding: 0 30px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        .courses-listing-item{
+          width: 20% !important;
+          margin: 30px !important;
         }
       }
      
