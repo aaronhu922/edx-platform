@@ -24,16 +24,21 @@ $learn-more-horizontal-position: calc(50% - 100px); // calculate the left positi
   }
 
   .courses {
-    @include row();
-    @include float(left);
+    // @include row();
+    // @include float(left);
 
     width: 100%;
 
     .courses-listing {
-      @extend %ui-no-list;
+      // @extend %ui-no-list;
+      padding: 0 30px ;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
 
       .courses-listing-item {
-        margin: 0 0 ($baseline*1.5) 0;
+        width: 20%;
+        margin: 30px;
         max-height: $course-card-height;
       }
     }
