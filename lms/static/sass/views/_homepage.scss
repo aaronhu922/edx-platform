@@ -195,7 +195,7 @@ $learn-more-horizontal-position: calc(50% - 100px); // calculate the left positi
 }
 
 /* Set homepage specific media queries */
-.home .courses-container .courses .courses-listing .courses-listing-item {
+.courses-container .courses .courses-listing .courses-listing-item {
   @include rtl() { $layout-direction: "RTL"; }
 
   @include fill-parent();
