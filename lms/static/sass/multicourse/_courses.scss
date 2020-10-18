@@ -48,23 +48,29 @@ $facet-background-color: #007db8;
   .courses-container {
     @include padding(($baseline*2), ($baseline/2), 0, ($baseline/2));
 
+    @media screen and (min-width: 1024px) {
+      section.courses{
+        ul.courses-listing {
+          padding: 0 30px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          li.courses-listing-item{
+            width: 20%;
+            margin: 30px;
+          }
+        } 
+      }
+    }
 
     .courses {
-      // @include rtl() { $layout-direction: "RTL"; }
-      width: 100%;
+      @include rtl() { $layout-direction: "RTL"; }
 
-      .courses-listing {
-        // @extend %ui-no-list;
-        padding: 0 30px ;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-  
-        .courses-listing-item {
-          width: 20%;
-          margin: 30px;
-          max-height: $course-card-height;
-        }
+      .courses-listing .courses-listing-item {
+        @include fill-parent();
+
+        margin: ($baseline*0.75) 0 ($baseline*1.5) 0;
+        max-height: $course-card-height;
       }
 
       // CASE: Course Discovery Search enabled
