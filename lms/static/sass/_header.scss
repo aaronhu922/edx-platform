@@ -33,7 +33,7 @@
       .logo {
         @include float(left);
 
-        height: $header-logo-height;
+        height: 60px;
       }
 
       @include media-breakpoint-down(md) {
