@@ -32,6 +32,8 @@ $course-search-input-height: ($button-size);
       margin: 0 auto;
       padding: ($baseline*3);
       max-width: ($baseline*60);
+      height: 247px;
+      box-sizing: border-box;
 
       @include media($bp-tiny) {
         padding: ($baseline/2);
