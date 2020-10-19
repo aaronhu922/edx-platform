@@ -305,3 +305,20 @@ mark {
     }
   }
 }
+
+
+// 隐藏FAQ
+
+.content-wrapper{
+  .course-info{
+    .container{
+      .details{
+        .inner-wrapper{
+          .faq{
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
