@@ -67,3 +67,29 @@
     	<% if ( context.registerFormSubmitButtonText ) { %><%- context.registerFormSubmitButtonText %><% } else { %><%- gettext("Create Account") %><% } %>
     </button>
 </form>
+
+<script>
+
+    var flag = true;
+
+    function fetchCode(codeBtn) {
+        var time = 60;
+        codeBtn.classList.add('disable');
+        if (flag) {
+            flag = false;
+            var timer = setInterval(() => {
+                time--;
+                codeBtn.innerText = time + ' 秒' + '重新获取';
+                if (time === 0) {
+                    clearInterval(timer);
+                    codeBtn.innerText = '发送验证码';
+                    codeBtn.classList.remove('disable');
+                    flag = true;
+                }
+            }, 1000)
+        }
+    }
+
+   
+
+</script>
