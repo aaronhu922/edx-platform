@@ -13,10 +13,9 @@ $learn-more-horizontal-position: calc(50% - 100px); // calculate the left positi
         padding: 0 30px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
         li.courses-listing-item{
           width: 20%;
-          margin: 30px;
+          margin: 30px 40px;
         }
       } 
     }
