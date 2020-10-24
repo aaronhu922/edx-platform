@@ -17,7 +17,7 @@ def forwards(apps, schema_editor):
     config = {
         "default": {
             "accomplishment_class_append": "accomplishment-certificate",
-            "platform_name": "Your Platform Name Here",
+            "platform_name": "智能学习地图",
             "company_about_url": "http://www.example.com/about-us",
             "company_privacy_url": "http://www.example.com/privacy-policy",
             "company_tos_url": "http://www.example.com/terms-service",
