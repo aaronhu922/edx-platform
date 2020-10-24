@@ -62,7 +62,7 @@
         </label>
     </div>
 
-
+    <span class="fetchCode" onclick="fetchCode(this)">发送验证码</span>
     <button type="submit" class="action action-primary action-update js-register register-button">
     	<% if ( context.registerFormSubmitButtonText ) { %><%- context.registerFormSubmitButtonText %><% } else { %><%- gettext("Create Account") %><% } %>
     </button>
