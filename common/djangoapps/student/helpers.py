@@ -622,11 +622,13 @@ def do_create_account(form, custom_form=None):
         raise ValidationError(errors)
 
     proposed_username = form.cleaned_data["username"]
+    # TODO: yonghu create account
     user = User(
         username=proposed_username,
-        email=form.cleaned_data["email"],
+        email=form.cleaned_data["phone_number"] + '@edx.com',
         is_active=False
     )
+    log.warning("phone: " + form.cleaned_data["phone_number"])
     password = normalize_password(form.cleaned_data["password"])
     user.set_password(password)
     registration = Registration()
@@ -664,7 +666,7 @@ def do_create_account(form, custom_form=None):
 
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
-        "year_of_birth"
+        "year_of_birth", "phone_number"
     ]
     profile = UserProfile(
         user=user,
@@ -678,7 +680,7 @@ def do_create_account(form, custom_form=None):
     except Exception:
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
         raise
-
+    log.warning("Testing the process to register {id}".format(id=user.id))
     return user, profile, registration
 
 
