@@ -53,7 +53,7 @@
 
     <%= context.fields /* xss-lint: disable=underscore-not-escaped */ %>
 
-    <span class="fetchCode" onclick="fetchCode(this)">发送验证码</span>
+    <span class="fetchCode" onclick="fetchCode(this)">获取验证码</span>
     <button type="submit" class="action action-primary action-update js-register register-button">
     	<% if ( context.registerFormSubmitButtonText ) { %><%- context.registerFormSubmitButtonText %><% } else { %><%- gettext("Create Account") %><% } %>
     </button>
@@ -92,6 +92,25 @@
             getErrorMsg('请填写正确的手机号码！');
             return;
         }
+         $.ajax({
+            type: "POST",
+            url: "/api/user/v1/sendsms",
+            dataType: "json",
+            data: {
+                phone_number:phone
+            },
+            success: function (data) {
+                console.log(data)
+                if (data.status = 'success') {
+                    handleCode(dom);
+                }else{
+                    getErrorMsg(data.detail)
+                }
+            },
+            error: function (data) {
+                console.log(data)
+            }
+        });
     }
 
 
@@ -104,7 +123,6 @@
         var frondDom = '<div class="js-form-errors status submission-error"><h4 class="message-title">获取验证码失败。</h4><ul class="message-copy"><li>';
         var backDom = '</li></ul></div>';
         return frondDom + message + backDom;
-
     }
 
 
