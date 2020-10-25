@@ -143,17 +143,19 @@ class AccountCreationForm(forms.Form):
 
     username = UsernameField()
 
-    email = forms.EmailField(
-        max_length=accounts.EMAIL_MAX_LENGTH,
-        min_length=accounts.EMAIL_MIN_LENGTH,
-        error_messages={
-            "required": _EMAIL_INVALID_MSG,
-            "invalid": _EMAIL_INVALID_MSG,
-            "max_length": _(u"Email cannot be more than %(limit_value)s characters long"),
-        }
-    )
+    # email = forms.EmailField(
+    #     max_length=accounts.EMAIL_MAX_LENGTH,
+    #     min_length=accounts.EMAIL_MIN_LENGTH,
+    #     error_messages={
+    #         "required": _EMAIL_INVALID_MSG,
+    #         "invalid": _EMAIL_INVALID_MSG,
+    #         "max_length": _(u"Email cannot be more than %(limit_value)s characters long"),
+    #     }
+    # )
 
     password = forms.CharField()
+
+    phone_number = forms.CharField()
 
     name = forms.CharField(
         min_length=accounts.NAME_MIN_LENGTH,
@@ -177,10 +179,10 @@ class AccountCreationForm(forms.Form):
         extra_fields = extra_fields or {}
         self.extended_profile_fields = extended_profile_fields or {}
         self.do_third_party_auth = do_third_party_auth
-        if tos_required:
-            self.fields["terms_of_service"] = TrueField(
-                error_messages={"required": _("You must accept the terms of service.")}
-            )
+        # if tos_required:
+        #     self.fields["terms_of_service"] = TrueField(
+        #         error_messages={"required": _("You must accept the terms of service.")}
+        #     )
 
         error_message_dict = {
             "level_of_education": _("A level of education is required"),
@@ -193,28 +195,29 @@ class AccountCreationForm(forms.Form):
         }
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
-                if field_name == "honor_code":
-                    if field_value == "required":
-                        self.fields[field_name] = TrueField(
-                            error_messages={
-                                "required": _("To enroll, you must follow the honor code.")
-                            }
-                        )
-                else:
-                    required = field_value == "required"
-                    min_length = 1
-                    error_message = error_message_dict.get(
-                        field_name,
-                        _("You are missing one or more required fields")
-                    )
-                    self.fields[field_name] = forms.CharField(
-                        required=required,
-                        min_length=min_length,
-                        error_messages={
-                            "required": error_message,
-                            "min_length": error_message,
-                        }
-                    )
+                #     if field_name == "honor_code":
+                #         if field_value == "required":
+                #             self.fields[field_name] = TrueField(
+                #                 error_messages={
+                #                     "required": _("To enroll, you must follow the honor code.")
+                #                 }
+                #             )
+                #     else:
+
+                required = field_value == "required"
+                min_length = 1
+                error_message = error_message_dict.get(
+                    field_name,
+                    _("You are missing one or more required fields")
+                )
+                self.fields[field_name] = forms.CharField(
+                    required=required,
+                    min_length=min_length,
+                    error_messages={
+                        "required": error_message,
+                        "min_length": error_message,
+                    }
+                )
 
         for field in self.extended_profile_fields:
             if field not in self.fields:
@@ -227,32 +230,41 @@ class AccountCreationForm(forms.Form):
             # Creating a temporary user object to test password against username
             # This user should NOT be saved
             username = self.cleaned_data.get('username')
-            email = self.cleaned_data.get('email')
-            temp_user = User(username=username, email=email) if username else None
+            # email = self.cleaned_data.get('email')
+            # email = self.clean_email()
+            temp_user = User(username=username, email=None) if username else None
             validate_password(password, temp_user)
         return password
 
-    def clean_email(self):
-        """ Enforce email restrictions (if applicable) """
-        email = self.cleaned_data["email"]
-        if settings.REGISTRATION_EMAIL_PATTERNS_ALLOWED is not None:
-            # This Open edX instance has restrictions on what email addresses are allowed.
-            allowed_patterns = settings.REGISTRATION_EMAIL_PATTERNS_ALLOWED
-            # We append a '$' to the regexs to prevent the common mistake of using a
-            # pattern like '.*@edx\\.org' which would match 'bob@edx.org.badguy.com'
-            if not any(re.match(pattern + "$", email) for pattern in allowed_patterns):
-                # This email is not on the whitelist of allowed emails. Check if
-                # they may have been manually invited by an instructor and if not,
-                # reject the registration.
-                if not CourseEnrollmentAllowed.objects.filter(email=email).exists():
-                    raise ValidationError(_(u"Unauthorized email address."))
-        if email_exists_or_retired(email):
-            raise ValidationError(
-                _(
-                    u"It looks like {email} belongs to an existing account. Try again with a different email address."
-                ).format(email=email)
-            )
-        return email
+    # def clean_phone_number(self):
+    #     """Enforce pbone number policies (if applicable)"""
+    #     phone_number = self.cleaned_data["phone_number"]
+    #     # print(" clean data: " + self.cleaned_data["phone_number"])
+    #     #TODO: yonghu phone number exists_or_retired check
+    #     print("phone_number" + str(phone_number))
+    #     return str(phone_number)
+
+    # def clean_email(self):
+    #     """ Enforce email restrictions (if applicable) """
+    #     email = self.clean_phone_number() + "@edx.com"
+    #     if settings.REGISTRATION_EMAIL_PATTERNS_ALLOWED is not None:
+    #         # This Open edX instance has restrictions on what email addresses are allowed.
+    #         allowed_patterns = settings.REGISTRATION_EMAIL_PATTERNS_ALLOWED
+    #         # We append a '$' to the regexs to prevent the common mistake of using a
+    #         # pattern like '.*@edx\\.org' which would match 'bob@edx.org.badguy.com'
+    #         if not any(re.match(pattern + "$", email) for pattern in allowed_patterns):
+    #             # This email is not on the whitelist of allowed emails. Check if
+    #             # they may have been manually invited by an instructor and if not,
+    #             # reject the registration.
+    #             if not CourseEnrollmentAllowed.objects.filter(email=email).exists():
+    #                 raise ValidationError(_(u"Unauthorized email address."))
+    #     if email_exists_or_retired(email):
+    #         raise ValidationError(
+    #             _(
+    #                 u"It looks like {email} belongs to an existing account. Try again with a different email address."
+    #             ).format(email=email)
+    #         )
+    #     return email
 
     def clean_year_of_birth(self):
         """
@@ -295,7 +307,7 @@ class RegistrationFormFactory(object):
     Construct Registration forms and associated fields.
     """
 
-    DEFAULT_FIELDS = ["email", "name", "username", "password"]
+    DEFAULT_FIELDS = ["phone_number", "name", "username", "password", "sms_code"]
 
     EXTRA_FIELDS = [
         "confirm_email",
@@ -316,6 +328,7 @@ class RegistrationFormFactory(object):
         "terms_of_service",
         "profession",
         "specialty",
+        "phone_number"
     ]
 
     def _is_field_visible(self, field_name):
@@ -441,7 +454,7 @@ class RegistrationFormFactory(object):
     def _get_registration_submit_url(self, request):
         return reverse("user_api_registration") if is_api_v1(request) else reverse("user_api_registration_v2")
 
-    def _add_email_field(self, form_desc, required=True):
+    def _add_email_field(self, form_desc, required=False):
         """Add an email field to a form description.
         Arguments:
             form_desc: A form description
@@ -465,6 +478,60 @@ class RegistrationFormFactory(object):
                 "min_length": accounts.EMAIL_MIN_LENGTH,
                 "max_length": accounts.EMAIL_MAX_LENGTH,
             },
+            required=False
+        )
+
+    def _add_phone_number_field(self, form_desc, required=True):
+        """Add an phone_number field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's phone number.
+        phone_number_label = _(u"Mobile")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's phone number.
+        phone_number_instructions = _(u"This is what you will use to login.")
+
+        form_desc.add_field(
+            "phone_number",
+            field_type="text",
+            label=phone_number_label,
+            instructions=phone_number_instructions,
+            restrictions={
+                "min_length": 11,
+                "max_length": 11,
+            },
+            required=required
+        )
+
+    def _add_sms_code_field(self, form_desc, required=True):
+        """Add a sms_code field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's public username.
+        sms_code_label = _(u"SMS Code")
+
+        sms_code_instructions = _(
+            # Translators: These instructions appear on the registration form, immediately
+            # below a field meant to hold the user's public username.
+            u"Input the sms code received from your mobile number. "
+        )
+        form_desc.add_field(
+            "sms_code",
+            label=sms_code_label,
+            instructions=sms_code_instructions,
+            restrictions={
+                "min_length": 6,
+                "max_length": 6,
+            },
             required=required
         )
 
@@ -485,7 +552,7 @@ class RegistrationFormFactory(object):
             "confirm_email",
             field_type="email",
             label=email_label,
-            required=required,
+            required=False,
             error_messages={
                 "required": error_msg
             }
@@ -913,13 +980,13 @@ class RegistrationFormFactory(object):
             field_type="select",
             options=list(countries),
             include_default_option=True,
-            required=required,
+            required=False,
             error_messages={
                 "required": error_msg
             }
         )
 
-    def _add_honor_code_field(self, form_desc, required=True):
+    def _add_honor_code_field(self, form_desc, required=False):
         """Add an honor code field to a form description.
         Arguments:
             form_desc: A form description
@@ -986,9 +1053,10 @@ class RegistrationFormFactory(object):
         form_desc.add_field(
             "honor_code",
             label=label,
-            field_type=field_type,
+            # field_type=field_type,
+            field_type="hidden",
             default=False,
-            required=required,
+            required=False,
             error_messages={
                 "required": error_msg
             },
