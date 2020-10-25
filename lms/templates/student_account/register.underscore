@@ -101,6 +101,7 @@
             success: function (data) {
                 console.log('success:',data)
                 if (data.status = 'success') {
+                    $('.js-form-feedback').empty();
                     handleCode(dom);
                 }else{
                     getErrorMsg(data.detail)
