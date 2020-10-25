@@ -63,10 +63,9 @@
 
     var flag = true;
 
-    function fetchCode(codeBtn) {
-        console.log($)
+     function handleCode(codeBtn) {
         var time = 60;
-        codeBtn.classList.add('fetchCode-disable');
+        codeBtn.classList.add('disable');
         if (flag) {
             flag = false;
             var timer = setInterval(() => {
@@ -75,11 +74,18 @@
                 if (time === 0) {
                     clearInterval(timer);
                     codeBtn.innerText = '发送验证码';
-                    codeBtn.classList.remove('fetchCode-disable');
+                    codeBtn.classList.remove('disable');
                     flag = true;
                 }
             }, 1000)
         }
+    }
+
+    function fetchCode(dom) {
+        var phone=$("input[name='phone_number']").val();
+        console.log(phone);
+
+      
     }
 
 
