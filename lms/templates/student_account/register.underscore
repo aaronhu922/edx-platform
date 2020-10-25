@@ -84,7 +84,7 @@
     function fetchCode(dom) {
         var phone=$("input[name='phone_number']").val();
        if(true){
-           $('js-form-feedback').append('
+           $('.js-form-feedback').append('
                 <div class='js-form-errors status submission-error'>
                     <h4 class='message-title'>
                         无法创建账号。
