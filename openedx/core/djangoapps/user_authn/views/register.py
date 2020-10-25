@@ -151,6 +151,8 @@ def create_account_with_params(request, params):
     # params is request.POST, that results in a dict containing lists of values
     params = dict(list(params.items()))
 
+    log.warning("params: " + str(params))
+
     # allow to define custom set of required/optional/hidden fields via configuration
     extra_fields = configuration_helpers.get_value(
         'REGISTRATION_EXTRA_FIELDS',
@@ -159,7 +161,7 @@ def create_account_with_params(request, params):
     if is_registration_api_v1(request):
         if 'confirm_email' in extra_fields:
             del extra_fields['confirm_email']
-
+    log.warning("---" + str(extra_fields))
     # registration via third party (Google, Facebook) using mobile application
     # doesn't use social auth pipeline (no redirect uri(s) etc involved).
     # In this case all related info (required for account linking)
@@ -201,7 +203,7 @@ def create_account_with_params(request, params):
 
     # Perform operations within a transaction that are critical to account creation
     with outer_atomic(read_committed=True):
-        # first, create the account
+        # first, create the account TODO: yonghu create account
         (user, profile, registration) = do_create_account(form, custom_form)
 
         third_party_provider, running_pipeline = _link_user_to_third_party_provider(
@@ -250,7 +252,7 @@ def create_account_with_params(request, params):
     # and is not yet an active user.
     if new_user is not None:
         AUDIT_LOG.info(u"Login success on new account creation - {0}".format(new_user.username))
-
+    log.warning("New account creation - {0}".format(new_user))
     return new_user
 
 
@@ -485,10 +487,10 @@ class RegistrationView(APIView):
         data = request.POST.copy()
         self._handle_terms_of_service(data)
 
-        response = self._handle_duplicate_email_username(request, data)
-        if response:
-            return response
-
+        # response = self._handle_duplicate_email_username(request, data)
+        # if response:
+        #     return response
+        #TODO: yonghu create account
         response, user = self._create_account(request, data)
         if response:
             return response
@@ -527,7 +529,7 @@ class RegistrationView(APIView):
     def _create_account(self, request, data):
         response, user = None, None
         try:
-            user = create_account_with_params(request, data)
+            user = create_account_with_params(request, data)         #TODO: yonghu create account
         except AccountValidationError as err:
             errors = {
                 err.field: [{"user_message": text_type(err)}]
@@ -677,6 +679,8 @@ class RegistrationValidationView(APIView):
         # We prefer seeing for invalidity first.
         # Some invalid usernames (like for superusers) may exist.
         return invalid_username_error or username_exists_error
+
+    #TODO: yonghu add phone check.
 
     def email_handler(self, request):
         """ Validates whether the email address is valid. """
