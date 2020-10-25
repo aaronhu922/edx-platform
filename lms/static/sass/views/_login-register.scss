@@ -266,6 +266,7 @@ ul.fa-ul{
   .login-form,
   .password-reset-form,
   .register-form {
+    position: relative;
     &:focus {
       outline: none;
     }
@@ -303,13 +304,14 @@ ul.fa-ul{
   .fetchCode {
     color: #fff;
     cursor: pointer;
-    background: #1890ff;
+    background: #126f9a;
     width: 100px;
     line-height: 1.5;
     text-align: center;
     font-size: 14px;
-    padding: 6px;
-    border-radius: 3px;
+    padding: 1ex 1em;
+    position: absolute;
+    right: 0;
 }
 
 .fetchCode-disable {
