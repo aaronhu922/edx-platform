@@ -96,9 +96,8 @@
             type: "POST",
             url: "/api/user/v1/sendsms",
             dataType: "json",
-            data: {
-                phone_number:phone
-            },
+            contentType:'application/json',
+            data:JSON.stringify({phone_number:phone}),
             success: function (data) {
                 console.log('success:',data)
                 if (data.status = 'success') {
