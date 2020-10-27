@@ -65,7 +65,7 @@
 
      function handleCode(codeBtn) {
         var time = 60;
-        codeBtn.classList.add('disable');
+        codeBtn.classList.add('fetchCode-disable');
         if (flag) {
             flag = false;
             var timer = setInterval(() => {
@@ -74,7 +74,7 @@
                 if (time === 0) {
                     clearInterval(timer);
                     codeBtn.innerText = '发送验证码';
-                    codeBtn.classList.remove('disable');
+                    codeBtn.classList.remove('fetchCode-disable');
                     flag = true;
                 }
             }, 1000)
