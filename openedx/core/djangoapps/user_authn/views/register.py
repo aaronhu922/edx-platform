@@ -32,6 +32,7 @@ from rest_framework.views import APIView
 from six import text_type
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_django import utils as social_utils
+from django.core.cache import cache
 
 import third_party_auth
 # Note that this lives in LMS, so this dependency should be refactored.
@@ -530,6 +531,19 @@ class RegistrationView(APIView):
 
     def _create_account(self, request, data):
         response, user = None, None
+
+        smscode = request.data.get('sms_code')
+        phonenumber = request.data.get('phone_number')
+        cachedcode = cache.get(phonenumber);
+        log.warning("{phonenumber}'s sms code {smscode}, cached code is {cachedcode}".format(phonenumber=phonenumber, smscode=smscode, cachedcode=cachedcode))
+
+        if smscode is None or phonenumber is None or (smscode != cachedcode):
+            errors = {
+                'sms_code_invalid': [{"user_message": _(u"SMS code {smscode} is invalid.").format(smscode=smscode)}
+                                     ]}
+            response = self._create_response(request, errors, status_code=400)
+            return response, user
+
         try:
             user = create_account_with_params(request, data)         #TODO: yonghu create account
         except AccountValidationError as err:
@@ -682,8 +696,6 @@ class RegistrationValidationView(APIView):
         # Some invalid usernames (like for superusers) may exist.
         return invalid_username_error or username_exists_error
 
-    #TODO: yonghu add phone check.
-
     def email_handler(self, request):
         """ Validates whether the email address is valid. """
         email = request.data.get('email')
@@ -772,10 +784,12 @@ class SendSmsCodeView(APIView):
         readom_code = ''.join(str(random.randint(0, 9)) for _ in range(6))
         log.warning("SMS code {code}".format(code=readom_code))
 
-        # cache.set(phone_number, code, 60*5)
+        cache.set(phone_number, readom_code, 60*5)
+        log.warning("Get sms code from memcache {cachecode}".format(cachecode=cache.get(phone_number)))
         params = "{'code':'%s'}" % (readom_code)
+
         log.warning("SMS str {jsonstr}".format(jsonstr=params))
 
         obj = Aliyun()
-        res = obj.send_sms(phone_number, "轻语英语", 'SMS_205055214', params)
+        # res = obj.send_sms(phone_number, "轻语英语", 'SMS_205055214', params)
         return Response({"status": "success", "detail": "Testing purpose"})
