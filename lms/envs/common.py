@@ -4137,7 +4137,7 @@ COUNTRIES_FIRST = []
 
 SMS = {
     'default': 'aliyun',
-    'appid': 'LTAI4GKqQtFz3TTh5BPuu5Nm',
-    'secret': 'wJS2xlvA4oi0p4G1MBXaNXp07gccd6',
+    'appid': 'LTAI4G2VrexG171v9eqMZvfR',
+    'secret': 'O7LWLz9PnfLUhCHax1f2HosXatv61G',
     'signname': '轻语英语'
 }
