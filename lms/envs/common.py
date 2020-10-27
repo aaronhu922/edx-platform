@@ -4134,3 +4134,10 @@ MAX_BLOCKS_PER_CONTENT_LIBRARY = 1000
 # COUNTRIES_FIRST = ['SA', 'BH', 'QA'] will display these countries on top of the list
 # https://github.com/SmileyChris/django-countries#show-certain-countries-first
 COUNTRIES_FIRST = []
+
+SMS = {
+    'default': 'aliyun',
+    'appid': 'LTAI4GKqQtFz3TTh5BPuu5Nm',
+    'secret': 'wJS2xlvA4oi0p4G1MBXaNXp07gccd6',
+    'signname': '轻语英语'
+}

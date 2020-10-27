@@ -6,7 +6,8 @@ Registration related views.
 import datetime
 import json
 import logging
-
+import random
+import re
 from django.conf import settings
 from django.contrib.auth import login as django_login
 from django.contrib.auth.models import User
@@ -50,6 +51,7 @@ from openedx.core.djangoapps.user_api.accounts.api import (
     get_username_validation_error
 )
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
+from openedx.core.djangoapps.user_authn.aliyun import Aliyun
 from openedx.core.djangoapps.user_authn.cookies import set_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import generate_password, is_registration_api_v1
 from openedx.core.djangoapps.user_authn.views.registration_form import (
@@ -748,3 +750,32 @@ class RegistrationValidationView(APIView):
                     form_field_key: handler(self, request)
                 })
         return Response({"validation_decisions": validation_decisions})
+
+
+class SendSmsCodeView(APIView):
+    """
+
+    """
+
+    # This end-point is available to anonymous users, so no authentication is needed.
+    authentication_classes = []
+
+
+    @method_decorator(
+        ratelimit(key=REAL_IP_KEY, rate=settings.REGISTRATION_VALIDATION_RATELIMIT, method='POST', block=True)
+    )
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        log.warning("phone number {data}".format(data=phone_number))
+        if not re.match('^1\d{10}$', phone_number):
+            return Response({"status": "failed", "detail": "电话号码不正确"})
+        readom_code = ''.join(str(random.randint(0, 9)) for _ in range(6))
+        log.warning("SMS code {code}".format(code=readom_code))
+
+        # cache.set(phone_number, code, 60*5)
+        params = "{'code':'%s'}" % (readom_code)
+        log.warning("SMS str {jsonstr}".format(jsonstr=params))
+
+        obj = Aliyun()
+        res = obj.send_sms(phone_number, "轻语英语", 'SMS_205055214', params)
+        return Response({"status": "success", "detail": "Testing purpose"})
