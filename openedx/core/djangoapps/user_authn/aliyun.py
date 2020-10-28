@@ -32,10 +32,10 @@ class Aliyun:
 
         request.add_query_param('RegionId', "default")
         request.add_query_param('PhoneNumbers', mobile)
-        request.add_query_param('SignName', self.sign)
+        request.add_query_param('SignName', str(self.sign))
         request.add_query_param('TemplateCode', self.template)
         request.add_query_param('TemplateParam', data)
-        logging.warning("Sign name: {sign}, template: {template}".format(sign=self.sign, template=self.template))
+        logging.warning("Sign name: {sign}, template: {template}".format(sign=str(self.sign), template=self.template))
         response = self.client.do_action_with_exception(request)
         logging.warning(response)
         return response
