@@ -4139,5 +4139,6 @@ SMS = {
     'default': 'aliyun',
     'appid': 'LTAI4G4yVUfW6LTgVyrgBZLk',
     'secret': '',
-    'signname': '轻语英语'
+    'signname': '轻语英语',
+    'template': 'SMS_205055214',
 }

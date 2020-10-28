@@ -791,5 +791,5 @@ class SendSmsCodeView(APIView):
         log.warning("SMS str {jsonstr}".format(jsonstr=params))
 
         obj = Aliyun()
-        res = obj.send_sms(phone_number, "轻语英语", 'SMS_205055214', params)
+        res = obj.send_sms(phone_number, params)
         return Response({"status": "success", "detail": "Testing purpose"})
