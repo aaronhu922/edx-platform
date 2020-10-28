@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
 from django.conf import settings
