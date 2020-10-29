@@ -95,10 +95,10 @@ def _get_user_by_email(request):
     """
     Finds a user object in the database based on the given request, ignores all fields except for email.
     """
-    if 'email' not in request.POST or 'password' not in request.POST:
+    if 'phone_number' not in request.POST or 'password' not in request.POST:
         raise AuthFailedError(_('There was an error receiving your login information. Please email us.'))
 
-    email = request.POST['email']
+    email = request.POST['phone_number'] + '@edx.com'
 
     try:
         return User.objects.get(email=email)

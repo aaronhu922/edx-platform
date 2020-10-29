@@ -544,7 +544,7 @@ FEATURES = {
     'ENABLE_ONE_CLICK_PROGRAM_PURCHASE': False,
 
     # Allow users to change their email address.
-    'ALLOW_EMAIL_ADDRESS_CHANGE': True,
+    'ALLOW_EMAIL_ADDRESS_CHANGE': False,
 
     # Whether the bulk enrollment view is enabled.
     'ENABLE_BULK_ENROLLMENT_VIEW': False,
@@ -4138,7 +4138,7 @@ COUNTRIES_FIRST = []
 SMS = {
     'default': 'aliyun',
     'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
-    'secret': '',
+    'secret': '81gI6P4ybB0oEAuIQ8K80PvoUC4DSP',
     'signname': 'ILMEnglish',
     'template': 'SMS_205090469',
 }
