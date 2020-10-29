@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
 from django.conf import settings
@@ -28,12 +29,12 @@ class Aliyun:
         request.set_version('2017-05-25')
         request.set_action_name('SendSms')
 
-        request.add_query_param('RegionId', "default")
+        request.add_query_param('RegionId', "cn-hangzhou")
         request.add_query_param('PhoneNumbers', mobile)
         request.add_query_param('SignName', sign)
         request.add_query_param('TemplateCode', template)
         request.add_query_param('TemplateParam', data)
-
+        logging.warning("Sign name: {sign}, template: {template}".format(sign=sign, template=template))
         response = self.client.do_action_with_exception(request)
         logging.warning(response)
         return response

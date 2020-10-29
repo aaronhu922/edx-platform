@@ -59,8 +59,8 @@ from lms.djangoapps.lms_xblock.mixin import LmsBlockMixin
 # .. setting_default: Your Platform Name Here
 # .. setting_description: The display name of the platform to be used in
 #     templates/emails/etc.
-PLATFORM_NAME = _('Your Platform Name Here')
-PLATFORM_DESCRIPTION = _('Your Platform Description Here')
+PLATFORM_NAME = _('ILM智能学习地图')
+PLATFORM_DESCRIPTION = _('Intelligent Learning Map，简称ILM，在线学习平台，智能精准匹配个性化，多样性学习系统，让学生英语能力提升看得见！')
 CC_MERCHANT_NAME = PLATFORM_NAME
 
 PLATFORM_FACEBOOK_ACCOUNT = "http://www.facebook.com/YourPlatformFacebookAccount"
@@ -1432,7 +1432,7 @@ LANGUAGES = [
     ('es-ec', u'Español (Ecuador)'),  # Spanish (Ecuador)
     ('es-es', u'Español (España)'),  # Spanish (Spain)
     ('es-mx', u'Español (México)'),  # Spanish (Mexico)
-    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)
+    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)G
     ('et-ee', u'Eesti (Eesti)'),  # Estonian (Estonia)
     ('eu-es', u'euskara (Espainia)'),  # Basque (Spain)
     ('fa', u'فارسی'),  # Persian
@@ -4137,7 +4137,8 @@ COUNTRIES_FIRST = []
 
 SMS = {
     'default': 'aliyun',
-    'appid': 'LTAI4G2VrexG171v9eqMZvfR',
-    'secret': 'O7LWLz9PnfLUhCHax1f2HosXatv61G',
-    'signname': '轻语英语'
+    'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
+    'secret': '',
+    'signname': 'ILMEnglish',
+    'template': 'SMS_205090469',
 }
