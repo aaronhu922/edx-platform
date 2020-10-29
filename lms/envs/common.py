@@ -1432,7 +1432,7 @@ LANGUAGES = [
     ('es-ec', u'Español (Ecuador)'),  # Spanish (Ecuador)
     ('es-es', u'Español (España)'),  # Spanish (Spain)
     ('es-mx', u'Español (México)'),  # Spanish (Mexico)
-    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)
+    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)G
     ('et-ee', u'Eesti (Eesti)'),  # Estonian (Estonia)
     ('eu-es', u'euskara (Espainia)'),  # Basque (Spain)
     ('fa', u'فارسی'),  # Persian
@@ -4137,8 +4137,8 @@ COUNTRIES_FIRST = []
 
 SMS = {
     'default': 'aliyun',
-    'appid': 'LTAI4G4yVUfW6LTgVyrgBZLk',
+    'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
     'secret': '',
-    'signname': '轻语英语',
-    'template': 'SMS_205055214',
+    'signname': 'ILMEnglish',
+    'template': 'SMS_205090469',
 }

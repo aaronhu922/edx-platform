@@ -10,10 +10,9 @@ class Aliyun:
     def __init__(self):
         appid = settings.SMS.get('appid', None)
         secret = settings.SMS.get('secret', None)
-        self.template = settings.SMS.get('template', 'SMS_205055214')
         self.client = AcsClient(appid, secret, 'cn-hangzhou')
 
-    def send_sms(self, mobile, sign, data=None):
+    def send_sms(self, mobile, sign, template, data=None):
         """
         发送短信
 
@@ -30,12 +29,12 @@ class Aliyun:
         request.set_version('2017-05-25')
         request.set_action_name('SendSms')
 
-        request.add_query_param('RegionId', "default")
+        request.add_query_param('RegionId', "cn-hangzhou")
         request.add_query_param('PhoneNumbers', mobile)
         request.add_query_param('SignName', sign)
-        request.add_query_param('TemplateCode', self.template)
+        request.add_query_param('TemplateCode', template)
         request.add_query_param('TemplateParam', data)
-        logging.warning("Sign name: {sign}, template: {template}".format(sign=sign, template=self.template))
+        logging.warning("Sign name: {sign}, template: {template}".format(sign=sign, template=template))
         response = self.client.do_action_with_exception(request)
         logging.warning(response)
         return response

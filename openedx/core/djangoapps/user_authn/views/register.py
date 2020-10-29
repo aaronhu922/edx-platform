@@ -789,10 +789,16 @@ class SendSmsCodeView(APIView):
         log.warning("Get sms code from memcache {cachecode}".format(cachecode=cache.get(phone_number)))
         params = "{'code':'%s'}" % (readom_code)
 
-        sign = settings.SMS.get('signname', '轻语英语')
+        sign = settings.SMS.get('signname', 'ILMEnglish')
+        template = settings.SMS.get('template', 'SMS_205090469')
 
-        log.warning("SMS str {jsonstr}, sign name {sign}".format(jsonstr=params, sign=sign))
+        log.warning("SMS str {jsonstr}, sign name {sign}, template {template}".format(jsonstr=params, sign=sign, template=template))
 
         obj = Aliyun()
-        res = obj.send_sms(phone_number, "轻语英语", params)
-        return Response({"status": "success", "detail": "Testing purpose"})
+        res = obj.send_sms(phone_number, sign, template, params)
+
+        jsonStr = json.loads(str(res, encoding='utf-8'))
+
+        if jsonStr['Code'] == 'OK':
+            return Response({"status": "success", "detail": "短信发送成功！"})
+        return Response({"status": "failed", "detail": jsonStr['Message']})
