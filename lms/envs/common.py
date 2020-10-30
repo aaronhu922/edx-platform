@@ -4138,7 +4138,7 @@ COUNTRIES_FIRST = []
 SMS = {
     'default': 'aliyun',
     'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
-    'secret': '81gI6P4ybB0oEAuIQ8K80PvoUC4DSP',
+    'secret': '',
     'signname': 'ILMEnglish',
     'template': 'SMS_205090469',
 }
