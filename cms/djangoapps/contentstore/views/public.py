@@ -1,7 +1,7 @@
 """
 Public views
 """
-
+import os
 
 from django.conf import settings
 from django.shortcuts import redirect
@@ -10,8 +10,11 @@ from waffle.decorators import waffle_switch
 
 from contentstore.config import waffle
 from edxmako.shortcuts import render_to_response
+from django.http import HttpResponse
 
-__all__ = ['register_redirect_to_lms', 'login_redirect_to_lms', 'howitworks', 'accessibility']
+
+
+__all__ = ['register_redirect_to_lms', 'login_redirect_to_lms', 'howitworks', 'accessibility', 'studentmanageapi']
 
 
 def register_redirect_to_lms(request):
@@ -56,6 +59,21 @@ def howitworks(request):
         return redirect('/home/')
     else:
         return render_to_response('howitworks.html', {})
+
+
+
+def studentmanageapi(request):
+    # response = HttpResponse()
+    # construct the file's path
+    url = '/edx/app/edxapp/edx-platform/cms/static/manage/index.html'
+    # test if path is ok and file exists
+    if request.user.is_authenticated and os.path.isfile(url):
+        # let nginx determine the correct content type in this case
+        # response['Content-Type'] = ""
+        # response['X-Accel-Redirect'] = url
+        # response['X-Sendfile'] = url
+        # other webservers may accept X-Sendfile and not X-Accel-Redirect
+        return HttpResponse(open(url).read())
 
 
 @waffle_switch('{}.{}'.format(waffle.WAFFLE_NAMESPACE, waffle.ENABLE_ACCESSIBILITY_POLICY_PAGE))
