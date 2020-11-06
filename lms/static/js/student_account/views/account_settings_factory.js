@@ -38,7 +38,7 @@
                 emailFieldView, secondaryEmailFieldView, socialFields, accountDeletionFields, platformData,
                 aboutSectionMessageType, aboutSectionMessage, fullnameFieldView, countryFieldView,
                 fullNameFieldData, emailFieldData, secondaryEmailFieldData, countryFieldData, additionalFields,
-                fieldItem, emailFieldViewIndex, focusId,
+                fieldItem, emailFieldViewIndex, focusId, phoneNumberFieldData, phoneNumberFieldView,
                 tabIndex = 0;
 
             $accountSettingsElement = $('.wrapper-account-settings');
@@ -66,6 +66,20 @@
                     }
                 );
             }
+
+            phoneNumberFieldData = {
+                model: userAccountModel,
+                title: gettext('Phone Number (Sign In)'),
+                valueAttribute: 'phone_number',
+                helpMessage: StringUtils.interpolate(
+                    gettext('接收从 {platform_name} 平台发送的信息， 用来注册和登录.'),  // eslint-disable-line max-len
+                    {platform_name: platformName}
+                ),
+                persistChanges: true
+            };
+            phoneNumberFieldView = {
+              view: new AccountSettingsFieldViews.ReadonlyFieldView(phoneNumberFieldData)
+            };
 
             emailFieldData = {
                 model: userAccountModel,
@@ -155,6 +169,7 @@
                             })
                         },
                         fullnameFieldView,
+                        phoneNumberFieldView,
                         emailFieldView,
                         {
                             view: new AccountSettingsFieldViews.PasswordFieldView({

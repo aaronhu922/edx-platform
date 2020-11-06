@@ -227,7 +227,7 @@ def _get_extended_profile_fields():
     """
 
     extended_profile_fields = []
-    fields_already_showing = ['username', 'name', 'email', 'pref-lang', 'country', 'time_zone', 'level_of_education',
+    fields_already_showing = ['username', 'name', 'email', 'phone_number', 'pref-lang', 'country', 'time_zone', 'level_of_education',
                               'gender', 'year_of_birth', 'language_proficiencies', 'social_links']
 
     field_labels_map = {
@@ -243,7 +243,8 @@ def _get_extended_profile_fields():
             platform_name=configuration_helpers.get_value("PLATFORM_NAME", settings.PLATFORM_NAME)
         ),
         "profession": _(u"Profession"),
-        "specialty": _(u"Specialty")
+        "specialty": _(u"Specialty"),
+        "phone_number": _(u"Phone Number")
     }
 
     extended_profile_field_names = configuration_helpers.get_value('extended_profile_fields', [])

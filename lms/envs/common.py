@@ -544,7 +544,7 @@ FEATURES = {
     'ENABLE_ONE_CLICK_PROGRAM_PURCHASE': False,
 
     # Allow users to change their email address.
-    'ALLOW_EMAIL_ADDRESS_CHANGE': True,
+    'ALLOW_EMAIL_ADDRESS_CHANGE': False,
 
     # Whether the bulk enrollment view is enabled.
     'ENABLE_BULK_ENROLLMENT_VIEW': False,
@@ -574,7 +574,7 @@ FEATURES = {
     'UNSUPPORTED_BROWSER_ALERT_VERSIONS': "{i:10,f:-3,o:-3,s:-3,c:-3}",
 
     # Whether to display the account deletion section the account settings page
-    'ENABLE_ACCOUNT_DELETION': True,
+    'ENABLE_ACCOUNT_DELETION': False,
 
     # Enable feature to remove enrollments and users. Used to reset state of master's integration environments
     'ENABLE_ENROLLMENT_RESET': False,
@@ -3501,21 +3501,6 @@ ACCOUNT_VISIBILITY_CONFIGURATION["admin_fields"] = (
 # input field as well as in some messaging describing an example of a
 # valid link.
 SOCIAL_PLATFORMS = {
-    'facebook': {
-        'display_name': 'Facebook',
-        'url_stub': 'facebook.com/',
-        'example': 'https://www.facebook.com/username'
-    },
-    'twitter': {
-        'display_name': 'Twitter',
-        'url_stub': 'twitter.com/',
-        'example': 'https://www.twitter.com/username'
-    },
-    'linkedin': {
-        'display_name': 'LinkedIn',
-        'url_stub': 'linkedin.com/in/',
-        'example': 'www.linkedin.com/in/username'
-    }
 }
 
 # E-Commerce API Configuration
