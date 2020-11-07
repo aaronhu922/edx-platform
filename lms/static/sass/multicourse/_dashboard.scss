@@ -64,6 +64,7 @@
 
         .details {
           @include clearfix();
+          position: relative;
 
           .wrapper-course-image {
             @include float(left);
@@ -207,10 +208,13 @@
             }
 
             .wrapper-course-actions {
-              @include margin-right($baseline);
-
-              margin-top: $baseline;
-              align-self: flex-end;
+             position: absolute;
+             right: 0;
+             height: 100%;
+             box-sizing: border-box;
+             border: 2px solid #126f9a;
+             border-top-right-radius: 10px;
+             border-bottom-right-radius: 10px;
             }
 
 
@@ -236,7 +240,7 @@
           }
 
           .course-actions {
-
+            height: 100%;
             // UI: course item actions
             .action {
               box-sizing: border-box;
@@ -421,13 +425,18 @@
           .enter-course {
             font: -apple-system-short-subheadline !important;
 
-            @extend %btn-pl-white-base;
+            // @extend %btn-pl-white-base;
 
             @include float(right);
 
             &.archived {
               @extend %btn-pl-default-base;
             }
+            height: 100%;
+            display: flex;
+            padding: 0 20px;
+            width: 80px;
+            align-items: center;
           }
 
           // Responsive behavior

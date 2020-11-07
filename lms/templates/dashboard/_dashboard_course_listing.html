@@ -202,7 +202,7 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
             % if (show_courseware_link or is_unfulfilled_entitlement) and not is_course_expired:
               % if course_overview.has_ended():
                 % if not is_unfulfilled_entitlement:
-                  <a href="${course_target}" class="enter-course archived course-target-link" data-course-key="${enrollment.course_id}">${_('View Archived Course')}<span class="sr">&nbsp;${course_overview.display_name_with_default}</span></a>
+                  <a href="${course_target}" class="enter-course archived course-target-link" data-course-key="${enrollment.course_id}">点击进入</a>
                 % endif
 
               % else:
