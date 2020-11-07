@@ -425,7 +425,7 @@
           .enter-course {
             font: -apple-system-short-subheadline !important;
 
-            // @extend %btn-pl-white-base;
+            @extend %btn-pl-white-base;
 
             @include float(right);
 
