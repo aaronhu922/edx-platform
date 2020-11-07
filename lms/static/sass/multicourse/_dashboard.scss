@@ -165,6 +165,15 @@
                 display: inline-block;
               }
 
+              .account-container{
+                margin-top: 10px;
+                >span{
+                  padding: 10px 15px;
+                  border: 1px solid #eee;
+                  margin-right: 8px;
+                }
+              }
+
               .info-date-block-container {
                 display: block;
 
