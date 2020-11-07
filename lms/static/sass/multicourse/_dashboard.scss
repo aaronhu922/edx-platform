@@ -145,7 +145,7 @@
                 @extend %t-regular;
 
                 display: inline-block;
-                margin-bottom: ($baseline/2);
+                // margin-bottom: ($baseline/2);
                 text-decoration: none;
 
                 // Responsive behavior
@@ -194,6 +194,10 @@
                   letter-spacing: normal;
                 }
               }
+              .info-date-block-container{
+                display: block;
+              }
+
             }
 
             .wrapper-course-actions {
