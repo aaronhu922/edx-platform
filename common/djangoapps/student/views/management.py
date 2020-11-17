@@ -966,6 +966,7 @@ def students_management(request):
         user, user_pro = do_create_account_no_registration(data)
         if user is not None:
             return JsonResponse({
+                "id": user.id,
                 "username": user.username,
                 "phone_number": user_pro.phone_number,
                 "errorCode": "201",
