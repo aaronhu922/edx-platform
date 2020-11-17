@@ -883,7 +883,13 @@ def course_enrollment_info(request):
     if request.method == 'GET':
         test_obj = CourseEnrollmentInfo.objects.all()
         serializer = CourseEnrollmentInfoSerializer(test_obj, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of enrollments info!",
+            "success": True
+        }, safe=False)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
@@ -909,7 +915,13 @@ def customer_service_info(request):
     if request.method == 'GET':
         test_obj = CustomerService.objects.all()
         serializer = CustomerServiceSerializer(test_obj, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of customer services!",
+            "success": True
+        }, safe=False)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
@@ -934,18 +946,35 @@ def students_management(request):
     if request.method == 'GET':
         test_obj = UserProfile.objects.all()
         serializer = StudentSerializer(test_obj, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get all the students!",
+            "success": True
+        }, safe=False)
 
     elif request.method == 'POST':
-        # phone_number = request.data.get('phone_number')
+        data = JSONParser().parse(request)
+        phone_number = data['phone_number']
         # username = request.data.get('username')
         # password = request.data.get('password')
         # name = request.data.get('name')
         # web_accelerator_name = request.data.get('web_accelerator_name')
         # web_accelerator_link = request.data.get('web_accelerator_link')
-        data = JSONParser().parse(request)
         log.warning(data)
         user, user_pro = do_create_account_no_registration(data)
         if user is not None:
-            return JsonResponse({"name": user.username}, status=201)
-        return JsonResponse({'error': 'Create student failed!'}, status=401)
+            return JsonResponse({
+                "username": user.username,
+                "phone_number": user_pro.phone_number,
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to create a student account!",
+                "success": True
+            }, status=201)
+        return JsonResponse({"phone_number": phone_number,
+                             "errorCode": "401",
+                             "executed": True,
+                             "message": "Failed to create student account!",
+                             "success": False}, status=401)
