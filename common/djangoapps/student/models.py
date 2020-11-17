@@ -564,6 +564,8 @@ class UserProfile(models.Model):
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
     phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
     phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, max_length=50)
+    web_accelerator_name = models.CharField(blank=True, max_length=255, null=True)
+    web_accelerator_link = models.CharField(blank=True, max_length=255, null=True)
 
     @property
     def has_profile_image(self):
@@ -2100,6 +2102,38 @@ class CourseEnrollment(models.Model):
         given cache.
         """
         cache[(user_id, course_key)] = enrollment_state
+
+
+@python_2_unicode_compatible
+class CustomerService(models.Model):
+    customer_service_name = models.CharField(max_length=250, blank=False)
+    customer_service_info = models.TextField(max_length=1024, blank=True)
+
+    class Meta:
+        verbose_name = _('customer_service')
+
+    def __str__(self):
+        return self.customer_service_name
+
+
+@python_2_unicode_compatible
+class CourseEnrollmentInfo(models.Model):
+    # course_enrolled = models.ForeignKey(CourseEnrollment, on_delete=models.CASCADE)
+    course_enrolled = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE, related_name='enrolled_detail')
+    course_user_name = models.CharField(max_length=250, blank=False)
+    course_user_password = models.CharField(max_length=255, blank=False)
+    course_school_code = models.CharField(max_length=255, blank=True)
+    created = models.DateTimeField(auto_now_add=True, blank=True)
+    ended_date = models.DateTimeField(auto_now=True, blank=True)
+    description = models.TextField(max_length=1024, blank=True)
+    customer_service = models.ForeignKey(CustomerService,  null=True, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _('courses-students')
+        verbose_name_plural = _('courses-students-list')
+
+    def __str__(self):
+        return self.course_user_name
 
 
 @python_2_unicode_compatible

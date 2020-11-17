@@ -248,6 +248,7 @@ class CourseOverview(TimeStampedModel):
                 was not found.
             - IOError if some other error occurs while trying to load the
                 course from the module store.
+                TODO: yonghu
         """
         log.info(
             "Attempting to load CourseOverview for course %s from modulestore.",

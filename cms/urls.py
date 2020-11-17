@@ -83,7 +83,7 @@ urlpatterns = [
     url(r'^api/', include('cms.djangoapps.api.urls', namespace='api')),
 
     #For student management api.
-    url(r'^manage$', contentstore.views.studentmanageapi, name='studentmanageapi'),
+    url(r'^manage/', contentstore.views.studentmanageapi, name='studentmanageapi'),
 
     # restful api
     url(r'^$', contentstore.views.howitworks, name='homepage'),

@@ -659,7 +659,7 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         """
         # first make sure an existing course doesn't already exist in the mapping
         course_key = self.make_course_key(org, course, run)
-
+        # TODO: yonghu
         log.info('Creating course run %s...', course_key)
         if course_key in self.mappings and self.mappings[course_key].has_course(course_key):
             log.error('Cannot create course run %s. It already exists!', course_key)

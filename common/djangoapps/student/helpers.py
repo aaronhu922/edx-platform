@@ -684,6 +684,67 @@ def do_create_account(form, custom_form=None):
     return user, profile, registration
 
 
+def do_create_account_no_registration(data):
+    """
+    Given cleaned post variables, create the User and UserProfile objects, as well as the
+    registration for this user.
+
+    Returns a tuple (User, UserProfile, Registration).
+
+    Note: this function is also used for creating test users.
+    """
+    # Check if ALLOW_PUBLIC_ACCOUNT_CREATION flag turned off to restrict user account creation
+
+    proposed_username = data["username"]
+    user = User(
+        username=proposed_username,
+        email=data["phone_number"] + '@edx.com',
+        is_active=False
+    )
+    log.warning("phone: " + data["phone_number"])
+    password = normalize_password(data["password"])
+    user.set_password(password)
+
+    try:
+        with transaction.atomic():
+            user.save()
+    except IntegrityError:
+        # Figure out the cause of the integrity error
+        # TODO duplicate email is already handled by form.errors above as a ValidationError.
+        # The checks for duplicate email/username should occur in the same place with an
+        # AccountValidationError and a consistent user message returned (i.e. both should
+        # return "It looks like {username} belongs to an existing account. Try again with a
+        # different username.")
+        if username_exists_or_retired(user.username):
+            raise AccountValidationError(
+                USERNAME_EXISTS_MSG_FMT.format(username=proposed_username),
+                field="username"
+            )
+        elif email_exists_or_retired(user.email):
+            raise AccountValidationError(
+                _("An account with the Email '{email}' already exists.").format(email=user.email),
+                field="email"
+            )
+        else:
+            raise
+
+
+    profile_fields = [
+        "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
+        "year_of_birth", "phone_number", "web_accelerator_name", "web_accelerator_link"
+    ]
+    profile = UserProfile(
+        user=user,
+        **{key: data.get(key) for key in profile_fields}
+    )
+    profile.save()
+    # except Exception:
+    #     log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
+    #     raise
+    log.warning("Testing the process to register {id}".format(id=user.id))
+    return user, profile
+
+
 def get_resume_urls_for_enrollments(user, enrollments):
     '''
     For a given user, return a list of urls to the user's last completed block in

@@ -2,7 +2,6 @@
 Student Views
 """
 
-
 import datetime
 import logging
 import uuid
@@ -39,6 +38,8 @@ from six import text_type
 import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
+
+from common.djangoapps.student.serializers import StudentSerializer
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
 from edxmako.shortcuts import marketing_link, render_to_response, render_to_string
 from entitlements.models import CourseEntitlement
@@ -51,7 +52,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangolib.markup import HTML, Text
-from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context
+from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context, do_create_account_no_registration
 from student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, RecoveryEmailCreate
 from student.models import (
     AccountRecovery,
@@ -65,7 +66,10 @@ from student.models import (
     UserSignupSource,
     UserStanding,
     create_comments_service_user,
-    email_exists_or_retired
+    email_exists_or_retired,
+    CourseEnrollmentInfo,
+    CustomerService,
+    get_user
 )
 from student.signals import REFUND_ORDER
 from student.tasks import send_activation_email
@@ -73,6 +77,13 @@ from student.text_me_the_app import TextMeTheAppFragmentView
 from util.db import outer_atomic
 from util.json_request import JsonResponse
 from xmodule.modulestore.django import modulestore
+
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer
+from rest_framework.views import APIView
+import json
+
 
 log = logging.getLogger("edx.student")
 
@@ -862,3 +873,79 @@ def text_me_the_app(request):
     }
 
     return render_to_response('text-me-the-app.html', context)
+
+
+@csrf_exempt
+def course_enrollment_info(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        test_obj = CourseEnrollmentInfo.objects.all()
+        serializer = CourseEnrollmentInfoSerializer(test_obj, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        log.warning(data['phone_number'])
+        email = data['phone_number'] + "@edx.com"
+        user, u_prof = get_user(email)
+        course_key = CourseKey.from_string(data['course_id'])
+        enrollment = CourseEnrollment.enroll(user, course_key, 'test')
+        data['course_enrolled'] = enrollment.id
+        log.warning(data)
+        serializer = CourseEnrollmentInfoSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def customer_service_info(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        test_obj = CustomerService.objects.all()
+        serializer = CustomerServiceSerializer(test_obj, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        log.warning(data)
+        serializer = CustomerServiceSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def students_management(request):
+    """
+    "phone_number": "",
+    "username": "",
+    "password": "test",
+    "name": "",
+    "web_accelerator_name": "洛杉矶",
+    "web_accelerator_link": "http://47.114.176.127/test.pac",
+    """
+    if request.method == 'GET':
+        test_obj = UserProfile.objects.all()
+        serializer = StudentSerializer(test_obj, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        # phone_number = request.data.get('phone_number')
+        # username = request.data.get('username')
+        # password = request.data.get('password')
+        # name = request.data.get('name')
+        # web_accelerator_name = request.data.get('web_accelerator_name')
+        # web_accelerator_link = request.data.get('web_accelerator_link')
+        data = JSONParser().parse(request)
+        log.warning(data)
+        user, user_pro = do_create_account_no_registration(data)
+        if user is not None:
+            return JsonResponse({"name": user.username}, status=201)
+        return JsonResponse({'error': 'Create student failed!'}, status=401)
