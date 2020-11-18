@@ -45,18 +45,18 @@ class CourseOverviewSerializer(serializers.ModelSerializer):
     """
     Serializer for a course run overview.
     """
-    course_extend_info = CourseOverviewExtendInfoSerializer(required=False)
+    course_ext_info = CourseOverviewExtendInfoSerializer(required=False)
 
     class Meta(object):
         model = CourseOverview
-        fields = ('id', 'org', 'display_name', 'course_extend_info')
+        fields = ('id', 'org', 'display_name', 'course_ext_info')
 
-    def to_representation(self, instance):
-        representation = super(CourseOverviewSerializer, self).to_representation(instance)
-        representation['display_name_with_default'] = instance.display_name_with_default
-        representation['has_started'] = instance.has_started()
-        representation['has_ended'] = instance.has_ended()
-        representation['pacing'] = instance.pacing
-        return representation
+    # def to_representation(self, instance):
+    #     representation = super(CourseOverviewSerializer, self).to_representation(instance)
+    #     representation['display_name_with_default'] = instance.display_name_with_default
+    #     representation['has_started'] = instance.has_started()
+    #     representation['has_ended'] = instance.has_ended()
+    #     representation['pacing'] = instance.pacing
+    #     return representation
 
 

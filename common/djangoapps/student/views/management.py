@@ -935,7 +935,7 @@ def customer_service_info(request):
 
 
 @csrf_exempt
-def students_management(request):
+def students_management(request, pk=None):
     """
     "phone_number": "",
     "username": "",
@@ -980,6 +980,14 @@ def students_management(request):
                              "executed": True,
                              "message": "Failed to create student account!",
                              "success": False}, status=401)
+    elif request.method == 'DELETE':
+        instance = User.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a student account!",
+                             "success": False}, status=200)
 
 
 @csrf_exempt
@@ -989,9 +997,10 @@ def course_overview_info(request):
     """
     if request.method == 'GET':
         test_obj = CourseOverview.objects.all()
+        log.warning(test_obj)
         serializer = CourseOverviewSerializer(test_obj, many=True)
         return JsonResponse({
-            "data_list": serializer.data,
+            "data_list": list(serializer.data),
             "errorCode": "200",
             "executed": True,
             "message": "Succeed to get list of courses!",
