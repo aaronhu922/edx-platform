@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from student.models import CourseEnrollmentInfo, CustomerService, UserProfile
+from django.contrib.auth.models import User
 
 
 class CourseEnrollmentInfoSerializer(serializers.ModelSerializer):
@@ -15,10 +16,18 @@ class CustomerServiceSerializer(serializers.ModelSerializer):
         fields = ('id', 'customer_service_name', 'customer_service_info')
 
 
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'password', 'username',)
+
+
 class StudentSerializer(serializers.ModelSerializer):
+    user = AccountSerializer(required=True)
+
     class Meta:
         model = UserProfile
-        fields = ('id', 'name', 'phone_number', "web_accelerator_name", "web_accelerator_link")
+        fields = ('user', 'phone_number', "web_accelerator_name", "web_accelerator_link")
 
 
 class CourseOverViewsSerializer(serializers.ModelSerializer):
