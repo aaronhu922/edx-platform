@@ -881,6 +881,18 @@ class CourseOverviewTab(models.Model):
         return self.tab_id
 
 
+class CourseOverviewExtendInfo(models.Model):
+    """
+    Model to identify the course which no section, unit, ..., Just redirect to third party link.
+    """
+    course_overview = models.OneToOneField(CourseOverview, related_name="course_ext_info", on_delete=models.CASCADE)
+    course_outside = models.BooleanField(default=False)
+    course_link = models.TextField(max_length=1024, blank=True, null=True)
+
+    def __str__(self):
+        return self.course_link
+
+
 @python_2_unicode_compatible
 class CourseOverviewImageSet(TimeStampedModel):
     """
