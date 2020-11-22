@@ -7,8 +7,10 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 class CourseEnrollmentInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseEnrollmentInfo
-        fields = ('id', 'course_enrolled', 'course_user_name', 'course_user_password', 'course_school_code', 'created',
-                  'ended_date', 'description', 'customer_service')
+        fields = (
+            'id', 'course_enrolled', 'course_id', 'course_user_name', 'course_user_password', 'course_school_code',
+            'created',
+            'ended_date', 'description', 'customer_service')
 
 
 class CustomerServiceSerializer(serializers.ModelSerializer):

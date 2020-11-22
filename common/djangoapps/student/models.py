@@ -2120,6 +2120,7 @@ class CustomerService(models.Model):
 class CourseEnrollmentInfo(models.Model):
     # course_enrolled = models.ForeignKey(CourseEnrollment, on_delete=models.CASCADE)
     course_enrolled = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE, related_name='enrolled_detail')
+    course_id = models.CharField(max_length=255, blank=True)
     course_user_name = models.CharField(max_length=250, blank=False)
     course_user_password = models.CharField(max_length=255, blank=False)
     course_school_code = models.CharField(max_length=255, blank=True)
