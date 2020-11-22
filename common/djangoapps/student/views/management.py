@@ -899,9 +899,8 @@ def course_enrollment_info(request, id=None):
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        log.warning(data['phone_number'])
-        email = data['phone_number'] + "@edx.com"
-        user, u_prof = get_user(email)
+        user_id = data['stu_id']
+        user = User.objects.get(id=user_id)
         course_key = CourseKey.from_string(data['course_id'])
         enrollment = CourseEnrollment.enroll(user, course_key, 'test')
         data['course_enrolled'] = enrollment.id
