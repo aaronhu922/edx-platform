@@ -22,7 +22,13 @@
         <a href="/">${_("{studio_name} Home").format(studio_name=settings.STUDIO_SHORT_NAME)}</a>
       </li>
       <li class="nav-item">
-        <a href="/manage/students">学生管理</a>
+        <a href="/manage/students">我的学员</a>
+      </li>
+      <li class="nav-item">
+        <a href="/manage/">课程管理</a>
+      </li>
+      <li class="nav-item">
+        <a href="/manage/">报告导入</a>
       </li>
       % if GlobalStaff().has_user(user):
       <li class="nav-item">
