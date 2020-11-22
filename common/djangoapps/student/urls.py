@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^api/manage/students$', views.students_management, name='students_management'),
     url(r'^api/manage/courses$', views.course_overview_info, name='course_overview_info'),
     url(r'^api/manage/students/(?P<pk>[0-9]+)$', views.students_management, name='students_management'),
+    url(r'^api/manage/courseenrollments/(?P<id>[0-9]+)$', views.course_enrollment_info, name='course_enrollment_info'),
 
 ]
