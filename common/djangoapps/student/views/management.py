@@ -45,6 +45,7 @@ from edxmako.shortcuts import marketing_link, render_to_response, render_to_stri
 from entitlements.models import CourseEntitlement
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.catalog.utils import get_programs_with_type
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.embargo import api as embargo_api
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
@@ -80,7 +81,7 @@ from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
 from rest_framework.views import APIView
 import json
 
@@ -934,7 +935,7 @@ def customer_service_info(request):
 
 
 @csrf_exempt
-def students_management(request):
+def students_management(request, pk=None):
     """
     "phone_number": "",
     "username": "",
@@ -956,26 +957,101 @@ def students_management(request):
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        phone_number = data['phone_number']
-        # username = request.data.get('username')
-        # password = request.data.get('password')
-        # name = request.data.get('name')
-        # web_accelerator_name = request.data.get('web_accelerator_name')
-        # web_accelerator_link = request.data.get('web_accelerator_link')
+        if 'id' in data and data['id']:
+            id = data['id']
+            try:
+                user = User.objects.get(id=id)
+            except User.DoesNotExist:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": "User with username {} does not exist".format(id),
+                                     "success": False}, status=200)
+            else:
+                from common.djangoapps.util.password_policy_validators import normalize_password
+
+                user.set_password(normalize_password(data["password"]))
+                user.username = data["username"];
+                # user.update(username=data["username"])
+                user.save()
+
+                user_profile, profile_created = UserProfile.objects.update_or_create(
+                    user=user, defaults={"name": data['name'],
+                                         "web_accelerator_name": data['web_accelerator_name'],
+                                         "web_accelerator_link": data['web_accelerator_link']},
+                )
+                return JsonResponse({
+                    "id": user.id,
+                    "username": user.username,
+                    "phone_number": user_profile.phone_number,
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to update a student account!",
+                    "success": True
+                }, status=201)
+        else:
+            phone_number = data['phone_number']
+            # username = request.data.get('username')
+            # password = request.data.get('password')
+            # name = request.data.get('name')
+            # web_accelerator_name = request.data.get('web_accelerator_name')
+            # web_accelerator_link = request.data.get('web_accelerator_link')
+            log.warning(data)
+            user, user_pro = do_create_account_no_registration(data)
+            if user is not None:
+                return JsonResponse({
+                    "id": user.id,
+                    "username": user.username,
+                    "phone_number": user_pro.phone_number,
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to create a student account!",
+                    "success": True
+                }, status=201)
+            return JsonResponse({"phone_number": phone_number,
+                                 "errorCode": "401",
+                                 "executed": True,
+                                 "message": "Failed to create student account!",
+                                 "success": False}, status=401)
+
+    elif request.method == 'DELETE':
+        instance = User.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a student account!",
+                             "success": True}, status=200)
+
+
+@csrf_exempt
+def course_overview_info(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        test_obj = CourseOverview.objects.all()
+        log.warning(test_obj)
+        serializer = CourseOverviewSerializer(test_obj, many=True)
+        return JsonResponse({
+            "data_list": list(serializer.data),
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of courses!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        log.warning(data['course_overview'])
         log.warning(data)
-        user, user_pro = do_create_account_no_registration(data)
-        if user is not None:
+        serializer = CourseOverviewExtendInfoSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
             return JsonResponse({
-                "id": user.id,
-                "username": user.username,
-                "phone_number": user_pro.phone_number,
+                "course_overview": data['course_overview'],
                 "errorCode": "201",
                 "executed": True,
-                "message": "Succeed to create a student account!",
+                "message": "Succeed to update course to a direct access outside course!",
                 "success": True
             }, status=201)
-        return JsonResponse({"phone_number": phone_number,
-                             "errorCode": "401",
-                             "executed": True,
-                             "message": "Failed to create student account!",
-                             "success": False}, status=401)
+        return JsonResponse(serializer.errors, status=400)
