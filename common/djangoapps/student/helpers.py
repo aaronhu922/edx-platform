@@ -625,7 +625,7 @@ def do_create_account(form, custom_form=None):
     # TODO: yonghu create account
     user = User(
         username=proposed_username,
-        email=form.cleaned_data["phone_number"] + '@edx.com',
+        email=form.cleaned_data["phone_number"] + '@thomsonilm.com',
         is_active=False
     )
     log.warning("phone: " + form.cleaned_data["phone_number"])
@@ -699,12 +699,12 @@ def do_create_account_no_registration(data):
     user = User(
         username=proposed_username,
         email=data["phone_number"] + '@edx.com',
-        is_active=False
+        is_active=True
     )
     log.warning("phone: " + data["phone_number"])
     password = normalize_password(data["password"])
     user.set_password(password)
-
+    registration = Registration()
     try:
         with transaction.atomic():
             user.save()
@@ -728,7 +728,7 @@ def do_create_account_no_registration(data):
         else:
             raise
 
-
+    registration.register(user)
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
         "year_of_birth", "phone_number", "web_accelerator_name", "web_accelerator_link"

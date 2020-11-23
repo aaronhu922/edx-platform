@@ -919,6 +919,15 @@ def course_enrollment_info(request, id=None):
                              "message": serializer.data,
                              "success": False}, status=401)
 
+    elif request.method == 'DELETE':
+        instance = User.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a student account!",
+                             "success": True}, status=200)
+
 
 @csrf_exempt
 def customer_service_info(request):
@@ -990,7 +999,7 @@ def students_management(request, pk=None):
                 from common.djangoapps.util.password_policy_validators import normalize_password
 
                 user.set_password(normalize_password(data["password"]))
-                user.username = data["username"];
+                user.username = data["username"]
                 # user.update(username=data["username"])
                 user.save()
 
@@ -1010,11 +1019,7 @@ def students_management(request, pk=None):
                 }, status=201)
         else:
             phone_number = data['phone_number']
-            # username = request.data.get('username')
-            # password = request.data.get('password')
-            # name = request.data.get('name')
-            # web_accelerator_name = request.data.get('web_accelerator_name')
-            # web_accelerator_link = request.data.get('web_accelerator_link')
+            data['name'] = data['username']
             log.warning(data)
             user, user_pro = do_create_account_no_registration(data)
             if user is not None:
