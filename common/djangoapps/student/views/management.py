@@ -1122,8 +1122,9 @@ def course_overview_info(request):
         try:
             course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
         except CourseOverviewExtendInfo.DoesNotExist:
+            course_overview = CourseOverview.get_from_id(course_overview_id)
             course_ext = CourseOverviewExtendInfo(
-                course_overview=course_overview_id,
+                course_overview=course_overview,
                 course_outside=data['course_outside'],
                 course_link=data['course_link']
             )
