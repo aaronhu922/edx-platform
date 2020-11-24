@@ -1121,7 +1121,7 @@ def course_overview_info(request):
         log.warning(data)
         try:
             course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
-        except course_ext.DoesNotExist:
+        except CourseOverviewExtendInfo.DoesNotExist:
             course_ext = CourseOverviewExtendInfo(
                 course_overview=course_overview_id,
                 course_outside=data['course_outside'],
