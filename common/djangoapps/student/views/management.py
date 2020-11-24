@@ -918,7 +918,7 @@ def course_enrollment_info(request, id=None, stu_id=None):
                 course_enrollment_info.created = data['created']
                 course_enrollment_info.ended_date = data['ended_date']
                 course_enrollment_info.description = data['description']
-                course_enrollment_info.customer_service = data['customer_service']
+                course_enrollment_info.customer_service_id = data['customer_service']
                 course_enrollment_info.save()
                 return JsonResponse({
                     "errorCode": "201",
@@ -931,7 +931,7 @@ def course_enrollment_info(request, id=None, stu_id=None):
             user = User.objects.get(id=user_id)
             course_key = CourseKey.from_string(data['course_id'])
             try:
-                enrollment = CourseEnrollment.enroll(user, course_key, 'test')
+                enrollment = CourseEnrollment.enroll(user, course_key)
             except AlreadyEnrolledError as err:
                 return JsonResponse({"errorCode": "400",
                                      "executed": True,
@@ -1105,10 +1105,10 @@ def course_overview_info(request):
     """
     if request.method == 'GET':
         test_obj = CourseOverview.objects.all()
-        log.warning(test_obj)
+        log.warning(str(test_obj))
         serializer = CourseOverviewSerializer(test_obj, many=True)
         return JsonResponse({
-            "data_list": list(serializer.data),
+            "data_list": serializer.data,
             "errorCode": "200",
             "executed": True,
             "message": "Succeed to get list of courses!",

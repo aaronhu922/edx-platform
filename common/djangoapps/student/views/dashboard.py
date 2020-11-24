@@ -26,6 +26,7 @@ from bulk_email.models import Optout
 from course_modes.models import CourseMode
 from edxmako.shortcuts import render_to_response, render_to_string
 from entitlements.models import CourseEntitlement
+
 from lms.djangoapps.commerce.utils import EcommerceService
 from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.experiments.utils import get_dashboard_course_info
@@ -35,6 +36,7 @@ from openedx.core.djangoapps.catalog.utils import (
     get_pseudo_session_for_entitlement,
     get_visible_sessions_for_entitlement
 )
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverviewExtendInfo, CourseOverview
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_attribute_values, make_providers_strings
 from openedx.core.djangoapps.plugins.constants import ProjectType
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
@@ -57,7 +59,8 @@ from student.models import (
     CourseEnrollmentAttribute,
     DashboardConfiguration,
     PendingSecondaryEmailChange,
-    UserProfile
+    UserProfile,
+    CourseEnrollmentInfo
 )
 from util.milestones_helpers import get_pre_requisite_courses_not_completed
 from xmodule.modulestore.django import modulestore
@@ -524,7 +527,7 @@ def student_dashboard(request):
     # Get the org whitelist or the org blacklist for the current site
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site()
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist, course_limit))
-
+    log.warning(course_enrollments)
     # Get the entitlements for the user and a mapping to all available sessions for that entitlement
     # If an entitlement has no available sessions, pass through a mock course overview object
     (course_entitlements,
@@ -668,6 +671,19 @@ def student_dashboard(request):
         for enrollment in course_enrollments
     }
 
+    course_ext_infos = {
+        enrollment.course_id: CourseOverviewExtendInfo.objects.get(course_overview=CourseOverview.get_from_id(enrollment.course_id))
+        for enrollment in course_enrollments
+    }
+
+    logging.warning(course_ext_infos)
+
+    enrollment_ext_infos = {
+        enrollment.course_id: CourseEnrollmentInfo.objects.get(course_enrolled=enrollment)
+        for enrollment in course_enrollments
+    }
+
+    logging.warning(enrollment_ext_infos)
     # Determine the per-course verification status
     # This is a dictionary in which the keys are course locators
     # and the values are one of:
@@ -797,6 +813,8 @@ def student_dashboard(request):
         # TODO START: clean up as part of REVEM-199 (START)
         'course_info': get_dashboard_course_info(user, course_enrollments),
         # TODO START: clean up as part of REVEM-199 (END)
+        'enrollment_ext_infos': enrollment_ext_infos,
+        'course_ext_infos': course_ext_infos,
     }
 
     context_from_plugins = get_plugins_view_context(
