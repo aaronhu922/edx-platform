@@ -672,14 +672,14 @@ def student_dashboard(request):
     }
 
     course_ext_infos = {
-        enrollment.course_id: CourseOverviewExtendInfo.objects.get(course_overview=CourseOverview.get_from_id(enrollment.course_id))
+        enrollment.course_id: get_course_ext_info(enrollment)
         for enrollment in course_enrollments
     }
 
     logging.warning(course_ext_infos)
 
     enrollment_ext_infos = {
-        enrollment.course_id: CourseEnrollmentInfo.objects.get(course_enrolled=enrollment)
+        enrollment.course_id: get_enrollment_ext_info(enrollment)
         for enrollment in course_enrollments
     }
 
@@ -841,3 +841,20 @@ def student_dashboard(request):
     })
 
     return render_to_response('dashboard.html', context)
+
+
+def get_course_ext_info(enrollment):
+    try:
+        course_ext_info = CourseOverviewExtendInfo.objects.get(
+            course_overview=CourseOverview.get_from_id(enrollment.course_id))
+    except Exception:
+        return CourseOverviewExtendInfo(course_outside=False, course_link='')
+    return course_ext_info
+
+
+def get_enrollment_ext_info(enrollment):
+    try:
+        enrollment_ext_info = CourseEnrollmentInfo.objects.get(course_enrolled=enrollment)
+    except Exception:
+        return CourseEnrollmentInfo()
+    return enrollment_ext_info
