@@ -182,7 +182,10 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
                 学校代码：${enrollment_ext_info.course_school_code}
               </span>
               <span>
-                失效日期：${enrollment_ext_info.created}
+                开始日期：${enrollment_ext_info.created}
+              </span>
+              <span>
+                失效日期：${enrollment_ext_info.ended_date}
               </span>
             </div>
 
