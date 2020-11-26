@@ -5,7 +5,9 @@ Dashboard view and supporting methods
 
 import datetime
 import logging
+import os
 from collections import defaultdict
+from django.http import HttpResponse
 
 from django.conf import settings
 from django.contrib import messages
@@ -858,3 +860,17 @@ def get_enrollment_ext_info(enrollment):
     except Exception:
         return CourseEnrollmentInfo()
     return enrollment_ext_info
+
+
+def studentfrontapi(request):
+    # response = HttpResponse()
+    # construct the file's path
+    url = '/edx/app/edxapp/edx-platform/lms/static/front/index.html'
+    # test if path is ok and file exists
+    if request.user.is_authenticated and os.path.isfile(url):
+        # let nginx determine the correct content type in this case
+        # response['Content-Type'] = ""
+        # response['X-Accel-Redirect'] = url
+        # response['X-Sendfile'] = url
+        # other webservers may accept X-Sendfile and not X-Accel-Redirect
+        return HttpResponse(open(url).read())
