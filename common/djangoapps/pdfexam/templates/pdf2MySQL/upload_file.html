@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
+        {% csrf_token %}
+        <input type="file" name="myfile" />
+        <br/>
+        <input type="submit" value="upload"/>
+    </form>
+
+</body>
+</html>

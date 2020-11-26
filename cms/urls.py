@@ -85,6 +85,9 @@ urlpatterns = [
     #For student management api.
     url(r'^manage/', contentstore.views.studentmanageapi, name='studentmanageapi'),
 
+    #For pdf import and exam results.
+    url(r'^api/pdf/', include('pdfexam.urls')),
+
     # restful api
     url(r'^$', contentstore.views.howitworks, name='homepage'),
     url(r'^howitworks$', contentstore.views.howitworks, name='howitworks'),
