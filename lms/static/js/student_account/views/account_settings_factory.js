@@ -315,36 +315,36 @@
             }
 
 
-            // Add the social link fields
-            socialFields = {
-                title: gettext('Social Media Links'),
-                subtitle: gettext('Optionally, link your personal accounts to the social media icons on your edX profile.'),  // eslint-disable-line max-len
-                fields: []
-            };
-
-            for (var socialPlatform in socialPlatforms) {  // eslint-disable-line guard-for-in, no-restricted-syntax, vars-on-top, max-len
-                platformData = socialPlatforms[socialPlatform];
-                socialFields.fields.push(
-                    {
-                        view: new AccountSettingsFieldViews.SocialLinkTextFieldView({
-                            model: userAccountModel,
-                            title: StringUtils.interpolate(
-                                gettext('{platform_display_name} Link'),
-                                {platform_display_name: platformData.display_name}
-                            ),
-                            valueAttribute: 'social_links',
-                            helpMessage: StringUtils.interpolate(
-                                gettext('Enter your {platform_display_name} username or the URL to your {platform_display_name} page. Delete the URL to remove the link.'),  // eslint-disable-line max-len
-                                {platform_display_name: platformData.display_name}
-                            ),
-                            platform: socialPlatform,
-                            persistChanges: true,
-                            placeholder: platformData.example
-                        })
-                    }
-                );
-            }
-            aboutSectionsData.push(socialFields);
+            // // Add the social link fields
+            // socialFields = {
+            //     title: gettext('Social Media Links'),
+            //     subtitle: gettext('Optionally, link your personal accounts to the social media icons on your edX profile.'),  // eslint-disable-line max-len
+            //     fields: []
+            // };
+            //
+            // for (var socialPlatform in socialPlatforms) {  // eslint-disable-line guard-for-in, no-restricted-syntax, vars-on-top, max-len
+            //     platformData = socialPlatforms[socialPlatform];
+            //     socialFields.fields.push(
+            //         {
+            //             view: new AccountSettingsFieldViews.SocialLinkTextFieldView({
+            //                 model: userAccountModel,
+            //                 title: StringUtils.interpolate(
+            //                     gettext('{platform_display_name} Link'),
+            //                     {platform_display_name: platformData.display_name}
+            //                 ),
+            //                 valueAttribute: 'social_links',
+            //                 helpMessage: StringUtils.interpolate(
+            //                     gettext('Enter your {platform_display_name} username or the URL to your {platform_display_name} page. Delete the URL to remove the link.'),  // eslint-disable-line max-len
+            //                     {platform_display_name: platformData.display_name}
+            //                 ),
+            //                 platform: socialPlatform,
+            //                 persistChanges: true,
+            //                 placeholder: platformData.example
+            //             })
+            //         }
+            //     );
+            // }
+            // aboutSectionsData.push(socialFields);
 
             // Add account deletion fields
             if (displayAccountDeletion) {
