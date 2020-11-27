@@ -980,7 +980,7 @@ def course_enrollment_info(request, id=None, stu_id=None):
 
 
 @csrf_exempt
-def customer_service_info(request):
+def customer_service_info(request, pk=None):
     """
     List all code snippets, or create a new snippet.
     """
@@ -997,20 +997,48 @@ def customer_service_info(request):
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        log.warning(data)
-        serializer = CustomerServiceSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse({
-                "errorCode": "201",
-                "executed": True,
-                "message": serializer.data,
-                "success": True
-            }, status=201)
-        return JsonResponse({"errorCode": "401",
+        if 'id' in data and data['id']:
+            id = data['id']
+            try:
+                cs_obj = CustomerService.objects.get(id=id)
+            except CustomerService.DoesNotExist:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": "CustomerService with id {} does not exist".format(id),
+                                     "success": False}, status=200)
+            else:
+                cs_obj.customer_service_name = data['customer_service_name']
+                cs_obj.customer_service_info = data['customer_service_info']
+                cs_obj.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to update a customer service {}!".format(id),
+                    "success": True
+                }, status=201)
+        else:
+            serializer = CustomerServiceSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": serializer.data,
+                    "success": True
+                }, status=201)
+            return JsonResponse({"errorCode": "401",
+                                 "executed": True,
+                                 "message": serializer.data,
+                                 "success": False}, status=401)
+    elif request.method == 'DELETE':
+        instance = CustomerService.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
                              "executed": True,
-                             "message": serializer.data,
-                             "success": False}, status=401)
+                             "message": "Deleted a customer service record with id {}!".format(pk),
+                             "success": True}, status=200)
+
 
 
 @csrf_exempt
