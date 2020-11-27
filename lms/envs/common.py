@@ -2777,12 +2777,10 @@ MKTG_URL_LINK_MAP = {
     'FAQ': 'help',
     'COURSES': 'courses',
     'ROOT': 'root',
-    'TOS': 'tos',
-    'HONOR': 'honor',  # If your site does not have an honor code, simply delete this line.
+    'TOS': 'privacy',
+    'HONOR': 'privacy',  # If your site does not have an honor code, simply delete this line.
     'PRIVACY': 'privacy',
     'PRESS': 'press',
-    'BLOG': 'blog',
-    'DONATE': 'donate',
     'SITEMAP.XML': 'sitemap_xml',
 
     # Verified Certificates
@@ -4127,3 +4125,5 @@ SMS = {
     'signname': 'ILMEnglish',
     'template': 'SMS_205090469',
 }
+
+DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'

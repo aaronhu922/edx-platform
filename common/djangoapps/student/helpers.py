@@ -625,7 +625,7 @@ def do_create_account(form, custom_form=None):
     # TODO: yonghu create account
     user = User(
         username=proposed_username,
-        email=form.cleaned_data["phone_number"] + '@thomsonilm.com',
+        email=form.cleaned_data["phone_number"] + settings.DEFAULT_EMAIL_ACCOUNT_DOMAIN,
         is_active=False
     )
     log.warning("phone: " + form.cleaned_data["phone_number"])

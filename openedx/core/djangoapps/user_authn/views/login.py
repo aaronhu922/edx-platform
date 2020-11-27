@@ -98,9 +98,11 @@ def _get_user_by_email(request):
     if 'phone_number' not in request.POST or 'password' not in request.POST:
         raise AuthFailedError(_('There was an error receiving your login information. Please email us.'))
 
-    email = request.POST['phone_number'] + '@edx.com'
+    email = request.POST['phone_number'] + settings.DEFAULT_EMAIL_ACCOUNT_DOMAIN
+    # phone_number = request.POST['phone_number']
 
     try:
+        # UserProfile.objects.get(phone_number=phone_number)
         return User.objects.get(email=email)
     except User.DoesNotExist:
         if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
