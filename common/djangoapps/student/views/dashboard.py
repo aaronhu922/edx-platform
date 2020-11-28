@@ -849,6 +849,10 @@ def get_course_ext_info(enrollment):
     try:
         course_ext_info = CourseOverviewExtendInfo.objects.get(
             course_overview=CourseOverview.get_from_id(enrollment.course_id))
+        logging.warning(
+            "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(course_ext_info.course_outside,
+                                                                                 course_ext_info.course_link
+                                                                                 ))
     except Exception:
         return CourseOverviewExtendInfo(course_outside=False, course_link='')
     return course_ext_info

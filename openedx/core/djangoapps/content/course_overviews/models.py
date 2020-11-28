@@ -890,7 +890,9 @@ class CourseOverviewExtendInfo(models.Model):
     course_link = models.TextField(max_length=1024, blank=True, null=True)
 
     def __str__(self):
-        return self.course_link
+        return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(
+            self.course_outside, self.course_link
+        )
 
 
 @python_2_unicode_compatible

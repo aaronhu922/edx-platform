@@ -40,6 +40,10 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
   billing_email = settings.PAYMENT_SUPPORT_EMAIL
 
   is_course_expired = hasattr(show_courseware_link, 'error_code') and show_courseware_link.error_code == 'audit_expired'
+  if course_ext_info:
+    is_course_outside = course_ext_info.course_outside
+  else:
+    is_course_outside = False
 %>
 
 <%namespace name='static' file='../static_content.html'/>
@@ -200,7 +204,7 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
                 </div>
             % endif
         </div>
-        % if enrollment_ext_info and enrollment_ext_info.course_outside:
+        % if is_course_outside:
         <div class="wrapper-course-actions">
           <div class="course-actions">
             <a href="${course_ext_info.course_link}"
