@@ -200,9 +200,10 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
                 </div>
             % endif
         </div>
+        % if enrollment_ext_info.course_outside:
         <div class="wrapper-course-actions">
           <div class="course-actions">
-            <a href="${resume_button_url}"
+            <a href="${course_ext_info.course_link}"
               class="course-target-link enter-course"
               data-course-key="${enrollment.course_id}"
             >
@@ -213,6 +214,7 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
             </a>
           </div>
         </div>
+        % endif
       </div>
   </section>
   <footer class="wrapper-messages-primary">
