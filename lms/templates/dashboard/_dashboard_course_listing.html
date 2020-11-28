@@ -200,7 +200,7 @@ from lms.djangoapps.experiments.utils import UPSELL_TRACKING_FLAG
                 </div>
             % endif
         </div>
-        % if enrollment_ext_info.course_outside:
+        % if enrollment_ext_info and enrollment_ext_info.course_outside:
         <div class="wrapper-course-actions">
           <div class="course-actions">
             <a href="${course_ext_info.course_link}"
