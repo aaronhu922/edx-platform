@@ -2124,8 +2124,8 @@ class CourseEnrollmentInfo(models.Model):
     course_user_name = models.CharField(max_length=250, blank=False)
     course_user_password = models.CharField(max_length=255, blank=False)
     course_school_code = models.CharField(max_length=255, blank=True)
-    created = models.DateTimeField(auto_now_add=True, blank=True)
-    ended_date = models.DateTimeField(auto_now=True, blank=True)
+    created = models.DateField(blank=True)
+    ended_date = models.DateField(blank=True)
     description = models.TextField(max_length=1024, blank=True)
     customer_service = models.ForeignKey(CustomerService,  null=True, on_delete=models.CASCADE)
 
