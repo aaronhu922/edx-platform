@@ -73,7 +73,7 @@ from student.models import (
     CourseEnrollmentInfo,
     CustomerService,
     get_user,
-    AlreadyEnrolledError
+    CourseEnrollmentException
 )
 from student.signals import REFUND_ORDER
 from student.tasks import send_activation_email
@@ -84,8 +84,7 @@ from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, \
-    CourseOverviewExtendInfoSerializer
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
 from rest_framework.views import APIView
 import json
 
@@ -932,7 +931,7 @@ def course_enrollment_info(request, id=None, stu_id=None):
             course_key = CourseKey.from_string(data['course_id'])
             try:
                 enrollment = CourseEnrollment.enroll(user, course_key)
-            except AlreadyEnrolledError as err:
+            except CourseEnrollmentException as err:
                 return JsonResponse({"errorCode": "400",
                                      "executed": True,
                                      "message": err,
