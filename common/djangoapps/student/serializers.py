@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from student.models import CourseEnrollmentInfo, CustomerService, UserProfile
+from student.models import CourseEnrollmentInfo, CustomerService, UserProfile, CourseEnrollment
 from django.contrib.auth.models import User
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview, CourseOverviewExtendInfo
 
@@ -27,10 +27,14 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
     user = AccountSerializer(required=True)
+    courses_count = serializers.SerializerMethodField('enrolled_courses_count')
+
+    def enrolled_courses_count(self, user):
+        return CourseEnrollment.objects.filter(user=user.user, is_active=1).count()
 
     class Meta:
         model = UserProfile
-        fields = ('user', 'phone_number', "web_accelerator_name", "web_accelerator_link")
+        fields = ('user', 'phone_number', "web_accelerator_name", "web_accelerator_link", "courses_count")
 
 
 class CourseOverviewExtendInfoSerializer(serializers.ModelSerializer):
