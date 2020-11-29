@@ -2300,3 +2300,5 @@ PASSWORD_RESET_EMAIL_RATE = '2/h'
 
 ######################## Setting for content libraries ########################
 MAX_BLOCKS_PER_CONTENT_LIBRARY = 1000
+
+DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'
