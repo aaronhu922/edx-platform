@@ -698,7 +698,7 @@ def do_create_account_no_registration(data):
     proposed_username = data["username"]
     user = User(
         username=proposed_username,
-        email=data["phone_number"] + '@edx.com',
+        email=data["phone_number"] + settings.DEFAULT_EMAIL_ACCOUNT_DOMAIN,
         is_active=True
     )
     log.warning("phone: " + data["phone_number"])
