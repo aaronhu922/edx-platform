@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
@@ -7,8 +9,10 @@ import pdfplumber
 import re
 import json
 import datetime
-from .models import EarlyliteracySkillSetScores as m
+from .models import EarlyliteracySkillSetScores as EarlyliteracySkillSetScores
+from django.http import JsonResponse
 
+log = logging.getLogger("edx.pdfexam")
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +34,9 @@ def Handle(request):
         myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
         if not myFile:
             return HttpResponse("no files for upload!")
-
+        phonenumber = request.data.get('phone_number')
+        if not phonenumber:
+            return HttpResponse("Phone number must be provided!")
 
         destination = open(os.path.join(BASE_DIR, 'pdfsource', myFile.name), 'wb+')  # 打开特定的文件进行二进制的写操作
 
@@ -69,12 +75,12 @@ def Handle(request):
         #  trans end
         ################################################################
 
-    ExtractData(txtfilestored)
+    ExtractData(txtfilestored, phonenumber)
 
     return HttpResponse('upload over!')
 
 
-def ExtractData(pathfilename):
+def ExtractData(pathfilename, phonenumber):
     StarEarlyLiteracyPDFReportExtractListBriefInfo = ['FirstName', 'FamilyName', 'ID', 'PrintedDay', 'PrintedDateTime', \
                                                       'Reporting Period', 'SchoolYear', 'School', 'Class', 'Grade', \
                                                       'Teacher', 'Test Date', 'SS', 'Lexile® Measure', \
@@ -328,6 +334,8 @@ def ExtractData(pathfilename):
     DictKeys2List = ExtractDataDictMergeTemp.keys()
 
     ExtractDataDictReady2DjangoModel = {}
+
+    ExtractDataDictReady2DjangoModel['phone_number'] = phonenumber
 
     for KeyItem in DictKeys2List:
         if KeyItem == 'FirstName':
@@ -683,16 +691,16 @@ def ExtractData(pathfilename):
     ## Save the Django models formation  Extract Data in a txtfile, and the name in parttern xxxx.djangomodels.dict.txt
     ####################################################################################################################
 
-    ExtractDataDictReady2DjangoModelConvert2Str = json.dumps(ExtractDataDictReady2DjangoModel)
-
-    DjangomodelsDictfilenameportion = os.path.splitext(pathfilename)
-
-    DjangomodelsDicttxtfilename = DjangomodelsDictfilenameportion[0] + '.djangomodels.dict.txt'
-
-    DjangomodelsDicttxtfilestored = os.path.join(BASE_DIR, 'txtintermediate', DjangomodelsDicttxtfilename)
-
-    with open(DjangomodelsDicttxtfilestored, "w", encoding='utf-8') as f:
-        f.write(ExtractDataDictReady2DjangoModelConvert2Str)
+    # ExtractDataDictReady2DjangoModelConvert2Str = json.dumps(ExtractDataDictReady2DjangoModel)
+    #
+    # DjangomodelsDictfilenameportion = os.path.splitext(pathfilename)
+    #
+    # DjangomodelsDicttxtfilename = DjangomodelsDictfilenameportion[0] + '.djangomodels.dict.txt'
+    #
+    # DjangomodelsDicttxtfilestored = os.path.join(BASE_DIR, 'txtintermediate', DjangomodelsDicttxtfilename)
+    #
+    # with open(DjangomodelsDicttxtfilestored, "w", encoding='utf-8') as f:
+    #     f.write(ExtractDataDictReady2DjangoModelConvert2Str)
 
     ####################################################################################################################
     ## Save the Django models formation  Extract Data in a file END
@@ -700,9 +708,88 @@ def ExtractData(pathfilename):
 
     # ReportDataStr = json.dumps(ExtractDataDictReady2DjangoModel)
 
-    m.objects.create(**ExtractDataDictReady2DjangoModel)
+    EarlyliteracySkillSetScores.objects.create(**ExtractDataDictReady2DjangoModel)
 
 
 def show(self, request):
     temp = loader.get_template('pdf2MySQL/show.html')
     return HttpResponse(temp.render())
+
+
+def get_student_exam_stats(request, phone):
+    if request.method == 'GET':
+        instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate'))
+        log.warning("Get {} test results for user {}".format(len(instance), phone))
+        if not instance or len(instance) <= 0:
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "success": False}, status=200)
+        else:
+            ScaledScore = instance[0].ScaledScore
+            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord, instance[0].VisualDiscrimination,
+                                instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
+                                instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
+                                instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
+            sub_items_score = [instance[0].AlphabeticKnowledge,
+                               instance[0].AlphabeticSequence,
+                               instance[0].LetterSounds,
+                               instance[0].PrintConceptsWordLength,
+                               instance[0].PrintConceptsWordBorders,
+                               instance[0].PrintConceptsLettersAndWords,
+                               instance[0].Letters,
+                               instance[0].IdentificationAndWordMatching,
+                               instance[0].RhymingAndWordFamilies,
+                               instance[0].BlendingWordParts,
+                               instance[0].BlendingPhonemes,
+                               instance[0].InitialAndFinalPhonemes,
+                               instance[0].ConsonantBlendsPA,
+                               instance[0].MedialPhonemeDiscrimination,
+                               instance[0].PhonemeIsolationORManipulation,
+                               instance[0].PhonemeSegmentation,
+                               instance[0].ShortVowelSounds,
+                               instance[0].InitialConsonantSounds,
+                               instance[0].FinalConsonantSounds,
+                               instance[0].LongVowelSounds,
+                               instance[0].VariantVowelSounds,
+                               instance[0].ConsonantBlendsPH,
+                               instance[0].ConsonantDigraphs,
+                               instance[0].OtherVowelSounds,
+                               instance[0].SoundSymbolCorrespondenceConsonants,
+                               instance[0].WordBuilding,
+                               instance[0].SoundSymbolCorrespondenceVowels,
+                               instance[0].WordFamiliesOrRhyming,
+                               instance[0].WordsWithAffixes,
+                               instance[0].Syllabification,
+                               instance[0].CompoundWords,
+                               instance[0].WordFacility,
+                               instance[0].Synonyms,
+                               instance[0].Antonyms,
+                               instance[0].ComprehensionATtheSentenceLevel,
+                               instance[0].ComprehensionOfParagraphs,
+                               instance[0].NumberNamingAndNumberIdentification,
+                               instance[0].NumberObjectCorrespondence,
+                               instance[0].SequenceCompletion,
+                               instance[0].ComposingAndDecomposing,
+                               instance[0].Measurement]
+
+            scaled_scores_trend = {}
+            sub_domain_score_trend = {}
+            for result in instance:
+                scaled_scores_trend[str(result.TestDate)] = result.ScaledScore
+                sub_domain_score_trend[str(result.TestDate)] = [result.AlphabeticPrinciple, result.ConceptOfWord,
+                                                           result.VisualDiscrimination,
+                                                           result.Phonics, result.StructuralAnalysis, result.Vocabulary,
+                                                           result.SentenceLevelComprehension, result.PhonemicAwareness,
+                                                           result.ParagraphLevelComprehension, result.EarlyNumeracy]
+            return JsonResponse({
+                "scaled_score": ScaledScore,
+                "sub_domain_score": sub_domain_score,
+                "sub_items_score": sub_items_score,
+                "scaled_scores_trend": scaled_scores_trend,
+                "sub_domain_score_trend": sub_domain_score_trend,
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to get latest test result of user {}!".format(phone),
+                "success": True
+            }, status=201)

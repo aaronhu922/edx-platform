@@ -1,9 +1,13 @@
 from django.db import models
+from django.core.validators import RegexValidator
+
 
 # Create your models here.
 
 class EarlyliteracySkillSetScores(models.Model):
 
+    phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
+    phone_number = models.CharField(validators=[phone_regex], blank=False, null=False, max_length=50)
     SkillSetScoresReportID = models.AutoField(primary_key=True)
     IsDelete = models.BooleanField(default=False)
     FirstName = models.CharField(max_length=10)

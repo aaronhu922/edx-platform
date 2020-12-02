@@ -79,14 +79,12 @@ from student.signals import REFUND_ORDER
 from student.tasks import send_activation_email
 from student.text_me_the_app import TextMeTheAppFragmentView
 from util.db import outer_atomic
-from util.json_request import JsonResponse
 from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
-from rest_framework.views import APIView
-import json
+
 
 log = logging.getLogger("edx.student")
 

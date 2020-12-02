@@ -103,6 +103,8 @@ urlpatterns = [
     # For student management api.
     url(r'^front/', student_views.studentfrontapi, name='studentfrontapi'),
 
+    url(r'^api/front/', include('pdfexam.urls')),
+
     # Event tracking endpoints
     url(r'', include('track.urls')),
 
