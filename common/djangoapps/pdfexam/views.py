@@ -793,8 +793,8 @@ def get_student_exam_stats(request, phone):
                 "sub_items_score": sub_items_score,
                 "scaled_scores_trend": scaled_scores_trend,
                 "sub_domain_score_trend": sub_domain_score_trend,
-                "errorCode": "201",
+                "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get latest test result of user {}!".format(phone),
                 "success": True
-            }, status=201)
+            }, status=200)

@@ -28,7 +28,7 @@ class EarlyliteracySkillSetScores(models.Model):
     LexileMeasure = models.CharField(max_length=15)
     LexileRange = models.CharField(max_length=15)
     EstORF = models.CharField(max_length=5)
-    AlphabeticPrinciple = models.CharField(max_length=3)
+    AlphabeticPrinciple = models.IntegerField()
     ConceptOfWord = models.IntegerField()
     VisualDiscrimination = models.IntegerField()
     PhonemicAwareness = models.IntegerField()

@@ -188,6 +188,12 @@ def _set_deprecated_user_info_cookie(response, request, user, cookie_settings):
         **cookie_settings
     )
 
+    response.set_cookie(
+        settings.EDXMKTG_USER_PHONE_COOKIE_NAME,
+        user_info['phone_number'],
+        **cookie_settings
+    )
+
 
 def _set_deprecated_logged_in_cookie(response, cookie_settings):
     """ Sets the logged in cookie on the response. """
