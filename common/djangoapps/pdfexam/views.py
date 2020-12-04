@@ -732,7 +732,9 @@ def get_student_exam_stats(request, phone):
                                  "success": False}, status=200)
         else:
             ScaledScore = instance[0].ScaledScore
-            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord, instance[0].VisualDiscrimination,
+            test_date = instance[0].TestDate
+            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
+                                instance[0].VisualDiscrimination,
                                 instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
                                 instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
                                 instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
@@ -778,21 +780,25 @@ def get_student_exam_stats(request, phone):
                                instance[0].ComposingAndDecomposing,
                                instance[0].Measurement]
 
-            scaled_scores_trend = {}
-            sub_domain_score_trend = {}
-            for result in instance:
-                scaled_scores_trend[str(result.TestDate)] = result.ScaledScore
-                sub_domain_score_trend[str(result.TestDate)] = [result.AlphabeticPrinciple, result.ConceptOfWord,
-                                                           result.VisualDiscrimination,
-                                                           result.Phonics, result.StructuralAnalysis, result.Vocabulary,
-                                                           result.SentenceLevelComprehension, result.PhonemicAwareness,
-                                                           result.ParagraphLevelComprehension, result.EarlyNumeracy]
+            scaled_scores_trend_date = []
+            scaled_scores_trend_value = []
+            sub_domain_score_trend_value = []
+            for result in reversed(instance):
+                scaled_scores_trend_date.append(result.TestDate)
+                scaled_scores_trend_value.append(result.ScaledScore)
+                sub_domain_score_trend_value.append([result.AlphabeticPrinciple, result.ConceptOfWord,
+                                                     result.VisualDiscrimination,
+                                                     result.Phonics, result.StructuralAnalysis, result.Vocabulary,
+                                                     result.SentenceLevelComprehension, result.PhonemicAwareness,
+                                                     result.ParagraphLevelComprehension, result.EarlyNumeracy])
             return JsonResponse({
+                "test_date": test_date,
                 "scaled_score": ScaledScore,
                 "sub_domain_score": sub_domain_score,
                 "sub_items_score": sub_items_score,
-                "scaled_scores_trend": scaled_scores_trend,
-                "sub_domain_score_trend": sub_domain_score_trend,
+                "scaled_scores_trend_date": scaled_scores_trend_date,
+                "scaled_scores_trend_value": scaled_scores_trend_value,
+                "sub_domain_score_trend_value": sub_domain_score_trend_value,
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get latest test result of user {}!".format(phone),
