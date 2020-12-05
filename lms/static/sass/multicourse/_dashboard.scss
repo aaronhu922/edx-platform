@@ -128,6 +128,7 @@
           }
 
           .wrapper-course-details {
+            max-width: 800px;
             display: flex;
             flex-flow: row wrap;
             padding: 0;
@@ -172,6 +173,7 @@
                   padding: 10px;
                   border: 1px solid #bbb;
                   margin-right: 8px;
+                  margin-bottom: 8px;
                   display: inline-block;
                 }
               }
