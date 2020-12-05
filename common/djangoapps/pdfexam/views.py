@@ -731,7 +731,7 @@ def get_student_exam_stats(request, phone):
                                  "message": "User with phone {} does not have any test result!".format(phone),
                                  "success": False}, status=200)
         else:
-            ScaledScore = instance[0].ScaledScore
+            scaled_score = instance[0].ScaledScore
             test_date = instance[0].TestDate
             sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
                                 instance[0].VisualDiscrimination,
@@ -746,6 +746,7 @@ def get_student_exam_stats(request, phone):
                                instance[0].PrintConceptsLettersAndWords,
                                instance[0].Letters,
                                instance[0].IdentificationAndWordMatching,
+                               # 1
                                instance[0].RhymingAndWordFamilies,
                                instance[0].BlendingWordParts,
                                instance[0].BlendingPhonemes,
@@ -754,24 +755,28 @@ def get_student_exam_stats(request, phone):
                                instance[0].MedialPhonemeDiscrimination,
                                instance[0].PhonemeIsolationORManipulation,
                                instance[0].PhonemeSegmentation,
+                               # 2
                                instance[0].ShortVowelSounds,
                                instance[0].InitialConsonantSounds,
                                instance[0].FinalConsonantSounds,
                                instance[0].LongVowelSounds,
                                instance[0].VariantVowelSounds,
                                instance[0].ConsonantBlendsPH,
+                               # 3
                                instance[0].ConsonantDigraphs,
                                instance[0].OtherVowelSounds,
                                instance[0].SoundSymbolCorrespondenceConsonants,
                                instance[0].WordBuilding,
                                instance[0].SoundSymbolCorrespondenceVowels,
                                instance[0].WordFamiliesOrRhyming,
+                               #4
                                instance[0].WordsWithAffixes,
                                instance[0].Syllabification,
                                instance[0].CompoundWords,
                                instance[0].WordFacility,
                                instance[0].Synonyms,
                                instance[0].Antonyms,
+                               # 5
                                instance[0].ComprehensionATtheSentenceLevel,
                                instance[0].ComprehensionOfParagraphs,
                                instance[0].NumberNamingAndNumberIdentification,
@@ -793,7 +798,7 @@ def get_student_exam_stats(request, phone):
                                                      result.ParagraphLevelComprehension, result.EarlyNumeracy])
             return JsonResponse({
                 "test_date": test_date,
-                "scaled_score": ScaledScore,
+                "scaled_score": scaled_score,
                 "sub_domain_score": sub_domain_score,
                 "sub_items_score": sub_items_score,
                 "scaled_scores_trend_date": scaled_scores_trend_date,
