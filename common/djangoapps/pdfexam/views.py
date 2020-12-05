@@ -1,5 +1,7 @@
 import logging
 
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import JSONParser
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
@@ -27,16 +29,19 @@ def upload_file(request):
     return render(request, 'pdf2MySQL/upload_file.html')
 
 
-
+@csrf_exempt
 def Handle(request):
     # request.Files['myfile']
+    if 'phone_number' not in request.POST:
+        return HttpResponse("No phone_number for pdf importing!")
+
+    phonenumber = request.POST['phone_number']
+    log.warning(phonenumber)
+
     if request.method == 'POST':  # 请求方法为POST时，进行处理
         myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
         if not myFile:
             return HttpResponse("no files for upload!")
-        phonenumber = request.data.get('phone_number')
-        if not phonenumber:
-            return HttpResponse("Phone number must be provided!")
 
         destination = open(os.path.join(BASE_DIR, 'pdfsource', myFile.name), 'wb+')  # 打开特定的文件进行二进制的写操作
 
@@ -727,7 +732,9 @@ def get_student_exam_stats(request, phone):
                                  "success": False}, status=200)
         else:
             ScaledScore = instance[0].ScaledScore
-            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord, instance[0].VisualDiscrimination,
+            test_date = instance[0].TestDate
+            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
+                                instance[0].VisualDiscrimination,
                                 instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
                                 instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
                                 instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
@@ -773,23 +780,27 @@ def get_student_exam_stats(request, phone):
                                instance[0].ComposingAndDecomposing,
                                instance[0].Measurement]
 
-            scaled_scores_trend = {}
-            sub_domain_score_trend = {}
-            for result in instance:
-                scaled_scores_trend[str(result.TestDate)] = result.ScaledScore
-                sub_domain_score_trend[str(result.TestDate)] = [result.AlphabeticPrinciple, result.ConceptOfWord,
-                                                           result.VisualDiscrimination,
-                                                           result.Phonics, result.StructuralAnalysis, result.Vocabulary,
-                                                           result.SentenceLevelComprehension, result.PhonemicAwareness,
-                                                           result.ParagraphLevelComprehension, result.EarlyNumeracy]
+            scaled_scores_trend_date = []
+            scaled_scores_trend_value = []
+            sub_domain_score_trend_value = []
+            for result in reversed(instance):
+                scaled_scores_trend_date.append(result.TestDate)
+                scaled_scores_trend_value.append(result.ScaledScore)
+                sub_domain_score_trend_value.append([result.AlphabeticPrinciple, result.ConceptOfWord,
+                                                     result.VisualDiscrimination,
+                                                     result.Phonics, result.StructuralAnalysis, result.Vocabulary,
+                                                     result.SentenceLevelComprehension, result.PhonemicAwareness,
+                                                     result.ParagraphLevelComprehension, result.EarlyNumeracy])
             return JsonResponse({
+                "test_date": test_date,
                 "scaled_score": ScaledScore,
                 "sub_domain_score": sub_domain_score,
                 "sub_items_score": sub_items_score,
-                "scaled_scores_trend": scaled_scores_trend,
-                "sub_domain_score_trend": sub_domain_score_trend,
-                "errorCode": "201",
+                "scaled_scores_trend_date": scaled_scores_trend_date,
+                "scaled_scores_trend_value": scaled_scores_trend_value,
+                "sub_domain_score_trend_value": sub_domain_score_trend_value,
+                "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get latest test result of user {}!".format(phone),
                 "success": True
-            }, status=201)
+            }, status=200)

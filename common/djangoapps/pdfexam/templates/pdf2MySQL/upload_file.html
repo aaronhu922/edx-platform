@@ -8,6 +8,8 @@
     <form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
         {% csrf_token %}
         <input type="file" name="myfile" />
+        <input type="text" id="phone_number" name="phone_number" data-display-name="电话：">
+
         <br/>
         <input type="submit" value="upload"/>
     </form>
