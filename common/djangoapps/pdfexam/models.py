@@ -121,3 +121,5 @@ class EarlyliteracySkillSetScores(models.Model):
     Measurement = models.IntegerField()
     NextStepForMeasurement = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ('phone_number', 'TestDate')

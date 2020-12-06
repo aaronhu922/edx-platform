@@ -731,7 +731,9 @@ def ExtractData(pathfilename, phonenumber):
 
     # ReportDataStr = json.dumps(ExtractDataDictReady2DjangoModel)
 
-    EarlyliteracySkillSetScores.objects.create(**ExtractDataDictReady2DjangoModel)
+    EarlyliteracySkillSetScores.objects.update_or_create(phone_number=phonenumber,
+                                                         TestDate=ExtractDataDictReady2DjangoModel['TestDate'],
+                                                         defaults=ExtractDataDictReady2DjangoModel)
 
 
 def show(self, request):
@@ -750,6 +752,7 @@ def get_student_exam_stats(request, phone):
                                  "success": False}, status=200)
         else:
             scaled_score = instance[0].ScaledScore
+            lexile_measure = instance[0].LexileMeasure
             test_date = instance[0].TestDate
             sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
                                 instance[0].VisualDiscrimination,
@@ -816,6 +819,7 @@ def get_student_exam_stats(request, phone):
                                                      result.ParagraphLevelComprehension, result.EarlyNumeracy])
             return JsonResponse({
                 "test_date": test_date,
+                "lexile_measure": lexile_measure,
                 "scaled_score": scaled_score,
                 "sub_domain_score": sub_domain_score,
                 "sub_items_score": sub_items_score,
