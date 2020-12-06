@@ -7,8 +7,10 @@
 <body>
     <form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
         {% csrf_token %}
-        <input type="file" name="myfile" />
-        <input type="text" id="phone_number" name="phone_number" data-display-name="电话：">
+        <label for="myfile">上传报告:</label>
+        <input type="file" id="myfile" name="myfile"/><br><br>
+        <label for="phone_number">电话号码:</label>
+        <input type="text" id="phone_number" name="phone_number"><br><br>
 
         <br/>
         <input type="submit" value="upload"/>
