@@ -1,7 +1,7 @@
 import logging
 
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
@@ -33,15 +33,33 @@ def upload_file(request):
 def Handle(request):
     # request.Files['myfile']
     if 'phone_number' not in request.POST:
-        return HttpResponse("No phone_number for pdf importing!")
+        return JsonResponse({"errorCode": "400",
+                             "executed": True,
+                             "message": "No phone number input for pdf upload!",
+                             "success": False}, status=200)
 
     phonenumber = request.POST['phone_number']
     log.warning(phonenumber)
+    if not phonenumber:
+        return JsonResponse({"errorCode": "400",
+                             "executed": True,
+                             "message": "No phone number input for pdf upload!",
+                             "success": False}, status=200)
 
     if request.method == 'POST':  # 请求方法为POST时，进行处理
-        myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
+        try:
+            myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
+        except MultiValueDictKeyError as err:
+            log.warning(err)
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "Need to choose a PDF file for upload. {}!".format(err),
+                                 "success": False}, status=200)
         if not myFile:
-            return HttpResponse("no files for upload!")
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "No file was uploaded!",
+                                 "success": False}, status=200)
 
         destination = open(os.path.join(BASE_DIR, 'pdfsource', myFile.name), 'wb+')  # 打开特定的文件进行二进制的写操作
 
