@@ -8,10 +8,22 @@
 <main id="main" aria-label="Content" tabindex="-1">
     <section class="container about">
         <h1>
-            <%block name="pageheader">${page_header or _("Privacy Policy")}</%block>
+            <%block name="pageheader">${page_header or _("隐私政策")}</%block>
         </h1>
         <p>
-            <%block name="pagecontent">${page_content or _("This page left intentionally blank. Feel free to add your own content.")}</%block>
+            <pre><%block name="pagecontent">${page_content or _("您知悉并同意，为便于向您提供更好的服务，平台将在您自愿选择服务或者提供信息的情况下\n" +
+            "收集您的个人信息，并将这些信息进行整合。在您使用平台服务时，服务器会自动记录一些信息,\n" +
+            "包括但不限于URL、IP地址、浏览器类型、使用语言、访问日期和时间等。平台收集的信息将成\n" +
+            "为ILM平台常规档案的一部分，且有可能因为转让、合并、收购、重组等原因而被转移到平台的\n" +
+            "继任组织或者指定的一方。平台同意善意使用收集的信息，且采取各项措施保证信息安全。\n\n" +
+            "尊重用户个人隐私是平台的一项基本政策。平台不会公开或透露您的注册资料及保存在平台服务\n" +
+            "中的非公开内容，除非平台在诚信的基础上认为透露这些信息在以下几种情况是必要的：\n\n" +
+            "1.事先获得您的明确授权；或\n" +
+            "2.遵守有关法律规定，包括在国家有关机关查询时，提供您的注册信息、您在网页上发布的信息内容及其发布时间、互联网地址或者域名；或\n" +
+            "3.保持维护平台的知识产权和其他重要权利；或\n" +
+            "4.在紧急情况下竭力维护您个人和社会大众的隐私安全；或\n" +
+            "5.根据本条款相关规定或者平台认为必要的其他情况下。")}</%block>
+            </pre>
         </p>
     </section>
 </main>

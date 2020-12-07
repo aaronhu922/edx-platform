@@ -2780,8 +2780,8 @@ MKTG_URL_LINK_MAP = {
     'FAQ': 'help',
     'COURSES': 'courses',
     'ROOT': 'root',
-    'TOS': 'privacy',
-    'HONOR': 'privacy',  # If your site does not have an honor code, simply delete this line.
+    'TOS': 'tos',
+    'HONOR': 'honor',  # If your site does not have an honor code, simply delete this line.
     'PRIVACY': 'privacy',
     'PRESS': 'press',
     'SITEMAP.XML': 'sitemap_xml',

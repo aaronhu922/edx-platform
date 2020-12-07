@@ -7,10 +7,21 @@
 <main id="main" aria-label="Content" tabindex="-1">
     <section class="container about">
         <h1>
-            <%block name="pageheader">${page_header or _("Honor Code")}</%block>
+            <%block name="pageheader">${page_header or _("诚信准则")}</%block>
         </h1>
         <p>
-            <%block name="pagecontent">${page_content or _("This page left intentionally blank. Feel free to add your own content.")}</%block>
+        <pre><%block name="pagecontent">${page_content or _("为参与ILM课程，您必须同意以下诚信守则以及对某些课程适用的任何特定附加条款。\n"+
+            "参加ILM课程，以下内容将视为是您的承诺：\n\n"+
+            "1.遵守相关法律规定以及本协议相关服务条款；\n"+
+            "2.仅凭我个人努力完成所有期中和期末考试，不会提交任何其他人的作业/成果；\n"+
+            "3.仅持有一个用户帐号并且不会让其他人使用我的用户帐号和/或密码；\n"+
+            "4.不从事任何可能不诚实地提高我的成绩，或提高或损害他人成绩的行为；\n"+
+            "5发布用于评估学生表现的题目的答案。\n\n"+
+
+            "除非课程的指导老师另有说明，平台鼓励学生：\n"+
+            "1.在课程中同其他人讨论一般概念和资料；\n"+
+            "2.将想法和思路展示给ILM同学或其他人，以获得他们的意见和评论。")}</%block>
+        </pre>
         </p>
     </section>
 </main>
