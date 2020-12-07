@@ -10913,6 +10913,12 @@ msgstr "由于登录失败次数过多，该账号暂时被锁定，请稍后再
 msgid "Email or password is incorrect."
 msgstr "邮箱或密码错误。"
 
+#: openedx/core/djangoapps/user_api/accounts/views.py
+#: openedx/core/djangoapps/user_authn/views/login.py
+#: lms/templates/provider_login.html
+msgid "Phone or password is incorrect."
+msgstr "电话号码或密码错误。"
+
 #: openedx/core/djangoapps/user_api/admin.py
 #: wiki/templates/wiki/permission_denied.html
 msgid "Permission Denied"

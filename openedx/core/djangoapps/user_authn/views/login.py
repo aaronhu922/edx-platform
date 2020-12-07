@@ -220,7 +220,7 @@ def _handle_failed_authentication(user, authenticated_user):
             if not LoginFailures.is_user_locked_out(user):
                 max_failures_allowed = settings.MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED
                 remaining_attempts = max_failures_allowed - failure_count
-                raise AuthFailedError(Text(_('Email or password is incorrect.'
+                raise AuthFailedError(Text(_('Phone or password is incorrect.'
                                              '{li_start}You have {remaining_attempts} more sign-in '
                                              'attempts before your account is temporarily locked.{li_end}'
                                              '{li_start}If you\'ve forgotten your password, click '
@@ -235,7 +235,7 @@ def _handle_failed_authentication(user, authenticated_user):
             else:
                 _generate_locked_out_error_message()
 
-    raise AuthFailedError(_('Email or password is incorrect.'))
+    raise AuthFailedError(_('Phone or password is incorrect.'))
 
 
 def _handle_successful_authentication_and_login(user, request):
@@ -515,7 +515,7 @@ class LoginSessionView(APIView):
     def get(self, request):
         return HttpResponse(get_login_session_form(request).to_json(), content_type="application/json")
 
-    @method_decorator(require_post_params(["email", "password"]))
+    @method_decorator(require_post_params(["phone_number", "password"]))
     @method_decorator(csrf_protect)
     def post(self, request):
         """Log in a user.
