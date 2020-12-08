@@ -1,7 +1,8 @@
 import logging
 
 from django.utils.datastructures import MultiValueDictKeyError
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
@@ -741,6 +742,8 @@ def show(self, request):
     return HttpResponse(temp.render())
 
 
+@login_required
+@ensure_csrf_cookie
 def get_student_exam_stats(request, phone):
     if request.method == 'GET':
         instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate'))
