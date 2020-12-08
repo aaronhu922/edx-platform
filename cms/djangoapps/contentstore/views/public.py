@@ -10,9 +10,7 @@ from waffle.decorators import waffle_switch
 
 from contentstore.config import waffle
 from edxmako.shortcuts import render_to_response
-from django.http import HttpResponse
-
-
+from django.http import HttpResponse, JsonResponse
 
 __all__ = ['register_redirect_to_lms', 'login_redirect_to_lms', 'howitworks', 'accessibility', 'studentmanageapi']
 
@@ -67,13 +65,18 @@ def studentmanageapi(request):
     # construct the file's path
     url = '/edx/app/edxapp/edx-platform/cms/static/manage/index.html'
     # test if path is ok and file exists
-    if request.user.is_authenticated and os.path.isfile(url):
+    if os.path.isfile(url):
         # let nginx determine the correct content type in this case
         # response['Content-Type'] = ""
         # response['X-Accel-Redirect'] = url
         # response['X-Sendfile'] = url
         # other webservers may accept X-Sendfile and not X-Accel-Redirect
         return HttpResponse(open(url).read())
+    else:
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No html file returned!",
+                             "success": False}, status=200)
 
 
 @waffle_switch('{}.{}'.format(waffle.WAFFLE_NAMESPACE, waffle.ENABLE_ACCESSIBILITY_POLICY_PAGE))

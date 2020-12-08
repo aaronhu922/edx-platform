@@ -7,7 +7,7 @@ import datetime
 import logging
 import os
 from collections import defaultdict
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from django.conf import settings
 from django.contrib import messages
@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import ugettext as _
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.plugins import get_plugins_view_context
 from opaque_keys.edx.keys import CourseKey
@@ -866,15 +866,21 @@ def get_enrollment_ext_info(enrollment):
     return enrollment_ext_info
 
 
+@csrf_exempt
 def studentfrontapi(request):
     # response = HttpResponse()
     # construct the file's path
     url = '/edx/app/edxapp/edx-platform/lms/static/front/index.html'
     # test if path is ok and file exists
-    if request.user.is_authenticated and os.path.isfile(url):
+    if os.path.isfile(url):
         # let nginx determine the correct content type in this case
         # response['Content-Type'] = ""
         # response['X-Accel-Redirect'] = url
         # response['X-Sendfile'] = url
         # other webservers may accept X-Sendfile and not X-Accel-Redirect
         return HttpResponse(open(url).read())
+    else:
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No html file returned!",
+                             "success": False}, status=200)
