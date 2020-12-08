@@ -179,6 +179,7 @@
         }
 
         a.register-btn {
+          display: none;
           background: theme-color("inverse");
           color: theme-color("primary");
           font-weight: $font-weight-normal;
