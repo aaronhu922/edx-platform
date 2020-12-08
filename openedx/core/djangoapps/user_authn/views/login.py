@@ -27,6 +27,7 @@ from edx_django_utils.monitoring import set_custom_attribute
 from ratelimit.decorators import ratelimit
 from ratelimitbackend.exceptions import RateLimitException
 from rest_framework.views import APIView
+from rest_framework.parsers import JSONParser
 
 from edxmako.shortcuts import render_to_response
 from openedx.core.djangoapps.password_policy import compliance as password_policy_compliance
@@ -469,6 +470,123 @@ def login_user(request):
         if response_content.get('error_code') == 'inactive-user':
             response_content['email'] = user.email
 
+        response = JsonResponse(response_content, status=400)
+        set_custom_attribute('login_user_auth_failed_error', True)
+        set_custom_attribute('login_user_response_status', response.status_code)
+        return response
+
+
+class LoginSessionViewWithJson(APIView):
+    """HTTP end-points for logging in users. """
+
+    # This end-point is available to anonymous users,
+    # so do not require authentication.
+    authentication_classes = []
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        return HttpResponse(get_login_session_form(request).to_json(), content_type="application/json")
+
+    @method_decorator(require_post_params(["phone_number", "password"]))
+    # @method_decorator(csrf_protect)
+    def post(self, request):
+        return login_user_json(request)
+
+    @method_decorator(sensitive_post_parameters("password"))
+    def dispatch(self, request, *args, **kwargs):
+        return super(LoginSessionViewWithJson, self).dispatch(request, *args, **kwargs)
+
+
+@ensure_csrf_cookie
+@require_http_methods(['POST'])
+@ratelimit(
+    key='openedx.core.djangoapps.util.ratelimit.real_ip',
+    rate=settings.LOGISTRATION_RATELIMIT_RATE,
+    method='POST',
+    block=True
+)
+def login_user_json(request):
+    """
+    AJAX request to log in the user.
+
+    Arguments:
+        request (HttpRequest)
+
+    Required params:
+        phone, password
+
+    Optional params:
+        analytics: a JSON-encoded object with additional info to include in the login analytics event. The only
+            supported field is "enroll_course_id" to indicate that the user logged in while enrolling in a particular
+            course.
+
+    Returns:
+        HttpResponse: 200 if successful.
+            Ex. {'success': true}
+        HttpResponse: 400 if the request failed.
+            Ex. {'success': false, 'value': '{'success': false, 'value: 'Email or password is incorrect.'}
+        HttpResponse: 403 if successful authentication with a third party provider but does not have a linked account.
+            Ex. {'success': false, 'error_code': 'third-party-auth-with-no-linked-account'}
+
+    Example Usage:
+
+        POST /login_ajax
+        with POST params `email`, `password`
+
+        200 {'success': true}
+
+    """
+
+    log.warning(request.POST.dict())
+
+    _parse_analytics_param_for_course_id(request)
+
+    third_party_auth_requested = False
+    # first_party_auth_requested = bool(request.POST.get('phone_number')) or bool(request.POST.get('password'))
+    is_user_third_party_authenticated = False
+
+    set_custom_attribute('login_user_course_id', request.POST.get('course_id'))
+
+    try:
+        user = _get_user_by_email(request)
+
+        _check_excessive_login_attempts(user)
+
+        possibly_authenticated_user = user
+
+        if not is_user_third_party_authenticated:
+            possibly_authenticated_user = _authenticate_first_party(request, user, third_party_auth_requested)
+            if possibly_authenticated_user and password_policy_compliance.should_enforce_compliance_on_login():
+                # Important: This call must be made AFTER the user was successfully authenticated.
+                _enforce_password_policy_compliance(request, possibly_authenticated_user)
+
+        if possibly_authenticated_user is None or not possibly_authenticated_user.is_active:
+            _handle_failed_authentication(user, possibly_authenticated_user)
+
+        _handle_successful_authentication_and_login(possibly_authenticated_user, request)
+
+        # The AJAX method calling should know the default destination upon success
+        redirect_url = get_next_url_for_login_page(request)
+        log.warning("redirect url is {}".format(redirect_url))
+
+        response = JsonResponse({
+            'success': True,
+            'redirect_url': redirect_url,
+        })
+
+        # Ensure that the external marketing site can
+        # detect that the user is logged in.
+        response = set_logged_in_cookies(request, response, possibly_authenticated_user)
+        set_custom_attribute('login_user_auth_failed_error', False)
+        set_custom_attribute('login_user_response_status', response.status_code)
+        set_custom_attribute('login_user_redirect_url', redirect_url)
+        return response
+    except AuthFailedError as error:
+        response_content = error.get_response()
+        log.exception(response_content)
+        if response_content.get('error_code') == 'inactive-user':
+            response_content['email'] = user.email
+            response_content['phone_number'] = data['phone_number']
         response = JsonResponse(response_content, status=400)
         set_custom_attribute('login_user_auth_failed_error', True)
         set_custom_attribute('login_user_response_status', response.status_code)

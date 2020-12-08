@@ -49,6 +49,9 @@ urlpatterns = [
     url(r'^user_api/v1/account/login_session/$', login.LoginSessionView.as_view(),
         name="user_api_login_session"),
 
+    url(r'^api/front/login_user/$', login.LoginSessionViewWithJson.as_view(),
+        name="user_api_login_user_new"),
+
     # Login Refresh of JWT Cookies
     url(r'^login_refresh$', login.login_refresh, name="login_refresh"),
 
