@@ -572,6 +572,7 @@ def login_user_json(request):
         response = JsonResponse({
             'success': True,
             'redirect_url': redirect_url,
+            'executed': True,
         })
 
         # Ensure that the external marketing site can
@@ -583,10 +584,10 @@ def login_user_json(request):
         return response
     except AuthFailedError as error:
         response_content = error.get_response()
+        response_content['executed'] = True
         log.exception(response_content)
         if response_content.get('error_code') == 'inactive-user':
-            response_content['email'] = user.email
-            response_content['phone_number'] = data['phone_number']
+            response_content['phone_number'] = request.POST.get('phone_number')
         response = JsonResponse(response_content, status=400)
         set_custom_attribute('login_user_auth_failed_error', True)
         set_custom_attribute('login_user_response_status', response.status_code)
