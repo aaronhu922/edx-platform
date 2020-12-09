@@ -982,7 +982,7 @@ def customer_service_info(request, pk=None):
     List all code snippets, or create a new snippet.
     """
     if request.method == 'GET':
-        test_obj = CustomerService.objects.all()
+        test_obj = CustomerService.objects.all().order_by('id')
         serializer = CustomerServiceSerializer(test_obj, many=True)
         return JsonResponse({
             "data_list": serializer.data,
@@ -1049,7 +1049,7 @@ def students_management(request, pk=None):
     "web_accelerator_link": "http://47.114.176.127/test.pac",
     """
     if request.method == 'GET':
-        test_obj = UserProfile.objects.all()
+        test_obj = UserProfile.objects.all().order_by('id')
         serializer = StudentSerializer(test_obj, many=True)
         return JsonResponse({
             "data_list": serializer.data,
@@ -1129,7 +1129,7 @@ def course_overview_info(request):
     List all code snippets, or create a new snippet.
     """
     if request.method == 'GET':
-        test_obj = CourseOverview.objects.all()
+        test_obj = CourseOverview.objects.all().order_by('-modified')
         log.warning(str(test_obj))
         serializer = CourseOverviewSerializer(test_obj, many=True)
         return JsonResponse({
