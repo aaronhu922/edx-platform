@@ -61,11 +61,11 @@ from openedx.core.djangoapps.user_api.accounts.toggles import should_redirect_to
         % endif
         % if should_redirect_to_logistration_mfe:
           <div class="mobile-nav-item hidden-mobile nav-item">
-              <a class="sign-in-btn btn" href="${settings.ACCOUNT_MICROFRONTEND_URL}/login${login_query()}">${_("Sign in")}</a>
+              <a class="sign-in-btn btn" href="/front/login">${_("Sign in")}</a>
           </div>
         % else:
           <div class="mobile-nav-item hidden-mobile nav-item">
-              <a class="sign-in-btn btn" href="/login${login_query()}">${_("Sign in")}</a>
+              <a class="sign-in-btn btn" href="/front/login">${_("Sign in")}</a>
           </div>
         % endif
       % endif
