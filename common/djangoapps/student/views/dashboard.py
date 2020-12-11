@@ -5,7 +5,9 @@ Dashboard view and supporting methods
 
 import datetime
 import logging
+import os
 from collections import defaultdict
+from django.http import HttpResponse, JsonResponse
 
 from django.conf import settings
 from django.contrib import messages
@@ -13,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import ugettext as _
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.plugins import get_plugins_view_context
 from opaque_keys.edx.keys import CourseKey
@@ -26,6 +28,7 @@ from bulk_email.models import Optout
 from course_modes.models import CourseMode
 from edxmako.shortcuts import render_to_response, render_to_string
 from entitlements.models import CourseEntitlement
+
 from lms.djangoapps.commerce.utils import EcommerceService
 from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.experiments.utils import get_dashboard_course_info
@@ -35,6 +38,7 @@ from openedx.core.djangoapps.catalog.utils import (
     get_pseudo_session_for_entitlement,
     get_visible_sessions_for_entitlement
 )
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverviewExtendInfo, CourseOverview
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_attribute_values, make_providers_strings
 from openedx.core.djangoapps.plugins.constants import ProjectType
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
@@ -57,7 +61,8 @@ from student.models import (
     CourseEnrollmentAttribute,
     DashboardConfiguration,
     PendingSecondaryEmailChange,
-    UserProfile
+    UserProfile,
+    CourseEnrollmentInfo
 )
 from util.milestones_helpers import get_pre_requisite_courses_not_completed
 from xmodule.modulestore.django import modulestore
@@ -524,7 +529,7 @@ def student_dashboard(request):
     # Get the org whitelist or the org blacklist for the current site
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site()
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist, course_limit))
-
+    log.warning(course_enrollments)
     # Get the entitlements for the user and a mapping to all available sessions for that entitlement
     # If an entitlement has no available sessions, pass through a mock course overview object
     (course_entitlements,
@@ -668,6 +673,19 @@ def student_dashboard(request):
         for enrollment in course_enrollments
     }
 
+    course_ext_infos = {
+        enrollment.course_id: get_course_ext_info(enrollment)
+        for enrollment in course_enrollments
+    }
+
+    logging.warning(course_ext_infos)
+
+    enrollment_ext_infos = {
+        enrollment.course_id: get_enrollment_ext_info(enrollment)
+        for enrollment in course_enrollments
+    }
+
+    logging.warning(enrollment_ext_infos)
     # Determine the per-course verification status
     # This is a dictionary in which the keys are course locators
     # and the values are one of:
@@ -797,6 +815,8 @@ def student_dashboard(request):
         # TODO START: clean up as part of REVEM-199 (START)
         'course_info': get_dashboard_course_info(user, course_enrollments),
         # TODO START: clean up as part of REVEM-199 (END)
+        'enrollment_ext_infos': enrollment_ext_infos,
+        'course_ext_infos': course_ext_infos,
     }
 
     context_from_plugins = get_plugins_view_context(
@@ -823,3 +843,44 @@ def student_dashboard(request):
     })
 
     return render_to_response('dashboard.html', context)
+
+
+def get_course_ext_info(enrollment):
+    try:
+        course_ext_info = CourseOverviewExtendInfo.objects.get(
+            course_overview=CourseOverview.get_from_id(enrollment.course_id))
+        logging.warning(
+            "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(course_ext_info.course_outside,
+                                                                                 course_ext_info.course_link
+                                                                                 ))
+    except Exception:
+        return CourseOverviewExtendInfo(course_outside=False, course_link='')
+    return course_ext_info
+
+
+def get_enrollment_ext_info(enrollment):
+    try:
+        enrollment_ext_info = CourseEnrollmentInfo.objects.get(course_enrolled=enrollment)
+    except Exception:
+        return CourseEnrollmentInfo()
+    return enrollment_ext_info
+
+
+@csrf_exempt
+def studentfrontapi(request):
+    # response = HttpResponse()
+    # construct the file's path
+    url = '/edx/app/edxapp/edx-platform/lms/static/front/index.html'
+    # test if path is ok and file exists
+    if os.path.isfile(url):
+        # let nginx determine the correct content type in this case
+        # response['Content-Type'] = ""
+        # response['X-Accel-Redirect'] = url
+        # response['X-Sendfile'] = url
+        # other webservers may accept X-Sendfile and not X-Accel-Redirect
+        return HttpResponse(open(url).read())
+    else:
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No html file returned!",
+                             "success": False}, status=200)

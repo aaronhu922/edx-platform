@@ -39,12 +39,18 @@ urlpatterns = [
         name='registration_validation'
     ),
 
+    url(r'^api/user/v1/sendsms$', register.SendSmsCodeView.as_view(),
+        name='send_sms_code'),
+
     url(r'^login_ajax$', login.login_user, name="login_api"),
 
     # Moved from user_api/legacy_urls.py
     # `user_api` prefix is preserved for backwards compatibility.
     url(r'^user_api/v1/account/login_session/$', login.LoginSessionView.as_view(),
         name="user_api_login_session"),
+
+    url(r'^api/front/login_user/$', login.LoginSessionViewWithJson.as_view(),
+        name="user_api_login_user_new"),
 
     # Login Refresh of JWT Cookies
     url(r'^login_refresh$', login.login_refresh, name="login_refresh"),

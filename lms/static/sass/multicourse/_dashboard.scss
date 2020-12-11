@@ -64,6 +64,7 @@
 
         .details {
           @include clearfix();
+          position: relative;
 
           .wrapper-course-image {
             @include float(left);
@@ -127,6 +128,7 @@
           }
 
           .wrapper-course-details {
+            max-width: 800px;
             display: flex;
             flex-flow: row wrap;
             padding: 0;
@@ -165,6 +167,17 @@
                 display: inline-block;
               }
 
+              .account-container{
+                margin-top: 10px;
+                >span{
+                  padding: 10px;
+                  border: 1px solid #bbb;
+                  margin-right: 8px;
+                  margin-bottom: 8px;
+                  display: inline-block;
+                }
+              }
+
               .info-date-block-container {
                 display: block;
 
@@ -197,10 +210,13 @@
             }
 
             .wrapper-course-actions {
-              @include margin-right($baseline);
-
-              margin-top: $baseline;
-              align-self: flex-end;
+             position: absolute;
+             right: -5px;
+             height: 100%;
+             box-sizing: border-box;
+             border: 2px solid #126f9a;
+             border-top-right-radius: 10px;
+             border-bottom-right-radius: 10px;
             }
 
 
@@ -226,7 +242,7 @@
           }
 
           .course-actions {
-
+            height: 100%;
             // UI: course item actions
             .action {
               box-sizing: border-box;
@@ -418,6 +434,16 @@
             &.archived {
               @extend %btn-pl-default-base;
             }
+            height: 100%;
+            display: flex;
+            padding: 0 20px;
+            width: 80px;
+            align-items: center;
+            box-sizing: border-box;
+            line-height: 40px;
+            border-radius: 0;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
           }
 
           // Responsive behavior

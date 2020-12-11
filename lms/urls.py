@@ -100,6 +100,11 @@ urlpatterns = [
     url(r'^dashboard/?$', student_views.student_dashboard, name='dashboard'),
     url(r'^change_enrollment$', student_views.change_enrollment, name='change_enrollment'),
 
+    # For student management api.
+    url(r'^front/', student_views.studentfrontapi, name='studentfrontapi'),
+
+    url(r'^api/front/', include('pdfexam.urls')),
+
     # Event tracking endpoints
     url(r'', include('track.urls')),
 

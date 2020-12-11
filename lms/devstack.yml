@@ -252,6 +252,7 @@ ECOMMERCE_API_SIGNING_KEY: lms-secret
 ECOMMERCE_API_URL: http://localhost:8002/api/v2
 ECOMMERCE_PUBLIC_URL_ROOT: http://localhost:8002
 EDXMKTG_USER_INFO_COOKIE_NAME: edx-user-info
+EDXMKTG_USER_PHONE_COOKIE_NAME: user_phone_number
 EDXNOTES_INTERNAL_API: http://edx.devstack.edx_notes_api:18120/api/v1
 EDXNOTES_PUBLIC_API: http://localhost:18120/api/v1
 EDX_API_KEY: PUT_YOUR_API_KEY_HERE

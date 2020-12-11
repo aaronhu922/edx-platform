@@ -248,6 +248,7 @@ class CourseOverview(TimeStampedModel):
                 was not found.
             - IOError if some other error occurs while trying to load the
                 course from the module store.
+                TODO: yonghu
         """
         log.info(
             "Attempting to load CourseOverview for course %s from modulestore.",
@@ -878,6 +879,20 @@ class CourseOverviewTab(models.Model):
 
     def __str__(self):
         return self.tab_id
+
+
+class CourseOverviewExtendInfo(models.Model):
+    """
+    Model to identify the course which no section, unit, ..., Just redirect to third party link.
+    """
+    course_overview = models.OneToOneField(CourseOverview, related_name="course_ext_info", on_delete=models.CASCADE)
+    course_outside = models.BooleanField(default=False)
+    course_link = models.TextField(max_length=1024, blank=True, null=True)
+
+    def __str__(self):
+        return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(
+            self.course_outside, self.course_link
+        )
 
 
 @python_2_unicode_compatible

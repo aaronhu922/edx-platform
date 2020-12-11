@@ -179,6 +179,7 @@
         }
 
         a.register-btn {
+          display: none;
           background: theme-color("inverse");
           color: theme-color("primary");
           font-weight: $font-weight-normal;
@@ -213,7 +214,7 @@
           @include right(30px);
 
           top: 55px;
-          z-index: 10;
+          z-index: 1000;
 
           .dropdown-item {
             cursor: pointer;

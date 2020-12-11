@@ -2,7 +2,6 @@
 Student Views
 """
 
-
 import datetime
 import logging
 import uuid
@@ -39,11 +38,15 @@ from six import text_type
 import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
+
+from common.djangoapps.student.serializers import StudentSerializer
+
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
 from edxmako.shortcuts import marketing_link, render_to_response, render_to_string
 from entitlements.models import CourseEntitlement
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.catalog.utils import get_programs_with_type
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview, CourseOverviewExtendInfo
 from openedx.core.djangoapps.embargo import api as embargo_api
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
@@ -51,7 +54,8 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangolib.markup import HTML, Text
-from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context
+from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context, \
+    do_create_account_no_registration
 from student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, RecoveryEmailCreate
 from student.models import (
     AccountRecovery,
@@ -65,14 +69,22 @@ from student.models import (
     UserSignupSource,
     UserStanding,
     create_comments_service_user,
-    email_exists_or_retired
+    email_exists_or_retired,
+    CourseEnrollmentInfo,
+    CustomerService,
+    get_user,
+    CourseEnrollmentException
 )
 from student.signals import REFUND_ORDER
 from student.tasks import send_activation_email
 from student.text_me_the_app import TextMeTheAppFragmentView
 from util.db import outer_atomic
-from util.json_request import JsonResponse
 from xmodule.modulestore.django import modulestore
+
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
+
 
 log = logging.getLogger("edx.student")
 
@@ -862,3 +874,301 @@ def text_me_the_app(request):
     }
 
     return render_to_response('text-me-the-app.html', context)
+
+
+@login_required
+@ensure_csrf_cookie
+def course_enrollment_info(request, id=None, stu_id=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        stu = User.objects.get(id=id)
+        log.warning(stu)
+        enroll_list = CourseEnrollment.objects.filter(user=stu)
+        log.warning(enroll_list)
+        test_obj = CourseEnrollmentInfo.objects.filter(course_enrolled__in=enroll_list)
+        log.warning(test_obj)
+        serializer = CourseEnrollmentInfoSerializer(test_obj, many=True)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of enrollments info!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        if 'id' in data and data['id']:
+            id = data['id']
+            try:
+                course_enrollment_info = CourseEnrollmentInfo.objects.get(id=id)
+            except course_enrollment_info.DoesNotExist:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": "course_enrollment_info {} does not exist".format(id),
+                                     "success": False}, status=200)
+            else:
+                course_enrollment_info.course_user_name = data['course_user_name']
+                course_enrollment_info.course_user_password = data['course_user_password']
+                course_enrollment_info.course_school_code = data['course_school_code']
+                course_enrollment_info.created = data['created']
+                course_enrollment_info.ended_date = data['ended_date']
+                course_enrollment_info.description = data['description']
+                course_enrollment_info.customer_service_id = data['customer_service']
+                course_enrollment_info.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to update a student course_enrollment_info!",
+                    "success": True
+                }, status=201)
+        else:
+            user_id = data['stu_id']
+            user = User.objects.get(id=user_id)
+            course_key = CourseKey.from_string(data['course_id'])
+            try:
+                enrollment = CourseEnrollment.enroll(user, course_key)
+            except CourseEnrollmentException as err:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": err,
+                                     "success": False}, status=200)
+
+            data['course_enrolled'] = enrollment.id
+            log.warning(data)
+            serializer = CourseEnrollmentInfoSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": serializer.data,
+                    "success": True
+                }, status=201)
+            return JsonResponse({"errorCode": "401",
+                                 "executed": True,
+                                 "message": serializer.data,
+                                 "success": False}, status=401)
+    elif request.method == 'DELETE':
+        if id and stu_id:
+            try:
+                course_enrollment_info = CourseEnrollmentInfo.objects.get(id=id)
+                stu = User.objects.get(id=stu_id)
+                course_key = CourseKey.from_string(course_enrollment_info.course_id)
+                CourseEnrollment.unenroll(stu, course_key)
+            except CourseEnrollmentInfo.DoesNotExist:
+                return JsonResponse({"errorCode": "404",
+                                     "executed": True,
+                                     "message": "course_enrollment_info {} does not exist".format(id),
+                                     "success": False}, status=200)
+            except Exception as err:
+                return JsonResponse({"errorCode": "500",
+                                     "executed": True,
+                                     "message": err,
+                                     "success": False}, status=200)
+            ret = course_enrollment_info.delete()
+            log.warning(ret)
+            return JsonResponse({"errorCode": "200",
+                                 "executed": True,
+                                 "message": "Deleted a student enrollment {}!".format(id),
+                                 "success": True}, status=200)
+
+
+
+
+@login_required
+@ensure_csrf_cookie
+def customer_service_info(request, pk=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        test_obj = CustomerService.objects.all().order_by('id')
+        serializer = CustomerServiceSerializer(test_obj, many=True)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of customer services!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        if 'id' in data and data['id']:
+            id = data['id']
+            try:
+                cs_obj = CustomerService.objects.get(id=id)
+            except CustomerService.DoesNotExist:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": "CustomerService with id {} does not exist".format(id),
+                                     "success": False}, status=200)
+            else:
+                cs_obj.customer_service_name = data['customer_service_name']
+                cs_obj.customer_service_info = data['customer_service_info']
+                cs_obj.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to update a customer service {}!".format(id),
+                    "success": True
+                }, status=201)
+        else:
+            serializer = CustomerServiceSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": serializer.data,
+                    "success": True
+                }, status=201)
+            return JsonResponse({"errorCode": "401",
+                                 "executed": True,
+                                 "message": serializer.data,
+                                 "success": False}, status=401)
+    elif request.method == 'DELETE':
+        instance = CustomerService.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a customer service record with id {}!".format(pk),
+                             "success": True}, status=200)
+
+
+
+@login_required
+@ensure_csrf_cookie
+def students_management(request, pk=None):
+    """
+    "phone_number": "",
+    "username": "",
+    "password": "test",
+    "name": "",
+    "web_accelerator_name": "洛杉矶",
+    "web_accelerator_link": "http://47.114.176.127/test.pac",
+    """
+    if request.method == 'GET':
+        test_obj = UserProfile.objects.all().order_by('id')
+        serializer = StudentSerializer(test_obj, many=True)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get all the students!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        if 'id' in data and data['id']:
+            id = data['id']
+            try:
+                user = User.objects.get(id=id)
+            except User.DoesNotExist:
+                return JsonResponse({"errorCode": "400",
+                                     "executed": True,
+                                     "message": "User with username {} does not exist".format(id),
+                                     "success": False}, status=200)
+            else:
+                from common.djangoapps.util.password_policy_validators import normalize_password
+
+                user.set_password(normalize_password(data["password"]))
+                user.username = data["username"]
+                # user.update(username=data["username"])
+                user.save()
+
+                user_profile, profile_created = UserProfile.objects.update_or_create(
+                    user=user, defaults={"name": data['name'],
+                                         "web_accelerator_name": data['web_accelerator_name'],
+                                         "web_accelerator_link": data['web_accelerator_link']},
+                )
+                return JsonResponse({
+                    "id": user.id,
+                    "username": user.username,
+                    "phone_number": user_profile.phone_number,
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to update a student account!",
+                    "success": True
+                }, status=201)
+        else:
+            phone_number = data['phone_number']
+            data['name'] = data['username']
+            log.warning(data)
+            user, user_pro = do_create_account_no_registration(data)
+            if user is not None:
+                return JsonResponse({
+                    "id": user.id,
+                    "username": user.username,
+                    "phone_number": user_pro.phone_number,
+                    "errorCode": "201",
+                    "executed": True,
+                    "message": "Succeed to create a student account!",
+                    "success": True
+                }, status=201)
+            return JsonResponse({"phone_number": phone_number,
+                                 "errorCode": "401",
+                                 "executed": True,
+                                 "message": "Failed to create student account!",
+                                 "success": False}, status=401)
+
+    elif request.method == 'DELETE':
+        instance = User.objects.get(id=pk)
+        ret = instance.delete()
+        log.warning(ret)
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a student account!",
+                             "success": True}, status=200)
+
+
+
+@login_required
+@ensure_csrf_cookie
+def course_overview_info(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        test_obj = CourseOverview.objects.all().order_by('-modified')
+        log.warning(str(test_obj))
+        serializer = CourseOverviewSerializer(test_obj, many=True)
+        return JsonResponse({
+            "data_list": serializer.data,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of courses!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        course_overview_id = data['course_overview']
+        log.warning(data)
+        try:
+            course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
+        except CourseOverviewExtendInfo.DoesNotExist:
+            course_overview = CourseOverview.get_from_id(course_overview_id)
+            course_ext = CourseOverviewExtendInfo(
+                course_overview=course_overview,
+                course_outside=data['course_outside'],
+                course_link=data['course_link']
+            )
+        else:
+            course_ext.course_outside = data['course_outside']
+            course_ext.course_link = data['course_link']
+
+        course_ext.save()
+        return JsonResponse({
+            "course_overview": data['course_overview'],
+            "errorCode": "201",
+            "executed": True,
+            "message": "Succeed to update course to a direct access outside course!",
+            "success": True
+        }, status=201)
+        # return JsonResponse(serializer.errors, status=400)

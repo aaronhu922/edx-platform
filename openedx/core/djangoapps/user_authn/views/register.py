@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Registration related views.
 """
@@ -6,7 +7,8 @@ Registration related views.
 import datetime
 import json
 import logging
-
+import random
+import re
 from django.conf import settings
 from django.contrib.auth import login as django_login
 from django.contrib.auth.models import User
@@ -31,6 +33,7 @@ from rest_framework.views import APIView
 from six import text_type
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_django import utils as social_utils
+from django.core.cache import cache
 
 import third_party_auth
 # Note that this lives in LMS, so this dependency should be refactored.
@@ -50,6 +53,7 @@ from openedx.core.djangoapps.user_api.accounts.api import (
     get_username_validation_error
 )
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
+from openedx.core.djangoapps.user_authn.aliyun import Aliyun
 from openedx.core.djangoapps.user_authn.cookies import set_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import generate_password, is_registration_api_v1
 from openedx.core.djangoapps.user_authn.views.registration_form import (
@@ -151,6 +155,8 @@ def create_account_with_params(request, params):
     # params is request.POST, that results in a dict containing lists of values
     params = dict(list(params.items()))
 
+    log.warning("params: " + str(params))
+
     # allow to define custom set of required/optional/hidden fields via configuration
     extra_fields = configuration_helpers.get_value(
         'REGISTRATION_EXTRA_FIELDS',
@@ -159,7 +165,7 @@ def create_account_with_params(request, params):
     if is_registration_api_v1(request):
         if 'confirm_email' in extra_fields:
             del extra_fields['confirm_email']
-
+    log.warning("---" + str(extra_fields))
     # registration via third party (Google, Facebook) using mobile application
     # doesn't use social auth pipeline (no redirect uri(s) etc involved).
     # In this case all related info (required for account linking)
@@ -201,7 +207,7 @@ def create_account_with_params(request, params):
 
     # Perform operations within a transaction that are critical to account creation
     with outer_atomic(read_committed=True):
-        # first, create the account
+        # first, create the account TODO: yonghu create account
         (user, profile, registration) = do_create_account(form, custom_form)
 
         third_party_provider, running_pipeline = _link_user_to_third_party_provider(
@@ -250,7 +256,7 @@ def create_account_with_params(request, params):
     # and is not yet an active user.
     if new_user is not None:
         AUDIT_LOG.info(u"Login success on new account creation - {0}".format(new_user.username))
-
+    log.warning("New account creation - {0}".format(new_user))
     return new_user
 
 
@@ -485,10 +491,10 @@ class RegistrationView(APIView):
         data = request.POST.copy()
         self._handle_terms_of_service(data)
 
-        response = self._handle_duplicate_email_username(request, data)
-        if response:
-            return response
-
+        # response = self._handle_duplicate_email_username(request, data)
+        # if response:
+        #     return response
+        #TODO: yonghu create account
         response, user = self._create_account(request, data)
         if response:
             return response
@@ -526,8 +532,21 @@ class RegistrationView(APIView):
 
     def _create_account(self, request, data):
         response, user = None, None
+
+        smscode = request.data.get('sms_code')
+        phonenumber = request.data.get('phone_number')
+        cachedcode = cache.get(phonenumber);
+        log.warning("{phonenumber}'s sms code {smscode}, cached code is {cachedcode}".format(phonenumber=phonenumber, smscode=smscode, cachedcode=cachedcode))
+
+        if smscode is None or phonenumber is None or (smscode != cachedcode):
+            errors = {
+                'sms_code_invalid': [{"user_message": _(u"SMS code {smscode} is invalid.").format(smscode=smscode)}
+                                     ]}
+            response = self._create_response(request, errors, status_code=400)
+            return response, user
+
         try:
-            user = create_account_with_params(request, data)
+            user = create_account_with_params(request, data)         #TODO: yonghu create account
         except AccountValidationError as err:
             errors = {
                 err.field: [{"user_message": text_type(err)}]
@@ -744,3 +763,42 @@ class RegistrationValidationView(APIView):
                     form_field_key: handler(self, request)
                 })
         return Response({"validation_decisions": validation_decisions})
+
+
+class SendSmsCodeView(APIView):
+    """
+
+    """
+
+    # This end-point is available to anonymous users, so no authentication is needed.
+    authentication_classes = []
+
+
+    @method_decorator(
+        ratelimit(key=REAL_IP_KEY, rate=settings.REGISTRATION_VALIDATION_RATELIMIT, method='POST', block=True)
+    )
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        log.warning("phone number {data}".format(data=phone_number))
+        if not re.match('^1\d{10}$', phone_number):
+            return Response({"status": "failed", "detail": "电话号码不正确"})
+        readom_code = ''.join(str(random.randint(0, 9)) for _ in range(6))
+        log.warning("SMS code {code}".format(code=readom_code))
+
+        cache.set(phone_number, readom_code, 60*5)
+        log.warning("Get sms code from memcache {cachecode}".format(cachecode=cache.get(phone_number)))
+        params = "{'code':'%s'}" % (readom_code)
+
+        sign = settings.SMS.get('signname', 'ILMEnglish')
+        template = settings.SMS.get('template', 'SMS_205090469')
+
+        log.warning("SMS str {jsonstr}, sign name {sign}, template {template}".format(jsonstr=params, sign=sign, template=template))
+
+        obj = Aliyun()
+        res = obj.send_sms(phone_number, sign, template, params)
+
+        jsonStr = json.loads(str(res, encoding='utf-8'))
+
+        if jsonStr['Code'] == 'OK':
+            return Response({"status": "success", "detail": "短信发送成功！"})
+        return Response({"status": "failed", "detail": jsonStr['Message']})

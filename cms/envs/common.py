@@ -1523,6 +1523,8 @@ INSTALLED_APPS = [
     'openedx.core.djangoapps.content.learning_sequences.apps.LearningSequencesConfig',
 
     'ratelimitbackend',
+
+    'pdfexam',
 ]
 
 
@@ -1530,6 +1532,7 @@ INSTALLED_APPS = [
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'
 EDXMKTG_USER_INFO_COOKIE_NAME = 'edx-user-info'
+EDXMKTG_USER_PHONE_COOKIE_NAME = 'user_phone_number'
 EDXMKTG_USER_INFO_COOKIE_VERSION = 1
 
 MKTG_URLS = {}
@@ -2298,3 +2301,5 @@ PASSWORD_RESET_EMAIL_RATE = '2/h'
 
 ######################## Setting for content libraries ########################
 MAX_BLOCKS_PER_CONTENT_LIBRARY = 1000
+
+DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'

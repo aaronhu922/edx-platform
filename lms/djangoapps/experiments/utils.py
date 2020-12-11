@@ -259,6 +259,7 @@ def get_dashboard_course_info(user, dashboard_enrollments):
                                                                                    user_enrollments)
             for dashboard_enrollment in dashboard_enrollments
         }
+        logger.warning("-----" + course_info)
     return course_info
 # TODO: clean up as part of REVEM-199 (END)
 

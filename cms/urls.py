@@ -82,6 +82,12 @@ urlpatterns = [
     url(r'^help_token/', include('help_tokens.urls')),
     url(r'^api/', include('cms.djangoapps.api.urls', namespace='api')),
 
+    #For student management api.
+    url(r'^manage/', contentstore.views.studentmanageapi, name='studentmanageapi'),
+
+    #For pdf import and exam results.
+    url(r'^api/pdf/', include('pdfexam.urls')),
+
     # restful api
     url(r'^$', contentstore.views.howitworks, name='homepage'),
     url(r'^howitworks$', contentstore.views.howitworks, name='howitworks'),

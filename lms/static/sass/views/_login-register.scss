@@ -266,6 +266,7 @@ ul.fa-ul{
   .login-form,
   .password-reset-form,
   .register-form {
+    position: relative;
     &:focus {
       outline: none;
     }
@@ -303,13 +304,14 @@ ul.fa-ul{
   .fetchCode {
     color: #fff;
     cursor: pointer;
-    background: #1890ff;
+    background: #126f9a;
     width: 100px;
     line-height: 1.5;
     text-align: center;
-    font-size: 14px;
-    padding: 6px;
-    border-radius: 3px;
+    font-size: 15px;
+    padding: 1ex 0.5em;
+    position: absolute;
+    right: 0;
 }
 
 .fetchCode-disable {
@@ -543,7 +545,7 @@ ul.fa-ul{
     text-transform: none;
     font-weight: 600;
     letter-spacing: normal;
-    margin-top: $baseline;
+    margin-top: $baseline+20px;
 
     .icon {
       @extend %sso-icon;
