@@ -24,6 +24,7 @@ from openedx.core.djangoapps.user_api.accounts.utils import retrieve_last_sitewi
 from openedx.core.djangoapps.user_authn.exceptions import AuthFailedError
 from common.djangoapps.util.json_request import JsonResponse
 
+from student.models import UserProfile
 
 log = logging.getLogger(__name__)
 
@@ -202,6 +203,12 @@ def _set_deprecated_user_info_cookie(response, request, user, cookie_settings):
         **cookie_settings
     )
 
+    response.set_cookie(
+        settings.EDXMKTG_USER_PHONE_COOKIE_NAME,
+        user_info['phone_number'],
+        **cookie_settings
+    )
+
 
 def _set_deprecated_logged_in_cookie(response, cookie_settings):
     """ Sets the logged in cookie on the response. """
@@ -245,6 +252,12 @@ def _get_user_info_cookie_data(request, user):
     except User.DoesNotExist:
         pass
 
+    try:
+        u_prof = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        log.warning("No phone number for user {}!".format(user.username))
+        pass
+
     # Convert relative URL paths to absolute URIs
     for url_name, url_path in six.iteritems(header_urls):
         header_urls[url_name] = request.build_absolute_uri(url_path)
@@ -253,6 +266,7 @@ def _get_user_info_cookie_data(request, user):
         'version': settings.EDXMKTG_USER_INFO_COOKIE_VERSION,
         'username': user.username,
         'header_urls': header_urls,
+        'phone_number': u_prof.phone_number,
     }
 
     return user_info

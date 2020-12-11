@@ -26,6 +26,7 @@
 # 4. If the package is not needed in production, add it to another file such
 #    as development.in or testing.in instead.
 
+aliyun-python-sdk-core==2.13.26     # Used for sending sms code to Aliyun sms platform
 analytics-python                    # Used for Segment analytics
 attrs                               # Reduces boilerplate code involving class attributes
 Babel                               # Internationalization utilities, used for date formatting in a few places
@@ -116,6 +117,8 @@ nodeenv                             # Utility for managing Node.js environments;
 oauthlib                            # OAuth specification support for authenticating via LTI or other Open edX services
 openedx-calc                        # Library supporting mathematical calculations for Open edX
 ora2
+pdfminer.six                        # Used in shoppingcart for extracting/parsing pdf text
+pdfplumber==0.5.22                  # Use for pdf importing of app pdfexam.
 piexif                              # Exif image metadata manipulation, used in the profile_images app
 Pillow                              # Image manipulation library; used for course assets, profile images, invoice PDFs, etc.
 py2neo<4.0.0                        # Used to communicate with Neo4j, which is used internally for modulestore inspection

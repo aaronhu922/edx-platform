@@ -1517,6 +1517,7 @@ INSTALLED_APPS = [
 
     # Database-backed Organizations App (http://github.com/edx/edx-organizations)
     'organizations',
+    'pdfexam',
 ]
 
 
@@ -1524,6 +1525,7 @@ INSTALLED_APPS = [
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'
 EDXMKTG_USER_INFO_COOKIE_NAME = 'edx-user-info'
+EDXMKTG_USER_PHONE_COOKIE_NAME = 'user_phone_number'
 EDXMKTG_USER_INFO_COOKIE_VERSION = 1
 
 MKTG_URLS = {}
@@ -2317,3 +2319,4 @@ LOGO_URL_PNG = None
 LOGO_TRADEMARK_URL = None
 FAVICON_URL = None
 DEFAULT_EMAIL_LOGO_URL = 'https://edx-cdn.org/v3/default/logo.png'
+DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'

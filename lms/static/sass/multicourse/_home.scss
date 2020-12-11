@@ -14,11 +14,10 @@ $course-search-input-height: ($button-size);
   }
 
   > header {
-    @include linear-gradient($homepage__header--gradient__color--alpha, $homepage__header--gradient__color--bravo);
+    // @include linear-gradient($homepage__header--gradient__color--alpha, $homepage__header--gradient__color--bravo);
     @include clearfix();
-
-    background-size: cover;
-    background-image: $homepage-bg-image;
+    background: url('/static/images/header-bg.jpg') center center no-repeat;
+    background-size: contain;
     box-shadow: 0 1px 0 0 $course-header-bg, inset 0 -1px 5px 0 $shadow-l1;
     overflow: hidden;
     padding: 0;
@@ -33,6 +32,8 @@ $course-search-input-height: ($button-size);
       margin: 0 auto;
       padding: ($baseline*3);
       max-width: ($baseline*60);
+      height: 247px;
+      box-sizing: border-box;
 
       @include media($bp-tiny) {
         padding: ($baseline/2);

@@ -59,8 +59,8 @@ from lms.djangoapps.lms_xblock.mixin import LmsBlockMixin
 # .. setting_default: Your Platform Name Here
 # .. setting_description: The display name of the platform to be used in
 #     templates/emails/etc.
-PLATFORM_NAME = _('Your Platform Name Here')
-PLATFORM_DESCRIPTION = _('Your Platform Description Here')
+PLATFORM_NAME = _('ILM智能学习地图')
+PLATFORM_DESCRIPTION = _('Intelligent Learning Map，简称ILM，在线学习平台，智能精准匹配个性化，多样性学习系统，让学生英语能力提升看得见！')
 CC_MERCHANT_NAME = PLATFORM_NAME
 
 PLATFORM_FACEBOOK_ACCOUNT = "http://www.facebook.com/YourPlatformFacebookAccount"
@@ -580,7 +580,7 @@ FEATURES = {
     'ENABLE_ONE_CLICK_PROGRAM_PURCHASE': False,
 
     # Allow users to change their email address.
-    'ALLOW_EMAIL_ADDRESS_CHANGE': True,
+    'ALLOW_EMAIL_ADDRESS_CHANGE': False,
 
     # Whether the bulk enrollment view is enabled.
     'ENABLE_BULK_ENROLLMENT_VIEW': False,
@@ -612,7 +612,7 @@ FEATURES = {
     'UNSUPPORTED_BROWSER_ALERT_VERSIONS': "{i:10,f:-3,o:-3,s:-3,c:-3}",
 
     # Whether to display the account deletion section the account settings page
-    'ENABLE_ACCOUNT_DELETION': True,
+    'ENABLE_ACCOUNT_DELETION': False,
 
     # Enable feature to remove enrollments and users. Used to reset state of master's integration environments
     'ENABLE_ENROLLMENT_RESET': False,
@@ -1456,7 +1456,7 @@ LANGUAGES = [
     ('es-ec', u'Español (Ecuador)'),  # Spanish (Ecuador)
     ('es-es', u'Español (España)'),  # Spanish (Spain)
     ('es-mx', u'Español (México)'),  # Spanish (Mexico)
-    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)
+    ('es-pe', u'Español (Perú)'),  # Spanish (Peru)G
     ('et-ee', u'Eesti (Eesti)'),  # Estonian (Estonia)
     ('eu-es', u'euskara (Espainia)'),  # Basque (Spain)
     ('fa', u'فارسی'),  # Persian
@@ -2738,6 +2738,7 @@ INSTALLED_APPS = [
 
     # Database-backed Organizations App (http://github.com/edx/edx-organizations)
     'organizations',
+    'pdfexam',
 ]
 
 ######################### CSRF #########################################
@@ -2779,6 +2780,7 @@ OPENAPI_CACHE_TIMEOUT = 0
 ######################### MARKETING SITE ###############################
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'
 EDXMKTG_USER_INFO_COOKIE_NAME = 'edx-user-info'
+EDXMKTG_USER_PHONE_COOKIE_NAME = 'user_phone_number'
 EDXMKTG_USER_INFO_COOKIE_VERSION = 1
 
 MKTG_URLS = {}
@@ -2794,8 +2796,6 @@ MKTG_URL_LINK_MAP = {
     'TOS_AND_HONOR': 'edx-terms-service',
     'PRIVACY': 'privacy',
     'PRESS': 'press',
-    'BLOG': 'blog',
-    'DONATE': 'donate',
     'SITEMAP.XML': 'sitemap_xml',
 
     # Verified Certificates
@@ -2986,13 +2986,15 @@ REGISTRATION_EXTRA_FIELDS = {
     'year_of_birth': 'optional',
     'mailing_address': 'optional',
     'goals': 'optional',
-    'honor_code': 'required',
+    'honor_code': 'optional',
     'terms_of_service': 'hidden',
     'city': 'hidden',
     'country': 'hidden',
+    'phone_number': 'required',
 }
 
 REGISTRATION_FIELD_ORDER = [
+    "phone_number",
     "name",
     "first_name",
     "last_name",
@@ -3512,21 +3514,6 @@ ACCOUNT_VISIBILITY_CONFIGURATION["admin_fields"] = (
 # input field as well as in some messaging describing an example of a
 # valid link.
 SOCIAL_PLATFORMS = {
-    'facebook': {
-        'display_name': 'Facebook',
-        'url_stub': 'facebook.com/',
-        'example': 'https://www.facebook.com/username'
-    },
-    'twitter': {
-        'display_name': 'Twitter',
-        'url_stub': 'twitter.com/',
-        'example': 'https://www.twitter.com/username'
-    },
-    'linkedin': {
-        'display_name': 'LinkedIn',
-        'url_stub': 'linkedin.com/in/',
-        'example': 'www.linkedin.com/in/username'
-    }
 }
 
 # E-Commerce API Configuration
@@ -4159,3 +4146,12 @@ LOGO_URL_PNG = None
 LOGO_TRADEMARK_URL = None
 FAVICON_URL = None
 DEFAULT_EMAIL_LOGO_URL = 'https://edx-cdn.org/v3/default/logo.png'
+SMS = {
+    'default': 'aliyun',
+    'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
+    'secret': '',
+    'signname': 'ILMEnglish',
+    'template': 'SMS_205090469',
+}
+
+DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'

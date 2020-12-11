@@ -218,6 +218,7 @@ ECOMMERCE_API_SIGNING_KEY: lms-secret
 ECOMMERCE_API_URL: http://localhost:8002/api/v2
 ECOMMERCE_PUBLIC_URL_ROOT: http://localhost:8002
 EDXMKTG_USER_INFO_COOKIE_NAME: edx-user-info
+EDXMKTG_USER_PHONE_COOKIE_NAME: user_phone_number
 EDX_PLATFORM_REVISION: master
 ELASTIC_SEARCH_CONFIG:
 -   host: edx.devstack.elasticsearch

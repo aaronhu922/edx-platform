@@ -25,9 +25,9 @@ from openedx.core.djangoapps.user_authn.utils import should_redirect_to_logistra
 <nav class="nav-links" aria-label=${_("Supplemental Links")}>
   <div class="main">
   % if mktg_site_enabled:
-    <div class="mobile-nav-item hidden-mobile nav-item">
+    <!-- <div class="mobile-nav-item hidden-mobile nav-item">
       <a href="${marketing_link('HOW_IT_WORKS')}">${_("How it Works")}</a>
-    </div>
+    </div>  -->
     % if courses_are_browsable:
       <div class="mobile-nav-item hidden-mobile nav-item">
         <a href="${marketing_link('COURSES')}">${_("Courses")}</a>
@@ -61,11 +61,11 @@ from openedx.core.djangoapps.user_authn.utils import should_redirect_to_logistra
         % endif
         % if should_redirect_to_logistration_mfe:
           <div class="mobile-nav-item hidden-mobile nav-item">
-              <a class="sign-in-btn btn" href="${settings.LOGISTRATION_MICROFRONTEND_URL}/login${login_query()}">${_("Sign in")}</a>
+              <a class="sign-in-btn btn" href="/front/login">${_("Sign in")}</a>
           </div>
         % else:
           <div class="mobile-nav-item hidden-mobile nav-item">
-              <a class="sign-in-btn btn" href="/login${login_query()}">${_("Sign in")}</a>
+              <a class="sign-in-btn btn" href="/front/login">${_("Sign in")}</a>
           </div>
         % endif
       % endif

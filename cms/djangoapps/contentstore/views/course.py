@@ -510,12 +510,18 @@ def course_listing(request):
     List all courses and libraries available to the logged in user
     """
 
+    # TODO: verify the permisions of user if in studio site.
+    user = request.user
+    staff = GlobalStaff()
+    if not staff.has_user(user):
+        log.error("{} doesn't have the right to access studio!".format(user))
+        raise PermissionDenied()
+
     optimization_enabled = GlobalStaff().has_user(request.user) and \
         LegacyWaffleSwitchNamespace(name=WAFFLE_NAMESPACE).is_enabled(u'enable_global_staff_optimization')
 
     org = request.GET.get('org', '') if optimization_enabled else None
     courses_iter, in_process_course_actions = get_courses_accessible_to_user(request, org)
-    user = request.user
     libraries = _accessible_libraries_iter(request.user, org) if LIBRARIES_ENABLED else []
 
     def format_in_process_course_view(uca):
