@@ -1666,10 +1666,11 @@ MIDDLEWARE = [
 
     # A newer and safer request cache.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
-    'edx_django_utils.monitoring.middleware.CachedCustomMonitoringMiddleware',
+    'edx_django_utils.monitoring.CachedCustomMonitoringMiddleware',
 
+    'edx_django_utils.monitoring.MonitoringMemoryMiddleware',
     # Generate code ownership attributes. Keep this immediately after RequestCacheMiddleware.
-    'edx_django_utils.monitoring.code_owner.middleware.CodeOwnerMonitoringMiddleware',
+    'edx_django_utils.monitoring.CodeOwnerMonitoringMiddleware',
 
     # Cookie monitoring
     'openedx.core.lib.request_utils.CookieMonitoringMiddleware',
@@ -4130,3 +4131,4 @@ SMS = {
 }
 
 DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'
+FRONT_FRAMEWORK_HTML_PATH = PROJECT_ROOT + '/static/front/index.html'

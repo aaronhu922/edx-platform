@@ -11,7 +11,9 @@ from waffle.decorators import waffle_switch
 from contentstore.config import waffle
 from edxmako.shortcuts import render_to_response
 from django.http import HttpResponse, JsonResponse
+import logging
 
+log = logging.getLogger(__name__)
 __all__ = ['register_redirect_to_lms', 'login_redirect_to_lms', 'howitworks', 'accessibility', 'studentmanageapi']
 
 
@@ -63,7 +65,7 @@ def howitworks(request):
 def studentmanageapi(request):
     # response = HttpResponse()
     # construct the file's path
-    url = '/edx/app/edxapp/edx-platform/cms/static/manage/index.html'
+    url = settings.MANAGE_FRAMEWORK_HTML_PATH
     # test if path is ok and file exists
     if os.path.isfile(url):
         # let nginx determine the correct content type in this case
@@ -73,6 +75,7 @@ def studentmanageapi(request):
         # other webservers may accept X-Sendfile and not X-Accel-Redirect
         return HttpResponse(open(url).read())
     else:
+        log.error("Front static file url is {}".format(url))
         return JsonResponse({"errorCode": "404",
                              "executed": True,
                              "message": "No html file returned!",
