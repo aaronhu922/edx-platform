@@ -66,6 +66,8 @@ from student.models import (
 )
 from util.milestones_helpers import get_pre_requisite_courses_not_completed
 from xmodule.modulestore.django import modulestore
+from path import Path
+
 
 log = logging.getLogger("edx.student")
 
@@ -868,9 +870,7 @@ def get_enrollment_ext_info(enrollment):
 
 @csrf_exempt
 def studentfrontapi(request):
-    # response = HttpResponse()
-    # construct the file's path
-    url = '/edx/app/edxapp/edx-platform/lms/static/front/index.html'
+    url = settings.FRONT_FRAMEWORK_HTML_PATH
     # test if path is ok and file exists
     if os.path.isfile(url):
         # let nginx determine the correct content type in this case
@@ -880,6 +880,7 @@ def studentfrontapi(request):
         # other webservers may accept X-Sendfile and not X-Accel-Redirect
         return HttpResponse(open(url).read())
     else:
+        log.error("Front static file url is {}".format(url))
         return JsonResponse({"errorCode": "404",
                              "executed": True,
                              "message": "No html file returned!",

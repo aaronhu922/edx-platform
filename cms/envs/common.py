@@ -665,7 +665,9 @@ MIDDLEWARE = [
 
     # A newer and safer request cache.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
-    'edx_django_utils.monitoring.middleware.MonitoringMemoryMiddleware',
+    'edx_django_utils.monitoring.MonitoringMemoryMiddleware',
+
+    'edx_django_utils.monitoring.CodeOwnerMonitoringMiddleware',
 
     # Cookie monitoring
     'openedx.core.lib.request_utils.CookieMonitoringMiddleware',
@@ -2303,3 +2305,4 @@ PASSWORD_RESET_EMAIL_RATE = '2/h'
 MAX_BLOCKS_PER_CONTENT_LIBRARY = 1000
 
 DEFAULT_EMAIL_ACCOUNT_DOMAIN = '@thomsonilm.com'
+MANAGE_FRAMEWORK_HTML_PATH = PROJECT_ROOT + '/static/manage/index.html'
