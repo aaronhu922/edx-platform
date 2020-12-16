@@ -2404,6 +2404,12 @@ def get_user(email):
     return user, u_prof
 
 
+def get_user_by_phone(phone_number):
+    u_prof = UserProfile.objects.get(phone_number=phone_number)
+    user = u_prof.user
+    return user, u_prof
+
+
 def user_info(email):
     user, u_prof = get_user(email)
     print("User id", user.id)

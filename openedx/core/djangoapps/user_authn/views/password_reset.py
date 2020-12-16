@@ -41,9 +41,11 @@ from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangoapps.user_authn.message_types import PasswordReset, PasswordResetSuccess
 from openedx.core.djangolib.markup import HTML
 from student.forms import send_account_recovery_email_for_user
-from student.models import AccountRecovery
+from student.models import AccountRecovery, UserProfile, get_user_by_phone
 from util.json_request import JsonResponse
 from util.password_policy_validators import normalize_password, validate_password
+from django.core.cache import cache
+from django.db import IntegrityError
 
 POST_EMAIL_KEY = 'post:email'
 REAL_IP_KEY = 'openedx.core.djangoapps.util.ratelimit.real_ip'
@@ -659,3 +661,61 @@ def password_reset_token_validate(request):
         AUDIT_LOG.exception("Invalid password reset confirm token")
 
     return JsonResponse({'is_valid': is_valid})
+
+
+class PasswordResetWithPhoneNumber(APIView):
+    """
+    Reset password by user after logined.
+    """
+
+    authentication_classes = []
+
+    # @ratelimit(key=REAL_IP_KEY, rate=settings.PASSWORD_RESET_IP_RATE)
+    def post(self, request):
+        log.warning("Post data for password reset: {}".format(request.data))
+        phone_number = request.data.get('phone_number')
+        AUDIT_LOG.info("Password reset initiated for phone %s.", phone_number)
+        sms_code = request.data.get('sms_code')
+        origin_password = request.data["password"]
+        password = normalize_password(origin_password)
+        cached_code = cache.get(phone_number)
+        if sms_code is None or (sms_code != cached_code):
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "短信验证没有通过！",
+                                 "success": False}, status=200)
+        if phone_number:
+            try:
+                user, user_prof = get_user_by_phone(phone_number)
+                user.set_password(password)
+                user.save()
+            except ObjectDoesNotExist:
+                AUDIT_LOG.info("Invalid password reset attempt")
+                return JsonResponse({"errorCode": "401",
+                                     "executed": True,
+                                     "message": "用户不存在，请确保电话号码正确！",
+                                     "success": False}, status=200)
+            except IntegrityError as err:
+                AUDIT_LOG.info("Invalid password reset attempt")
+                return JsonResponse({"errorCode": "401",
+                                     "executed": True,
+                                     "message": "密码重置失败，请重试！",
+                                     "success": False}, status=200)
+            except Exception:
+                AUDIT_LOG.info("Invalid password reset attempt")
+                return JsonResponse({"errorCode": "401",
+                                     "executed": True,
+                                     "message": "服务器发生错误,请重试！",
+                                     "success": False}, status=200)
+
+            return JsonResponse({"errorCode": "200",
+                                 "executed": True,
+                                 "message": "密码重置成功!",
+                                 "success": True}, status=200)
+        else:
+            return JsonResponse({"errorCode": "401",
+                                 "executed": True,
+                                 "message": "电话号码不能为空！",
+                                 "success": False}, status=200)
+
+
