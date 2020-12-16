@@ -99,17 +99,18 @@ def _get_user_by_email(request):
     if 'phone_number' not in request.POST or 'password' not in request.POST:
         raise AuthFailedError(_('There was an error receiving your login information. Please email us.'))
 
-    email = request.POST['phone_number'] + settings.DEFAULT_EMAIL_ACCOUNT_DOMAIN
-    # phone_number = request.POST['phone_number']
+    # email = request.POST['phone_number'] + settings.DEFAULT_EMAIL_ACCOUNT_DOMAIN
+    phone_number = request.POST['phone_number']
 
     try:
-        # UserProfile.objects.get(phone_number=phone_number)
-        return User.objects.get(email=email)
-    except User.DoesNotExist:
+        u_prof = UserProfile.objects.get(phone_number=phone_number)
+        user = u_prof.user
+        return user
+    except UserProfile.DoesNotExist or User.DoesNotExist:
         if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
             AUDIT_LOG.warning(u"Login failed - Unknown user email")
         else:
-            AUDIT_LOG.warning(u"Login failed - Unknown user email: {0}".format(email))
+            AUDIT_LOG.warning(u"Login failed - Unknown user email: {0}".format(phone_number))
 
 
 def _check_excessive_login_attempts(user):
