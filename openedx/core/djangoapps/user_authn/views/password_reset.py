@@ -680,7 +680,7 @@ class PasswordResetWithPhoneNumber(APIView):
         password = normalize_password(origin_password)
         cached_code = cache.get(phone_number)
         if sms_code is None or (sms_code != cached_code):
-            return JsonResponse({"errorCode": "400",
+            return JsonResponse({"errorCode": "401",
                                  "executed": True,
                                  "message": "短信验证没有通过！",
                                  "success": False}, status=200)
