@@ -742,11 +742,12 @@ def show(self, request):
     return HttpResponse(temp.render())
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def get_student_exam_stats(request, phone):
     if request.method == 'GET':
-        instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate'))
+        instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
         log.warning("Get {} test results for user {}".format(len(instance), phone))
         if not instance or len(instance) <= 0:
             return JsonResponse({"errorCode": "400",
@@ -757,77 +758,82 @@ def get_student_exam_stats(request, phone):
             scaled_score = instance[0].ScaledScore
             lexile_measure = instance[0].LexileMeasure
             test_date = instance[0].TestDate
-            sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
-                                instance[0].VisualDiscrimination,
-                                instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
-                                instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
-                                instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
-            sub_items_score = [instance[0].AlphabeticKnowledge,
-                               instance[0].AlphabeticSequence,
-                               instance[0].LetterSounds,
-                               instance[0].PrintConceptsWordLength,
-                               instance[0].PrintConceptsWordBorders,
-                               instance[0].PrintConceptsLettersAndWords,
-                               instance[0].Letters,
-                               instance[0].IdentificationAndWordMatching,
-                               # 1
-                               instance[0].RhymingAndWordFamilies,
-                               instance[0].BlendingWordParts,
-                               instance[0].BlendingPhonemes,
-                               instance[0].InitialAndFinalPhonemes,
-                               instance[0].ConsonantBlendsPA,
-                               instance[0].MedialPhonemeDiscrimination,
-                               instance[0].PhonemeIsolationORManipulation,
-                               instance[0].PhonemeSegmentation,
-                               # 2
-                               instance[0].ShortVowelSounds,
-                               instance[0].InitialConsonantSounds,
-                               instance[0].FinalConsonantSounds,
-                               instance[0].LongVowelSounds,
-                               instance[0].VariantVowelSounds,
-                               instance[0].ConsonantBlendsPH,
-                               # 3
-                               instance[0].ConsonantDigraphs,
-                               instance[0].OtherVowelSounds,
-                               instance[0].SoundSymbolCorrespondenceConsonants,
-                               instance[0].WordBuilding,
-                               instance[0].SoundSymbolCorrespondenceVowels,
-                               instance[0].WordFamiliesOrRhyming,
-                               #4
-                               instance[0].WordsWithAffixes,
-                               instance[0].Syllabification,
-                               instance[0].CompoundWords,
-                               instance[0].WordFacility,
-                               instance[0].Synonyms,
-                               instance[0].Antonyms,
-                               # 5
-                               instance[0].ComprehensionATtheSentenceLevel,
-                               instance[0].ComprehensionOfParagraphs,
-                               instance[0].NumberNamingAndNumberIdentification,
-                               instance[0].NumberObjectCorrespondence,
-                               instance[0].SequenceCompletion,
-                               instance[0].ComposingAndDecomposing,
-                               instance[0].Measurement]
 
-            scaled_scores_trend_date = []
-            scaled_scores_trend_value = []
+            sub_items_alphabetic_principle = [instance[0].AlphabeticKnowledge,
+                                              instance[0].AlphabeticSequence,
+                                              instance[0].LetterSounds,
+                                              instance[0].PrintConceptsWordLength,
+                                              instance[0].PrintConceptsWordBorders,
+                                              instance[0].PrintConceptsLettersAndWords,
+                                              instance[0].Letters,
+                                              instance[0].IdentificationAndWordMatching]
+
+            sub_items_phonemic_awareness = [instance[0].RhymingAndWordFamilies,
+                                            instance[0].BlendingWordParts,
+                                            instance[0].BlendingPhonemes,
+                                            instance[0].InitialAndFinalPhonemes,
+                                            instance[0].ConsonantBlendsPA,
+                                            instance[0].MedialPhonemeDiscrimination,
+                                            instance[0].PhonemeIsolationORManipulation,
+                                            instance[0].PhonemeSegmentation]
+
+            sub_items_phonics1 = [instance[0].ShortVowelSounds,
+                                  instance[0].InitialConsonantSounds,
+                                  instance[0].FinalConsonantSounds,
+                                  instance[0].LongVowelSounds,
+                                  instance[0].VariantVowelSounds,
+                                  instance[0].ConsonantBlendsPH]
+
+            sub_items_phonics2 = [instance[0].ConsonantDigraphs,
+                                  instance[0].OtherVowelSounds,
+                                  instance[0].SoundSymbolCorrespondenceConsonants,
+                                  instance[0].WordBuilding,
+                                  instance[0].SoundSymbolCorrespondenceVowels,
+                                  instance[0].WordFamiliesOrRhyming]
+
+            sub_items_structural_vocabulary = [instance[0].WordsWithAffixes,
+                                               instance[0].Syllabification,
+                                               instance[0].CompoundWords,
+                                               instance[0].WordFacility,
+                                               instance[0].Synonyms,
+                                               instance[0].Antonyms]
+
+            sub_items_other_domains = [instance[0].ComprehensionATtheSentenceLevel,
+                                       instance[0].ComprehensionOfParagraphs,
+                                       instance[0].NumberNamingAndNumberIdentification,
+                                       instance[0].NumberObjectCorrespondence,
+                                       instance[0].SequenceCompletion,
+                                       instance[0].ComposingAndDecomposing,
+                                       instance[0].Measurement]
+
+            # sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
+            #                     instance[0].VisualDiscrimination,
+            #                     instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
+            #                     instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
+            #                     instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
+
+            sub_domain_score_trend_date = []
             sub_domain_score_trend_value = []
+
             for result in reversed(instance):
-                scaled_scores_trend_date.append(result.TestDate)
-                scaled_scores_trend_value.append(result.ScaledScore)
-                sub_domain_score_trend_value.append([result.AlphabeticPrinciple, result.ConceptOfWord,
-                                                     result.VisualDiscrimination,
-                                                     result.Phonics, result.StructuralAnalysis, result.Vocabulary,
-                                                     result.SentenceLevelComprehension, result.PhonemicAwareness,
-                                                     result.ParagraphLevelComprehension, result.EarlyNumeracy])
+                sub_domain_score_trend_date.append(result.TestDate)
+                sub_domain_score_data = [
+                    round((result.AlphabeticPrinciple + result.ConceptOfWord + result.VisualDiscrimination) / 3, 1),
+                    result.PhonemicAwareness, result.Phonics, (result.StructuralAnalysis + result.Vocabulary) / 2,
+                    round((result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3, 1)]
+                sub_domain_score_trend_value.append(sub_domain_score_data)
+
             return JsonResponse({
                 "test_date": test_date,
                 "lexile_measure": lexile_measure,
                 "scaled_score": scaled_score,
-                "sub_domain_score": sub_domain_score,
-                "sub_items_score": sub_items_score,
-                "scaled_scores_trend_date": scaled_scores_trend_date,
-                "scaled_scores_trend_value": scaled_scores_trend_value,
+                "sub_items_alphabetic_principle": sub_items_alphabetic_principle,
+                "sub_items_phonemic_awareness": sub_items_phonemic_awareness,
+                "sub_items_phonics1": sub_items_phonics1,
+                "sub_items_phonics2": sub_items_phonics2,
+                "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
+                "sub_items_other_domains": sub_items_other_domains,
+                "sub_domain_score_trend_date": sub_domain_score_trend_date,
                 "sub_domain_score_trend_value": sub_domain_score_trend_value,
                 "errorCode": "200",
                 "executed": True,
