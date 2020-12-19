@@ -40,7 +40,11 @@ def Handle(request):
                              "success": False}, status=200)
 
     phonenumber = request.POST['phone_number']
-    log.warning(phonenumber)
+    test_type = request.POST['test_type']
+    '''  3 types of test report.
+    "star_early", "star_reading", "map_test"
+    '''
+    log.warning("Import {} report for user {}".format(test_type, phonenumber))
     if not phonenumber:
         return JsonResponse({"errorCode": "400",
                              "executed": True,

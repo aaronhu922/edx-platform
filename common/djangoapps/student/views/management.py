@@ -876,8 +876,9 @@ def text_me_the_app(request):
     return render_to_response('text-me-the-app.html', context)
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def course_enrollment_info(request, id=None, stu_id=None):
     """
     List all code snippets, or create a new snippet.
@@ -978,8 +979,9 @@ def course_enrollment_info(request, id=None, stu_id=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def customer_service_info(request, pk=None):
     """
     List all code snippets, or create a new snippet.
@@ -1041,8 +1043,9 @@ def customer_service_info(request, pk=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def students_management(request, pk=None):
     """
     "phone_number": "",
@@ -1128,8 +1131,9 @@ def students_management(request, pk=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def course_overview_info(request):
     """
     List all code snippets, or create a new snippet.
