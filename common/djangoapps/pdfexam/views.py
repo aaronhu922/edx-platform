@@ -105,7 +105,8 @@ def Handle(request):
 
     ExtractData(txtfilestored, phonenumber)
 
-    return HttpResponse('upload over!')
+    temp = loader.get_template('pdf2MySQL/show_success.html')
+    return HttpResponse(temp.render())
 
 
 def ExtractData(pathfilename, phonenumber):
@@ -742,7 +743,7 @@ def ExtractData(pathfilename, phonenumber):
 
 
 def show(self, request):
-    temp = loader.get_template('pdf2MySQL/show.html')
+    temp = loader.get_template('pdf2MySQL/show_success.html')
     return HttpResponse(temp.render())
 
 

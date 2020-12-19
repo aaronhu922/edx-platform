@@ -2,9 +2,11 @@
 <html lang="zh-hans">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>测试报告导入</title>
 </head>
 <body>
+<!--<p id="res_message"></p>-->
+<p><input type="button" onclick="location.href='/home';" value="返回" /></p>
 <form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
     {% csrf_token %}
     <label for="myfile">上传报告:</label>
@@ -22,5 +24,8 @@
     <input type="submit" value="upload"/>
 </form>
 
+<!--<script>-->
+<!--  document.getElementById("res_message").innerHTML = ${res_message};-->
+<!--</script>-->
 </body>
 </html>
