@@ -92,7 +92,7 @@ from lms.djangoapps.instructor.views.api import require_global_staff
 from lms.djangoapps.verify_student.services import IDVerificationService
 from openedx.core.djangoapps.catalog.utils import get_programs, get_programs_with_type
 from openedx.core.djangoapps.certificates import api as auto_certs_api
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview, CourseOverviewExtendInfo
 from openedx.core.djangoapps.credit.api import (
     get_credit_requirement_status,
     is_credit_course,
@@ -870,7 +870,10 @@ def course_about(request, course_id):
     """
     Display the course's about page.
     """
+    # TODO:
     course_key = CourseKey.from_string(course_id)
+
+    course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_id)
 
     # If a user is not able to enroll in a course then redirect
     # them away from the about page to the dashboard.
@@ -898,7 +901,7 @@ def course_about(request, course_id):
 
         show_courseware_link = bool(
             (
-                request.user.has_perm(VIEW_COURSEWARE, course)
+                request.user.has_perm(VIEW_COURSEWARE, course) and not course_ext.course_outside
             ) or settings.FEATURES.get('ENABLE_LMS_MIGRATION')
         )
 
