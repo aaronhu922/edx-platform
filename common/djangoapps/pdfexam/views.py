@@ -12,19 +12,21 @@ import pdfplumber
 import re
 import json
 import datetime
-from .models import EarlyliteracySkillSetScores as EarlyliteracySkillSetScores
+from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
 
 log = logging.getLogger("edx.pdfexam")
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Create your views here.
 
 def choose_file(request):
     temp = loader.get_template('pdf2MySQL/upload_file.html')
     return HttpResponse(temp.render())
+
 
 def upload_file(request):
     return render(request, 'pdf2MySQL/upload_file.html')
@@ -77,7 +79,6 @@ def Handle(request):
         #  trans to txt file and stored in txtintermediate dictionary
         ################################################################
         pdffilestored = os.path.join(BASE_DIR, 'pdfsource', myFile.name)
-
 
         with pdfplumber.open(pdffilestored) as pdf:
             content = ''
@@ -148,9 +149,12 @@ def ExtractData(pathfilename, phonenumber):
                                                             'Composing and Decomposing', 'Measurement']
 
     ExtractDataFromStarEarlyLiteracyBriefInfoDict = dict.fromkeys(StarEarlyLiteracyPDFReportExtractListBriefInfo)
-    ExtractDataFromStarEarlyLiteracySubDomainCollectScoreDict = dict.fromkeys(StarEarlyLiteracyPDFReportExtractListSubDomainCollectScore)
-    ExtractDataFromStarEarlyLiteracySubDomainDetailScoreDict = dict.fromkeys(StarEarlyLiteracyPDFReportExtractListSubDomainDetail)
-    ExtractDataFromStarEarlyLiteracySubDomainNStepSymbolDict = dict.fromkeys(StarEarlyLiteracyPDFReportExtractListSubDomainDetail)
+    ExtractDataFromStarEarlyLiteracySubDomainCollectScoreDict = dict.fromkeys(
+        StarEarlyLiteracyPDFReportExtractListSubDomainCollectScore)
+    ExtractDataFromStarEarlyLiteracySubDomainDetailScoreDict = dict.fromkeys(
+        StarEarlyLiteracyPDFReportExtractListSubDomainDetail)
+    ExtractDataFromStarEarlyLiteracySubDomainNStepSymbolDict = dict.fromkeys(
+        StarEarlyLiteracyPDFReportExtractListSubDomainDetail)
 
     ExtractSubDomainNStepSymbolDict = {}
 
@@ -161,11 +165,9 @@ def ExtractData(pathfilename, phonenumber):
     with open(pathfilename) as f:
         data = f.read()
 
-
     ##################################################################
     ##    定制对报告的简要信息的提取正则表达式  Extract Brief Info
     #################################################################
-
 
     for KeyItem in StarEarlyLiteracyPDFReportExtractListBriefInfo:
         source = KeyItem
@@ -226,7 +228,9 @@ def ExtractData(pathfilename, phonenumber):
             ##  #import datetime
             #   datetime.datetime.strptime("21/12/2008", "%d/%m/%Y").strftime("%Y-%m-%d")
             ##################################################################################
-            ExtractDataFromStarEarlyLiteracyBriefInfoDict['Test Date'] = datetime.datetime.strptime(value[0], "%m/%d/%Y").strftime("%Y-%m-%d")
+            ExtractDataFromStarEarlyLiteracyBriefInfoDict['Test Date'] = datetime.datetime.strptime(value[0],
+                                                                                                    "%m/%d/%Y").strftime(
+                "%Y-%m-%d")
 
             #################################################################
             ## Change date format END
@@ -248,7 +252,6 @@ def ExtractData(pathfilename, phonenumber):
     ##  Brief Info Extract End
     #################################################################
 
-
     ##################################################################
     ##     Extract Sub Domain Collect Score
     ##################################################################
@@ -262,7 +265,6 @@ def ExtractData(pathfilename, phonenumber):
     #################################################################
     ##  Sub Domain Collect Score Extracted End
     #################################################################
-
 
     ##################################################################
     ##     Extract Sub Domain Detail Score
@@ -288,7 +290,6 @@ def ExtractData(pathfilename, phonenumber):
     #################################################################
     ##  Sub Domain Detail Score  End
     #################################################################
-
 
     ##################################################################
     ##   Extract Sub Domain Next-Step Symbol
@@ -317,7 +318,6 @@ def ExtractData(pathfilename, phonenumber):
     ##################################################################
     ##     Extract Sub Domain Next-Step Symbol END
     ##################################################################
-
 
     ############################################################################
     ##     Merge the Extract Data from 4 Dictionary, and at first alignment the
@@ -355,7 +355,6 @@ def ExtractData(pathfilename, phonenumber):
     ##############################################################################
     ## Save the Extract Info END
     ##############################################################################
-
 
     ##################################################################
     ## alignment the dict's key for importing  into Django Models
@@ -397,9 +396,13 @@ def ExtractData(pathfilename, phonenumber):
             #   datetime.datetime.strptime("21/12/2008", "%d/%m/%Y").strftime("%Y-%m-%d")
             ##################################################################################
 
-            ExtractDataDictReady2DjangoModel['ReportPeriodStart'] = datetime.datetime.strptime(value[0], "%m/%d/%Y").strftime("%Y-%m-%d")
+            ExtractDataDictReady2DjangoModel['ReportPeriodStart'] = datetime.datetime.strptime(value[0],
+                                                                                               "%m/%d/%Y").strftime(
+                "%Y-%m-%d")
 
-            ExtractDataDictReady2DjangoModel['ReportPeriodEnd'] = datetime.datetime.strptime(value[1], "%m/%d/%Y").strftime("%Y-%m-%d")
+            ExtractDataDictReady2DjangoModel['ReportPeriodEnd'] = datetime.datetime.strptime(value[1],
+                                                                                             "%m/%d/%Y").strftime(
+                "%Y-%m-%d")
             #################################################################
             ## Change date format END
             #################################################################
@@ -603,13 +606,15 @@ def ExtractData(pathfilename, phonenumber):
             ExtractDataDictReady2DjangoModel['NextStepForPrintConceptsWordBorders'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepPrint Concepts: Letters and Words':
-            ExtractDataDictReady2DjangoModel['NextStepForPrintConceptsLettersAndWords'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForPrintConceptsLettersAndWords'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepLetters':
             ExtractDataDictReady2DjangoModel['NextStepForLetters'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepIdentification and Word Matching':
-            ExtractDataDictReady2DjangoModel['NextStepForIdentificationAndWordMatching'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForIdentificationAndWordMatching'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepRhyming and Word Families':
             ExtractDataDictReady2DjangoModel['NextStepForRhymingAndWordFamilies'] = ExtractDataDictMergeTemp[KeyItem]
@@ -627,10 +632,12 @@ def ExtractData(pathfilename, phonenumber):
             ExtractDataDictReady2DjangoModel['NextStepForConsonantBlendsPA'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepMedial Phoneme Discrimination':
-            ExtractDataDictReady2DjangoModel['NextStepForMedialPhonemeDiscrimination'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForMedialPhonemeDiscrimination'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepPhoneme Isolation/Manipulation':
-            ExtractDataDictReady2DjangoModel['NextStepForPhonemeIsolationORManipulation'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForPhonemeIsolationORManipulation'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepPhoneme Segmentation':
             ExtractDataDictReady2DjangoModel['NextStepForPhonemeSegmentation'] = ExtractDataDictMergeTemp[KeyItem]
@@ -660,13 +667,15 @@ def ExtractData(pathfilename, phonenumber):
             ExtractDataDictReady2DjangoModel['NextStepForOtherVowelSounds'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepSound-Symbol Correspondence: Consonants':
-            ExtractDataDictReady2DjangoModel['NextStepForSoundSymbolCorrespondenceConsonants'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForSoundSymbolCorrespondenceConsonants'] = \
+            ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepWord Building':
             ExtractDataDictReady2DjangoModel['NextStepForWordBuilding'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepSound-Symbol Correspondence: Vowels':
-            ExtractDataDictReady2DjangoModel['NextStepForSoundSymbolCorrespondenceVowels'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForSoundSymbolCorrespondenceVowels'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepWord Families/Rhyming':
             ExtractDataDictReady2DjangoModel['NextStepForWordFamiliesOrRhyming'] = ExtractDataDictMergeTemp[KeyItem]
@@ -690,16 +699,19 @@ def ExtractData(pathfilename, phonenumber):
             ExtractDataDictReady2DjangoModel['NextStepForAntonyms'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepComprehension at the Sentence Level':
-            ExtractDataDictReady2DjangoModel['NextStepForComprehensionATtheSentenceLevel'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForComprehensionATtheSentenceLevel'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepComprehension of Paragraphs':
             ExtractDataDictReady2DjangoModel['NextStepForComprehensionOfParagraphs'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepNumber Naming and Number Identification':
-            ExtractDataDictReady2DjangoModel['NextStepForNumberNamingAndNumberIdentification'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForNumberNamingAndNumberIdentification'] = \
+            ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'NextStepNumber Object Correspondence':
-            ExtractDataDictReady2DjangoModel['NextStepForNumberObjectCorrespondence'] = ExtractDataDictMergeTemp[KeyItem]
+            ExtractDataDictReady2DjangoModel['NextStepForNumberObjectCorrespondence'] = ExtractDataDictMergeTemp[
+                KeyItem]
 
         if KeyItem == 'NextStepSequence Completion':
             ExtractDataDictReady2DjangoModel['NextStepForSequenceCompletion'] = ExtractDataDictMergeTemp[KeyItem]
@@ -713,8 +725,6 @@ def ExtractData(pathfilename, phonenumber):
     ####################################################################################################################
     ## Prepare the ExtractDataDictReady2DjangoModel Dict END
     ####################################################################################################################
-
-
 
     ####################################################################################################################
     ## Save the Django models formation  Extract Data in a txtfile, and the name in parttern xxxx.djangomodels.dict.txt
@@ -825,7 +835,9 @@ def get_student_exam_stats(request, phone):
                 sub_domain_score_data = [
                     round((result.AlphabeticPrinciple + result.ConceptOfWord + result.VisualDiscrimination) / 3, 1),
                     result.PhonemicAwareness, result.Phonics, (result.StructuralAnalysis + result.Vocabulary) / 2,
-                    round((result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3, 1)]
+                    round((
+                                  result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3,
+                          1)]
                 sub_domain_score_trend_value.append(sub_domain_score_data)
 
             return JsonResponse({
@@ -845,3 +857,40 @@ def get_student_exam_stats(request, phone):
                 "message": "Succeed to get latest test result of user {}!".format(phone),
                 "success": True
             }, status=200)
+
+
+@csrf_exempt
+def ccss_items_management(request):
+    if request.method == 'GET':
+        items = list(MapTestCheckItem.objects.values().order_by('-id'))
+        return JsonResponse({
+            "data_list": items,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get all the map test items!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        log.warning(data)
+        check_item, created = MapTestCheckItem.objects.update_or_create(
+            item_name=data['item_name'], defaults={"l1_domain": data["l1_domain"],
+                                                   "l2_sub_domain": data["l2_sub_domain"],
+                                                   "l3_grade": data["l3_grade"],
+                                                   "item_desc": data["item_desc"]}
+        )
+        log.warning("result: {}, item: {}".format(created, check_item))
+        if created:
+            return JsonResponse({
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to create a ccss test item {}!".format(check_item.item_name),
+                "success": True
+            }, status=201)
+        else:
+            return JsonResponse({
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to update a ccss test item {}!".format(check_item.item_name),
+                "success": False}, status=200)

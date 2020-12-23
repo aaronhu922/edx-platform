@@ -885,9 +885,13 @@ class CourseOverviewExtendInfo(models.Model):
     """
     Model to identify the course which no section, unit, ..., Just redirect to third party link.
     """
-    course_overview = models.OneToOneField(CourseOverview, related_name="course_ext_info", on_delete=models.CASCADE)
+    course_overview = models.OneToOneField(CourseOverview, on_delete=models.CASCADE)
     course_outside = models.BooleanField(default=False)
-    course_link = models.TextField(max_length=1024, blank=True, null=True)
+    course_link = models.TextField(max_length=512, blank=True, null=True)
+    course_grade = models.CharField(max_length=10, null=True)
+    course_price = models.IntegerField(default=0)
+    course_recommend_level = models.SmallIntegerField(default=5)
+    course_highlight = models.CharField(max_length=256, null=True)
 
     def __str__(self):
         return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(

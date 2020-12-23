@@ -1157,22 +1157,38 @@ def course_overview_info(request):
         try:
             course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
         except CourseOverviewExtendInfo.DoesNotExist:
+            log.warning("Course ext info of course {} not exist, create a new record!".format(course_overview_id))
             course_overview = CourseOverview.get_from_id(course_overview_id)
             course_ext = CourseOverviewExtendInfo(
                 course_overview=course_overview,
                 course_outside=data['course_outside'],
-                course_link=data['course_link']
+                course_link=data['course_link'],
+                course_grade=data['course_grade'],
+                course_price=data['course_price'],
+                course_recommend_level=data['course_recommend_level'],
+                course_highlight=data['course_highlight']
             )
         else:
             course_ext.course_outside = data['course_outside']
             course_ext.course_link = data['course_link']
-
-        course_ext.save()
-        return JsonResponse({
-            "course_overview": data['course_overview'],
-            "errorCode": "201",
-            "executed": True,
-            "message": "Succeed to update course to a direct access outside course!",
-            "success": True
-        }, status=201)
-        # return JsonResponse(serializer.errors, status=400)
+            course_ext.course_grade = data['course_grade']
+            course_ext.course_price = data['course_price']
+            course_ext.course_recommend_level = data['course_recommend_level']
+            course_ext.course_highlight = data['course_highlight']
+        try:
+            course_ext.save()
+            return JsonResponse({
+                "course_overview": data['course_overview'],
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to update course to a direct access outside course!",
+                "success": True
+            }, status=201)
+        except Exception:
+            return JsonResponse({
+                "course_overview": data['course_overview'],
+                "errorCode": "401",
+                "executed": True,
+                "message": "Failed to update course!",
+                "success": False
+            }, status=200)
