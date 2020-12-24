@@ -860,7 +860,7 @@ def get_student_exam_stats(request, phone):
 
 
 @csrf_exempt
-def ccss_items_management(request):
+def ccss_items_management(request, pk=None):
     if request.method == 'GET':
         items = list(MapTestCheckItem.objects.values().order_by('-id'))
         return JsonResponse({
@@ -894,3 +894,9 @@ def ccss_items_management(request):
                 "executed": True,
                 "message": "Succeed to update a ccss test item {}!".format(check_item.item_name),
                 "success": False}, status=200)
+    elif request.method == 'DELETE':
+        MapTestCheckItem.objects.filter(id=pk).delete()
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted a ccss item!",
+                             "success": True}, status=200)

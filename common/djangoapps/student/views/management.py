@@ -39,6 +39,7 @@ import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
+from pdfexam.models import MapTestCheckItem
 from common.djangoapps.student.serializers import StudentSerializer
 
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
@@ -1121,7 +1122,7 @@ def students_management(request, pk=None):
                                  "success": False}, status=401)
 
     elif request.method == 'DELETE':
-        instance = User.objects.get(id=pk)
+        instance = User.objects.filter(id=pk)
         ret = instance.delete()
         log.warning(ret)
         return JsonResponse({"errorCode": "200",
@@ -1192,3 +1193,68 @@ def course_overview_info(request):
                 "message": "Failed to update course!",
                 "success": False
             }, status=200)
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def course_overview_ccss_items_info(request, cour_id=None):
+    if request.method == 'GET':
+        if cour_id:
+            course_ext = CourseOverviewExtendInfo.objects.get(course_overview=cour_id)
+            added_items = list(course_ext.course_ccss_items.all().values('id'))
+            return JsonResponse({
+                "added_items": added_items,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get all existed items for course {}!".format(cour_id),
+                "success": True
+            }, status=200)
+        else:
+            gk_items = list(MapTestCheckItem.objects.filter(l3_grade="GK").order_by('id').values('id', 'item_name'))
+            g1_items = list(MapTestCheckItem.objects.filter(l3_grade="G1").order_by('id').values('id', 'item_name'))
+            g2_items = list(MapTestCheckItem.objects.filter(l3_grade="G2").order_by('id').values('id', 'item_name'))
+            g3_items = list(MapTestCheckItem.objects.filter(l3_grade="G3").order_by('id').values('id', 'item_name'))
+            g4_items = list(MapTestCheckItem.objects.filter(l3_grade="G4").order_by('id').values('id', 'item_name'))
+            g5_items = list(MapTestCheckItem.objects.filter(l3_grade="G5").order_by('id').values('id', 'item_name'))
+            course_ids = list(CourseOverview.objects.all().values('id'))
+            course_str_ids = []
+            for course_key in course_ids:
+                course_str_ids.append(str(course_key['id']))
+
+            return JsonResponse({
+                "gk_items": gk_items,
+                "g1_items": g1_items,
+                "g2_items": g2_items,
+                "g3_items": g3_items,
+                "g4_items": g4_items,
+                "g5_items": g5_items,
+                "course_ids": course_str_ids,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get all the map test items!",
+                "success": True
+            }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        course_overview_id = data['course_overview']
+        check_items = data['check_items']
+        log.warning(data)
+        try:
+            course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
+        except CourseOverviewExtendInfo.DoesNotExist:
+            return JsonResponse({
+                "errorCode": "404",
+                "executed": True,
+                "message": "Course does not exist {}!".format(course_overview_id),
+                "success": False}, status=200)
+        else:
+            course_ext.course_ccss_items.clear()
+            course_ext.course_ccss_items.add(*check_items)
+            return JsonResponse({
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to add ccss test items for course {}!".format(course_overview_id),
+                "success": True
+            }, status=201)

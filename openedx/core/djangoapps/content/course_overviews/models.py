@@ -24,6 +24,7 @@ from six import text_type  # pylint: disable=ungrouped-imports
 from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
 from simple_history.models import HistoricalRecords
 
+from pdfexam.models import MapTestCheckItem
 from lms.djangoapps.discussion import django_comment_client
 from openedx.core.djangoapps.catalog.models import CatalogIntegration
 from openedx.core.djangoapps.lang_pref.api import get_closest_released_language
@@ -885,13 +886,14 @@ class CourseOverviewExtendInfo(models.Model):
     """
     Model to identify the course which no section, unit, ..., Just redirect to third party link.
     """
-    course_overview = models.OneToOneField(CourseOverview, on_delete=models.CASCADE)
+    course_overview = models.OneToOneField(CourseOverview, related_name="course_ext_info", on_delete=models.CASCADE)
     course_outside = models.BooleanField(default=False)
     course_link = models.TextField(max_length=512, blank=True, null=True)
     course_grade = models.CharField(max_length=10, null=True)
     course_price = models.IntegerField(default=0)
     course_recommend_level = models.SmallIntegerField(default=5)
     course_highlight = models.CharField(max_length=256, null=True)
+    course_ccss_items = models.ManyToManyField(MapTestCheckItem)
 
     def __str__(self):
         return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(
