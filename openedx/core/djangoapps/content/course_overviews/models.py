@@ -890,8 +890,8 @@ class CourseOverviewExtendInfo(models.Model):
     course_outside = models.BooleanField(default=False)
     course_link = models.TextField(max_length=512, blank=True, null=True)
     course_grade = models.CharField(max_length=10, null=True)
-    course_price = models.IntegerField(default=0)
-    course_recommend_level = models.SmallIntegerField(default=5)
+    course_price = models.CharField(max_length=10, null=True)
+    course_recommend_level = models.CharField(max_length=5, null=True)
     course_highlight = models.CharField(max_length=256, null=True)
     course_ccss_items = models.ManyToManyField(MapTestCheckItem)
 

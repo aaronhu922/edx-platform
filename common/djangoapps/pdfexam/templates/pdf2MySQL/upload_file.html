@@ -7,7 +7,7 @@
 <body>
 <!--<p id="res_message"></p>-->
 <p><input type="button" onclick="location.href='/home';" value="返回" /></p>
-<form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
+<form enctype="multipart/form-data" action="/api/manage/handle/" method="post">
     {% csrf_token %}
     <label for="myfile">上传报告:</label>
     <input type="file" id="myfile" name="myfile"/><br><br>

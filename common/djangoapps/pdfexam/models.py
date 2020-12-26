@@ -126,13 +126,13 @@ class EarlyliteracySkillSetScores(models.Model):
 
 class MapStudentProfile(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
-    phone_number = models.CharField(validators=[phone_regex], blank=False, null=False, max_length=50)
+    phone_number = models.CharField(blank=False, null=False, max_length=50)
     ExportDate = models.DateField()
     ExportStaff = models.CharField(max_length=50)
     FirstName = models.CharField(max_length=20)
     FamilyName = models.CharField(max_length=20)
     Grade = models.CharField(max_length=10)
-    # ID = models.CharField(max_length=64)
+    MapID = models.CharField(max_length=64)
     TestCategory = models.CharField(max_length=20)
     Standard_Error = models.CharField(max_length=16)
     Possible_range = models.CharField(max_length=16)

@@ -1217,11 +1217,9 @@ def course_overview_ccss_items_info(request, cour_id=None):
             g3_items = list(MapTestCheckItem.objects.filter(l3_grade="G3").order_by('id').values('id', 'item_name'))
             g4_items = list(MapTestCheckItem.objects.filter(l3_grade="G4").order_by('id').values('id', 'item_name'))
             g5_items = list(MapTestCheckItem.objects.filter(l3_grade="G5").order_by('id').values('id', 'item_name'))
-            course_ids = list(CourseOverview.objects.all().values('id'))
-            course_str_ids = []
-            for course_key in course_ids:
-                course_str_ids.append(str(course_key['id']))
-
+            course_ids = list(CourseOverview.objects.all().values('id', 'display_name'))
+            for course_item in course_ids:
+                course_item['id'] = str(course_item['id'])
             return JsonResponse({
                 "gk_items": gk_items,
                 "g1_items": g1_items,
@@ -1229,7 +1227,7 @@ def course_overview_ccss_items_info(request, cour_id=None):
                 "g3_items": g3_items,
                 "g4_items": g4_items,
                 "g5_items": g5_items,
-                "course_ids": course_str_ids,
+                "course_ids": course_ids,
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get all the map test items!",
