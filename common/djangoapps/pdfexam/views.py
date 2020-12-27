@@ -10,6 +10,8 @@ from django.template import loader
 from io import open
 import os
 import pdfplumber
+
+from .map_res_table import draw_map_table
 from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
@@ -17,7 +19,6 @@ from .parse_helper import ExtractStarData, ExtractDataMap
 
 log = logging.getLogger("edx.pdfexam")
 
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Create your views here.
 
@@ -31,7 +32,7 @@ def upload_file(request):
 
 
 @csrf_exempt
-def Handle(request):
+def handle_pdf_data(request):
     # request.Files['myfile']
     if 'phone_number' not in request.POST:
         return JsonResponse({"errorCode": "400",
@@ -101,10 +102,23 @@ def Handle(request):
         ################################################################
         #  trans end
         ################################################################
+    try:
+        if test_type == "star_early":
+            ExtractStarData(txtfilestored, phonenumber)
+        elif test_type == "map_test":
+            ExtractDataMap(txtfilestored, phonenumber)
+            draw_map_table(phonenumber)
+        else:
+            raise
+    except Exception as err:
+        log.error(err)
+        log.error("Upload pdf {} failed!".format(myFile.name))
+        temp = loader.get_template('pdf2MySQL/show_failed.html')
+    else:
+        temp = loader.get_template('pdf2MySQL/show_success.html')
 
-    ExtractStarData(txtfilestored, phonenumber)
-
-    temp = loader.get_template('pdf2MySQL/show_success.html')
+    os.remove(pdffilestored)
+    os.remove(txtfilestored)
     return HttpResponse(temp.render())
 
 
@@ -192,7 +206,7 @@ def get_student_exam_stats(request, phone):
                     round((result.AlphabeticPrinciple + result.ConceptOfWord + result.VisualDiscrimination) / 3, 1),
                     result.PhonemicAwareness, result.Phonics, (result.StructuralAnalysis + result.Vocabulary) / 2,
                     round((
-                                  result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3,
+                              result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3,
                           1)]
                 sub_domain_score_trend_value.append(sub_domain_score_data)
 
@@ -249,12 +263,10 @@ def ccss_items_management(request, pk=None):
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to update a ccss test item {}!".format(check_item.item_name),
-                "success": False}, status=200)
+                "success": True}, status=200)
     elif request.method == 'DELETE':
         MapTestCheckItem.objects.filter(id=pk).delete()
         return JsonResponse({"errorCode": "200",
                              "executed": True,
                              "message": "Deleted a ccss item!",
                              "success": True}, status=200)
-
-

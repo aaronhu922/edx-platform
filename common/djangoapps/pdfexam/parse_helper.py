@@ -1,18 +1,13 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
+import logging
 from io import open
-import os
 import re
-import json
 import datetime
-from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults
-from django.conf import settings
-
+from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults, MapTestCheckItem
+log = logging.getLogger("edx.pdfexam")
 
 def ExtractStarData(pathfilename, phonenumber):
-    StarEarlyLiteracyPDFReportExtractListBriefInfo = ['FirstName', 'FamilyName', 'ID', 'PrintedDay', 'PrintedDateTime', \
-                                                      'Reporting Period', 'SchoolYear', 'School', 'Class', 'Grade', \
+    StarEarlyLiteracyPDFReportExtractListBriefInfo = ['FirstName', 'FamilyName', 'ID', 'PrintedDay', 'PrintedDateTime',
+                                                      'Reporting Period', 'SchoolYear', 'School', 'Class', 'Grade',
                                                       'Teacher', 'Test Date', 'SS', 'Lexile® Measure', \
                                                       'Lexile® Rangeb', \
                                                       'Estimated Oral Reading Fluency (Words Correct Per Minute)']
@@ -236,21 +231,6 @@ def ExtractStarData(pathfilename, phonenumber):
     ##################################################################
     ##     Merge the Extract Data END
     ##################################################################
-
-    ##############################################################################
-    ## Save the Extract Info in a txtfile, and the name in parttern xxxx.dict.txt
-    ##############################################################################
-
-    ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictMergeTemp)
-
-    Dictfilenameportion = os.path.splitext(pathfilename)
-
-    Dicttxtfilename = Dictfilenameportion[0] + '.dict.txt'
-
-    Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
-
-    with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
-        f.write(ExtractDataDictMergeTempConvert2Str)
 
     ##############################################################################
     ## Save the Extract Info END
@@ -652,8 +632,7 @@ def ExtractStarData(pathfilename, phonenumber):
                                                          defaults=ExtractDataDictReady2DjangoModel)
 
 
-def ExtractDataMap(pathfilename):
-    InstructionalAreas = []
+def ExtractDataMap(pathfilename, phonenumber):
 
     InstructionalAreas = ["Informational Text: Key Ideas and Details", "Vocabulary: Acquisition and Use", \
                           "Informational Text: Language, Craft, and Structure", \
@@ -680,7 +659,7 @@ def ExtractDataMap(pathfilename):
     ##    Open the data txtfile, which from pdfplumber
     #################################################################
 
-    with open('/home/denghongbo/Student Profile.txt', encoding='utf-8-sig') as f:
+    with open(pathfilename, encoding='utf-8-sig') as f:
         data0 = f.read()
         data = data0.replace("2020/11/30 Student Profile", ' ')
         data = data.replace('\n', ' ')
@@ -1086,29 +1065,29 @@ def ExtractDataMap(pathfilename):
     ## Save the Extract Info in a txtfile, and the name in parttern xxxx.dict.txt
     ##############################################################################
 
-    ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictReady2MySQLModel)
-
-    Dictfilenameportion = os.path.splitext(pathfilename)
-
-    Dicttxtfilename = Dictfilenameportion[0] + '.dict.txt'
-
-    Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
-
-    with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
-        f.write(ExtractDataDictMergeTempConvert2Str)
+    # ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictReady2MySQLModel)
+    #
+    # Dictfilenameportion = os.path.splitext(pathfilename)
+    #
+    # Dicttxtfilename = Dictfilenameportion[0] + '.dict.txt'
+    #
+    # Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
+    #
+    # with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
+    #     f.write(ExtractDataDictMergeTempConvert2Str)
 
     ##############################################################################
 
     #    ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictReady2MySQLModel)
 
-    Dictfilenameportion = os.path.splitext(pathfilename)
-
-    Dicttxtfilename = Dictfilenameportion[0] + '.list.txt'
-
-    Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
-
-    with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
-        f.write(str(MapProfileExtResultsListReady2MySQLModel))
+    # Dictfilenameportion = os.path.splitext(pathfilename)
+    #
+    # Dicttxtfilename = Dictfilenameportion[0] + '.list.txt'
+    #
+    # Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
+    #
+    # with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
+    #     f.write(str(MapProfileExtResultsListReady2MySQLModel))
 
     ##############################################################################
     ## Save the Extract Info END
@@ -1120,17 +1099,22 @@ def ExtractDataMap(pathfilename):
     #######################################################################################
 
     # ReportDataStr = json.dumps(ExtractDataDictReady2DjangoModel)
+    ExtractDataDictReady2MySQLModel['phone_number'] = phonenumber
 
-    obj, created = MapStudentProfile.objects.update_or_create(**ExtractDataDictReady2MySQLModel)
+    stu_map_pro, created = MapStudentProfile.objects.update_or_create(phone_number=phonenumber,
+                                                                      defaults=ExtractDataDictReady2MySQLModel)
 
     # e.objects.bulk_create(MapProfileExtResultsListReady2MySQLModel)
 
     # obj = p(ExtractDataDictReady2MySQLModel)
     # obj.save()
-
-    ExtResult_foreignKey = obj
+    # os.remove(Dicttxtfilestored)
+    if not created:
+        log.warning("It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
+        MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
     for GKtoG5CheckItem in CheckItem_GKtoG5:
-        MapProfileExtResults.objects.create(map_student_profile=ExtResult_foreignKey,
+        check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem).first()
+        MapProfileExtResults.objects.create(map_student_profile=stu_map_pro,
                                             item_level=MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[
-                                                GKtoG5CheckItem], check_item=GKtoG5CheckItem)
+                                                GKtoG5CheckItem], check_item=check_item)
