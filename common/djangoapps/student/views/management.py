@@ -1202,7 +1202,10 @@ def course_overview_ccss_items_info(request, cour_id=None):
     if request.method == 'GET':
         if cour_id:
             course_ext = CourseOverviewExtendInfo.objects.get(course_overview=cour_id)
-            added_items = list(course_ext.course_ccss_items.all().values('id'))
+            added_items_qs = course_ext.course_ccss_items.all().values('id')
+            added_items = []
+            for item in added_items_qs:
+                added_items.append(item['id'])
             return JsonResponse({
                 "added_items": added_items,
                 "errorCode": "200",
