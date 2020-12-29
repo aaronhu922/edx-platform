@@ -158,6 +158,9 @@ class MapStudentProfile(models.Model):
     Literary_Text_Key_Ideas_and_Details_SCORE = models.CharField(max_length=10)
     Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR = models.CharField(max_length=16)
 
+    class Meta:
+        unique_together = ('phone_number', 'TestDate')
+
 
 class MapTestCheckItem(models.Model):
     l1_domain = models.CharField(max_length=64)
@@ -172,5 +175,6 @@ class MapProfileExtResults(models.Model):
                                             on_delete=models.CASCADE)
     item_level = models.CharField(max_length=50)  # Value like: REINFORCE_DEVELOP, REINFORCE or DEVELOP
     # check_item = models.CharField(max_length=20)
-    check_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="checked_items", on_delete=models.CASCADE)
+    check_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="checked_items",
+                                   on_delete=models.CASCADE)
     recommend_description = models.TextField(null=True)

@@ -151,7 +151,7 @@ def draw_map_table(phonenumber):
     the_table.auto_set_column_width(col=list(range(len(columns))))
     the_table.scale(1, 0.24)
 
-    map_res = MapStudentProfile.objects.filter(phone_number='15895901300').first().map_ext_results.all()
+    map_res = MapStudentProfile.objects.filter(phone_number=phonenumber).first().map_ext_results.all()
 
     for item_result in map_res:
         item_name = item_result.check_item.item_name

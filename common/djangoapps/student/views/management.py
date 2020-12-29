@@ -39,7 +39,8 @@ import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
-from pdfexam.models import MapTestCheckItem
+from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
+
 from common.djangoapps.student.serializers import StudentSerializer
 
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
@@ -1259,3 +1260,125 @@ def course_overview_ccss_items_info(request, cour_id=None):
                 "message": "Succeed to add ccss test items for course {}!".format(course_overview_id),
                 "success": True
             }, status=201)
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def my_map_test_info(request, phone):
+    if request.method == 'GET':
+        map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+        if len(map_pro) <= 0:
+            log.error("No map test results for user {}".format(phone))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "success": False}, status=200)
+        else:
+            rit_score = map_pro[0].Score
+            test_duration = map_pro[0].TestDuration
+            test_date = map_pro[0].TestDate
+            map_score_trend_date = []
+            map_score_trend_value = []
+            for result in reversed(map_pro):
+                map_score_trend_date.append(result.TestDate)
+                map_score_trend_value.append(result.Score)
+
+            sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
+                                 map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                 map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
+                                 map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
+                                 map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
+            sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
+                                "Vocabulary Acquisition and Use SCORE",
+                                "Informational Text Language Craft and Structure SCORE",
+                                "Literary Text Language Craft and Structure SCORE",
+                                "Literary Text Key Ideas and Details SCORE"]
+
+            ext_list = MapProfileExtResults.objects.filter(map_student_profile=map_pro[0],
+                                                           item_level__contains='DEVELOP').values(
+                "check_item__item_name", "item_level")
+
+            return JsonResponse({
+                "test_date": test_date,
+                "test_duration": test_duration,
+                "rit_score": rit_score,
+                "map_score_trend_date": sub_domains_score,
+                "map_score_trend_value": sub_domains_name,
+                "sub_domains_score": sub_domains_score,
+                "sub_domains_name": sub_domains_name,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get latest map result of user {}!".format(phone),
+                "success": True
+            }, status=200)
+
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def my_i_picture_info(request, phone):
+    if request.method == 'GET':
+        map_pro = MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate').first()
+        if not map_pro:
+            log.error("No map test results for user {}".format(phone))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "success": False}, status=200)
+        else:
+            ext_list = MapProfileExtResults.objects.filter(map_student_profile=map_pro,
+                                                           item_level__contains='DEVELOP').values(
+                "check_item__item_name", "item_level", "check_item__item_desc")
+            language_standards = []
+            reading_foundational_skills = []
+            reading_standards_informational_text = []
+            reading_literature = []
+            speaking_listening = []
+            writing = []
+
+            for item in ext_list:
+                if item['check_item__item_name'].startswith('L'):
+                    item_name = item['check_item__item_name'];
+                    check_item = MapTestCheckItem.objects.get(item_name=item_name)
+                    course_list = check_item.courseoverviewextendinfo_set.all()
+                    courses_info = []
+                    for course in course_list:
+                        courses_info.append({
+                            "course_grade": course.course_grade,
+                            "course_price": course.course_price,
+                            "course_recommend_level": course.course_recommend_level,
+                            "course_highlight": course.course_highlight,
+                            "course_image_url": course.course_overview.course_image_url,
+                            "course_display_name": course.course_overview.display_name,
+                        })
+                    check_item_and_course_info = {
+                        "item_name": item['check_item__item_name'],
+                        "item_desc": item['check_item__item_desc'],
+                        "courses_info": courses_info,
+                        "courses_info_count": len(courses_info)
+                    }
+                    language_standards.append(item['check_item__item_name'])
+                if item['check_item__item_name'].startswith('RF'):
+                    reading_foundational_skills.append(item['check_item__item_name'])
+                if item['check_item__item_name'].startswith('RI'):
+                    reading_standards_informational_text.append(item['check_item__item_name'])
+                if item['check_item__item_name'].startswith('RL'):
+                    reading_literature.append(item['check_item__item_name'])
+                if item['check_item__item_name'].startswith('SL'):
+                    speaking_listening.append(item['check_item__item_name'])
+                if item['check_item__item_name'].startswith('W'):
+                    writing.append(item['check_item__item_name'])
+            return JsonResponse({
+                "language_standards": language_standards,
+                "reading_foundational_skills": reading_foundational_skills,
+                "reading_standards_informational_text": reading_standards_informational_text,
+                "reading_literature": reading_literature,
+                "speaking_listening": speaking_listening,
+                "writing": writing,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get latest map result of user {}!".format(phone),
+                "success": True
+            }, status=200)

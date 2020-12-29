@@ -1005,6 +1005,8 @@ def ExtractDataMap(pathfilename, phonenumber):
             ExtractDataDictReady2MySQLModel['TestDate'] = ExtractStudentProfileDictMerge[KeyItem]
         elif KeyItem == 'TestDuration':
             ExtractDataDictReady2MySQLModel['TestDuration'] = ExtractStudentProfileDictMerge[KeyItem]
+        elif KeyItem == 'Growth':
+            ExtractDataDictReady2MySQLModel['Growth'] = ExtractStudentProfileDictMerge[KeyItem]
         elif KeyItem == 'Rapid-Guessing %':
             ExtractDataDictReady2MySQLModel['Rapid_Guessing_Percent'] = ExtractStudentProfileDictMerge[KeyItem]
         elif KeyItem == 'Est. Impact of Rapid-Guessing % on RIT':
@@ -1102,6 +1104,8 @@ def ExtractDataMap(pathfilename, phonenumber):
     ExtractDataDictReady2MySQLModel['phone_number'] = phonenumber
 
     stu_map_pro, created = MapStudentProfile.objects.update_or_create(phone_number=phonenumber,
+                                                                      TestDate=ExtractDataDictReady2MySQLModel[
+                                                                          'TestDate'],
                                                                       defaults=ExtractDataDictReady2MySQLModel)
 
     # e.objects.bulk_create(MapProfileExtResultsListReady2MySQLModel)
