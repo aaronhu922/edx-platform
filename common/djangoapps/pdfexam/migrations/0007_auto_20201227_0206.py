@@ -11,9 +11,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='mapprofileextresults',
-            name='check_item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='checked_items', to='pdfexam.MapTestCheckItem'),
-        ),
+
     ]

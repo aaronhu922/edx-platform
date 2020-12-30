@@ -1295,18 +1295,15 @@ def my_map_test_info(request, phone):
                                 "Literary Text Language Craft and Structure SCORE",
                                 "Literary Text Key Ideas and Details SCORE"]
 
-            ext_list = MapProfileExtResults.objects.filter(map_student_profile=map_pro[0],
-                                                           item_level__contains='DEVELOP').values(
-                "check_item__item_name", "item_level")
-
             return JsonResponse({
                 "test_date": test_date,
                 "test_duration": test_duration,
                 "rit_score": rit_score,
-                "map_score_trend_date": sub_domains_score,
-                "map_score_trend_value": sub_domains_name,
+                "map_score_trend_date": map_score_trend_date,
+                "map_score_trend_value": map_score_trend_value,
                 "sub_domains_score": sub_domains_score,
                 "sub_domains_name": sub_domains_name,
+                "map_pdf_url": "Not ready yet",
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get latest map result of user {}!".format(phone),
@@ -1340,37 +1337,29 @@ def my_i_picture_info(request, phone):
 
             for item in ext_list:
                 if item['check_item__item_name'].startswith('L'):
-                    item_name = item['check_item__item_name'];
-                    check_item = MapTestCheckItem.objects.get(item_name=item_name)
-                    course_list = check_item.courseoverviewextendinfo_set.all()
-                    courses_info = []
-                    for course in course_list:
-                        courses_info.append({
-                            "course_grade": course.course_grade,
-                            "course_price": course.course_price,
-                            "course_recommend_level": course.course_recommend_level,
-                            "course_highlight": course.course_highlight,
-                            "course_image_url": course.course_overview.course_image_url,
-                            "course_display_name": course.course_overview.display_name,
-                        })
-                    check_item_and_course_info = {
-                        "item_name": item['check_item__item_name'],
-                        "item_desc": item['check_item__item_desc'],
-                        "courses_info": courses_info,
-                        "courses_info_count": len(courses_info)
-                    }
-                    language_standards.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    language_standards.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RF'):
-                    reading_foundational_skills.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_foundational_skills.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RI'):
-                    reading_standards_informational_text.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_standards_informational_text.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RL'):
-                    reading_literature.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_literature.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('SL'):
-                    speaking_listening.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    speaking_listening.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('W'):
-                    writing.append(item['check_item__item_name'])
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    writing.append(check_item_and_course_info)
+
+            count_of_develop_items = [len(language_standards), len(reading_foundational_skills),
+                                      len(reading_standards_informational_text), len(reading_literature),
+                                      len(speaking_listening), len(writing)]
             return JsonResponse({
+                "count_of_develop_items": count_of_develop_items,
                 "language_standards": language_standards,
                 "reading_foundational_skills": reading_foundational_skills,
                 "reading_standards_informational_text": reading_standards_informational_text,
@@ -1382,3 +1371,26 @@ def my_i_picture_info(request, phone):
                 "message": "Succeed to get latest map result of user {}!".format(phone),
                 "success": True
             }, status=200)
+
+
+def get_course_and_ccss_items_map(item_name):
+    check_item = MapTestCheckItem.objects.get(item_name=item_name)
+    course_list = check_item.courseoverviewextendinfo_set.all()
+    courses_info = []
+    for course in course_list:
+        courses_info.append({
+            "course_grade": course.course_grade,
+            "course_price": course.course_price,
+            "course_recommend_level": course.course_recommend_level,
+            "course_highlight": course.course_highlight,
+            "course_image_url": course.course_overview.course_image_url,
+            "course_display_name": course.course_overview.display_name,
+        })
+    check_item_and_course_info = {
+        "item_name": item_name,
+        "item_desc": check_item.item_desc,
+        "courses_info": courses_info,
+        "courses_info_count": len(courses_info)
+    }
+
+    return check_item_and_course_info

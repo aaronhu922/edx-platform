@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('item_level', models.CharField(max_length=50)),
-                ('check_item', models.CharField(max_length=20)),
+                ('check_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='checked_items', to='pdfexam.MapTestCheckItem')),
                 ('recommend_description', models.TextField(null=True)),
                 ('map_student_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='map_ext_results', to='pdfexam.MapStudentProfile')),
             ],

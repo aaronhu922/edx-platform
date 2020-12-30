@@ -39,5 +39,9 @@ urlpatterns = [
     url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)/(?P<id>[0-9]+)$', views.course_enrollment_info, name='delete_course_enrollment_info'),
     url(r'^api/manage/courses_ccss_items/(?P<cour_id>.+)$', views.course_overview_ccss_items_info, name='get_specific_course_overview_ccss_items_info'),
     url(r'^api/manage/courses_ccss_items$', views.course_overview_ccss_items_info, name='course_overview_ccss_items_info'),
+    url(r'^api/front/i_map/(?P<phone>[0-9]+)$', views.my_i_picture_info,
+        name='my_i_picture_info'),
+    url(r'^api/front/map_stats/(?P<phone>[0-9]+)$', views.my_map_test_info,
+        name='my_map_test_info'),
 
 ]
