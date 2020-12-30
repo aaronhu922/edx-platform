@@ -1117,8 +1117,14 @@ def ExtractDataMap(pathfilename, phonenumber):
         log.warning("It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
         MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
+    log.info(CheckItem_GKtoG5)
+
     for GKtoG5CheckItem in CheckItem_GKtoG5:
         check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem).first()
-        MapProfileExtResults.objects.create(map_student_profile=stu_map_pro,
-                                            item_level=MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[
-                                                GKtoG5CheckItem], check_item=check_item)
+        MapProfileExtResults.objects.update_or_create(map_student_profile=stu_map_pro, check_item=check_item,
+                                                      defaults={
+                                                          "item_level":
+                                                              MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[
+                                                                  GKtoG5CheckItem]
+                                                      }
+                                                      )

@@ -178,3 +178,6 @@ class MapProfileExtResults(models.Model):
     check_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="checked_items",
                                    on_delete=models.CASCADE)
     recommend_description = models.TextField(null=True)
+
+    class Meta:
+        unique_together = ('map_student_profile', 'check_item')
