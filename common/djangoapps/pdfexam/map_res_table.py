@@ -9,7 +9,9 @@ from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
 log = logging.getLogger("edx.pdfexam")
 
 
-def draw_map_table(phonenumber):
+def draw_map_table(map_pro):
+    phone_number = map_pro.phone_number
+
     plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
     # Prepare table
@@ -151,7 +153,7 @@ def draw_map_table(phonenumber):
     the_table.auto_set_column_width(col=list(range(len(columns))))
     the_table.scale(1, 0.24)
 
-    map_res = MapStudentProfile.objects.filter(phone_number=phonenumber).first().map_ext_results.all()
+    map_res = map_pro.map_ext_results.all()
 
     for item_result in map_res:
         item_name = item_result.check_item.item_name
@@ -165,7 +167,10 @@ def draw_map_table(phonenumber):
             else:
                 the_table[(indexs[0][0] + 1, indexs[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
 
-    file_path = settings.MEDIA_ROOT + phonenumber + '.pdf'
+    file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=200)
-    log.info("Successfully create the table for {}'s map test to file {}.".format(phonenumber, file_path))
+    map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
+    map_pro.save()
+    log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
+                                                                                             map_pro.map_pdf_url))
     plt.clf()

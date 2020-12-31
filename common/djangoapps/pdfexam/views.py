@@ -106,8 +106,8 @@ def handle_pdf_data(request):
         if test_type == "star_early":
             ExtractStarData(txtfilestored, phonenumber)
         elif test_type == "map_test":
-            ExtractDataMap(txtfilestored, phonenumber)
-            draw_map_table(phonenumber)
+            stu_map_pro = ExtractDataMap(txtfilestored, phonenumber)
+            draw_map_table(stu_map_pro)
         else:
             raise
     except Exception as err:

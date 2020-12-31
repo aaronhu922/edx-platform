@@ -9,6 +9,7 @@ from django.conf.urls.static import static
 from django.contrib.admin import autodiscover as django_autodiscover
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import RedirectView
+from django.views.static import serve
 from edx_api_doc_tools import make_docs_urls
 from edx_django_utils.plugins import get_plugin_url_patterns
 from ratelimitbackend import admin
@@ -901,12 +902,16 @@ urlpatterns += [
 ]
 
 if settings.DEBUG:
+    urlpatterns += [
+        url(r'^media/(?P<path>.*)$', serve, {"document_root": "/edx/var/edxapp/media/"}),
+    ]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(
         settings.PROFILE_IMAGE_BACKEND['options']['base_url'],
         document_root=settings.PROFILE_IMAGE_BACKEND['options']['location']
     )
+
 
 # UX reference templates
 urlpatterns += [

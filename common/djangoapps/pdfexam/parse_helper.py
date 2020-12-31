@@ -1128,3 +1128,4 @@ def ExtractDataMap(pathfilename, phonenumber):
                                                                   GKtoG5CheckItem]
                                                       }
                                                       )
+    return stu_map_pro

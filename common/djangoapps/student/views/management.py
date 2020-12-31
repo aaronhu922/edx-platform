@@ -1286,6 +1286,7 @@ def my_map_test_info(request, phone):
             rit_score = map_pro[0].Score
             test_duration = map_pro[0].TestDuration
             test_date = map_pro[0].TestDate
+            map_pdf_url = map_pro[0].map_pdf_url
             map_score_trend_date = []
             map_score_trend_value = []
             for result in reversed(map_pro):
@@ -1311,7 +1312,7 @@ def my_map_test_info(request, phone):
                 "map_score_trend_value": map_score_trend_value,
                 "sub_domains_score": sub_domains_score,
                 "sub_domains_name": sub_domains_name,
-                "map_pdf_url": "Not ready yet",
+                "map_pdf_url": map_pdf_url,
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get latest map result of user {}!".format(phone),
