@@ -1203,7 +1203,7 @@ def course_overview_ccss_items_info(request, cour_id=None):
     if request.method == 'GET':
         if cour_id:
             try:
-                course_ext = CourseOverviewExtendInfo.objects.get(course_overview=cour_id)
+                course_ext = CourseOverviewExtendInfo.objects.get(id=cour_id)
                 added_items_qs = course_ext.course_ccss_items.all().values('id')
                 added_items = []
                 for item in added_items_qs:
@@ -1212,7 +1212,7 @@ def course_overview_ccss_items_info(request, cour_id=None):
                 return JsonResponse({
                     "errorCode": "404",
                     "executed": True,
-                    "message": "Course does not exist {}!".format(cour_id),
+                    "message": "Course extend info does not exist {}!".format(cour_id),
                     "success": False}, status=200)
             return JsonResponse({
                 "added_items": added_items,
@@ -1228,9 +1228,10 @@ def course_overview_ccss_items_info(request, cour_id=None):
             g3_items = list(MapTestCheckItem.objects.filter(l3_grade="G3").order_by('id').values('id', 'item_name'))
             g4_items = list(MapTestCheckItem.objects.filter(l3_grade="G4").order_by('id').values('id', 'item_name'))
             g5_items = list(MapTestCheckItem.objects.filter(l3_grade="G5").order_by('id').values('id', 'item_name'))
-            course_ids = list(CourseOverview.objects.all().values('id', 'display_name'))
-            for course_item in course_ids:
-                course_item['id'] = str(course_item['id'])
+            # course_ids = list(CourseOverview.objects.all().values('id', 'display_name'))
+            course_ids = list(CourseOverviewExtendInfo.objects.all().values('id', 'course_overview__display_name'))
+            # for course_item in course_ids:
+            #     course_item['id'] = str(course_item['id'])
             return JsonResponse({
                 "gk_items": gk_items,
                 "g1_items": g1_items,
@@ -1251,12 +1252,12 @@ def course_overview_ccss_items_info(request, cour_id=None):
         check_items = data['check_items']
         log.warning(data)
         try:
-            course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
+            course_ext = CourseOverviewExtendInfo.objects.get(id=course_overview_id)
         except CourseOverviewExtendInfo.DoesNotExist:
             return JsonResponse({
                 "errorCode": "404",
                 "executed": True,
-                "message": "Course does not exist {}!".format(course_overview_id),
+                "message": "Course extend info does not exist {}!".format(course_overview_id),
                 "success": False}, status=200)
         else:
             course_ext.course_ccss_items.clear()

@@ -896,8 +896,8 @@ class CourseOverviewExtendInfo(models.Model):
     course_ccss_items = models.ManyToManyField(MapTestCheckItem)
 
     def __str__(self):
-        return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(
-            self.course_outside, self.course_link
+        return "CourseOverviewExtendInfo(course_name={}, course_link={})".format(
+            self.course_overview.display_name, self.course_link
         )
 
 
