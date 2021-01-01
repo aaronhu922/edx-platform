@@ -5,6 +5,7 @@ import matplotlib.colors as mcolors
 import numpy
 from django.conf import settings
 from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
+from .map_table_tmplate import *
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -157,16 +158,23 @@ def draw_map_table(map_pro):
 
     for item_result in map_res:
         item_name = item_result.check_item.item_name
+        reading_2_5.remove(item_name)
         item_level = item_result.item_level
-        indexs = numpy.argwhere(matrix == item_name)
-        if indexs.size > 0:
+        indexes = numpy.argwhere(matrix == item_name)
+        if indexes.size > 0:
             if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-                the_table[(indexs[0][0] + 1, indexs[0][1])].set_facecolor(mcolors.CSS4_COLORS['red'])
+                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
-                the_table[(indexs[0][0] + 1, indexs[0][1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
+                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
             else:
-                the_table[(indexs[0][0] + 1, indexs[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
+                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
 
+    log.info("Length of green cell is {}.".format(len(reading_2_5)))
+    for green_item_name in reading_2_5:
+        indexes = numpy.argwhere(matrix == green_item_name)
+        log.info("Item {}'s index is {}".format(green_item_name, indexes))
+        if indexes.size > 0:
+            the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=200)
     map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
