@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy
 from django.conf import settings
+
+from .map_table_tmplate import reading_2_5
 from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
-from .map_table_tmplate import *
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -51,21 +52,21 @@ def draw_map_table(map_pro):
         ["", "", "", "L.K.5", "L.1.5", "L.2.5", "L.3.5", "L.4.5", "L.5.5"],
         ["", "", "", "L.K.5.A", "L.1.5.A", "L.2.5.A", "L.3.5.A", "L.4.5.A", "L.5.5.A"],
         ["", "", "", "L.K.5.B", "L.1.5.B", "L.2.5.B", "L.3.5.B", "L.4.5.B", "L.5.5.B"],
-        ["", "", "", "L.K.5.C ", "L.1.5.C", "", "L.3.5.C", "L.4.5.C", "L.5.5.C"],
+        ["", "", "", "L.K.5.C", "L.1.5.C", "", "L.3.5.C", "L.4.5.C", "L.5.5.C"],
         ["", "", "", "L.K.5.D", "L.1.5.D", "", "", "", ""],
         ["", "", "", "L.K.6", "L.1.6", "L.2.6", "L.3.6", "L.4.6", "L.5.6"],
         ["2", "Speaking & Listening(K-5)", "Comprehension and Collaboration", "SL.K.1", "SL.1.1", "SL.2.1",
          "SL.3.1", "SL.4.1", "SL.5.1.1"],
-        ["", "", "", "SL.K.1.A", "SL.1.1.A ", "SL.2.1.A", "SL.3.1.A", "SL.4.1.A", "SL.5.1.1.A"],
+        ["", "", "", "SL.K.1.A", "SL.1.1.A", "SL.2.1.A", "SL.3.1.A", "SL.4.1.A", "SL.5.1.1.A"],
         ["", "", "", "SL.K.1.B", "SL.1.1.B", "SL.2.1.B", "SL.3.1.B", "SL.4.1.B", "SL.5.1.1.B"],
         ["", "", "", "", "SL.1.1.C", "SL.2.1.C", "SL.3.1.C", "SL.4.1.C", "SL.5.1.1..C"],
         ["", "", "", "", "", "", "SL.3.1.D", "SL.4.1.D", "SL.5.1.1.D"],
-        ["", "", "", "SL.K.2 ", "SL.1.2", "SL.2.2", "SL.3.2", "SL.4.1.2", "SL.5.2"],
+        ["", "", "", "SL.K.2", "SL.1.2", "SL.2.2", "SL.3.2", "SL.4.1.2", "SL.5.2"],
         ["", "", "", "SL.K.3", "SL.1.3", "SL.2.3", "SL.3.3", "SL.4.1.3", "SL.5.3"],
         ["", "", "Presentation of Knowledge and Ideas", "SL.K.4", "SL.1.4", "SL.2.4", "SL.3.4", "SL.4.1.4",
          "SL.5.4"],
         ["", "", "", "SL.K.5", "SL.1.5", "SL.2.5", "SL.3.5", "SL.4.1.5", "SL.5.5"],
-        ["", "", "", "SL.K.6", "SL.1.6", "SL.2.6 ", "SL.3.6", "SL.4.1.6", "SL.5.6"],
+        ["", "", "", "SL.K.6", "SL.1.6", "SL.2.6", "SL.3.6", "SL.4.1.6", "SL.5.6"],
         ["3", "Writing", "Text Types and Purposes", "W.K.1", "W.1.1", "W.2.1", "W.3.1", "W.4.1", "W.5.1"],
         ["", "", "", "", "", "", "W.3.1.A", "W.4.1.A", "W.5.1.A"],
         ["", "", "", "", "", "", "W.3.1.B", "W.4.1.B", "W.5.1.B"],
@@ -93,7 +94,7 @@ def draw_map_table(map_pro):
         ["", "", "", "", "", "", "", "W.4.9.A", "W.5.9.A"],
         ["", "", "", "", "", "", "", "W.4.9.B", "W.5.9.B"],
         ["", "", "Range of Writing", "W.K.10", "W.1.10", "W.2.10", "W.3.10", "W.4.10", "W.5.10"],
-        ["4", "Reading: Foundational Skills(K-5)", "Print Concepts", "RF.K.1 ", "RF.1.1", "", "", "", ""],
+        ["4", "Reading: Foundational Skills(K-5)", "Print Concepts", "RF.K.1", "RF.1.1", "", "", "", ""],
         ["", "", "", "RF.K.1.A", "RF.1.1.A", "", "", "", ""],
         ["", "", "", "RF.K.1.B", "", "", "", "", ""],
         ["", "", "", "RF.K.1.C", "", "", "", "", ""],
@@ -116,11 +117,11 @@ def draw_map_table(map_pro):
         ["", "", "", "", "RF.1.4.A", "RF.2.4.A", "RF.3.4.A", "RF.4.4.A", "RF.5.4.A"],
         ["", "", "", "", "RF.1.4.B", "RF.2.4.B", "RF.3.4.B", "RF.4.4.B", "RF.5.4.B"],
         ["", "", "", "", "RF.1.4.C", "RF.2.4.C", "RF.3.4.C", "RF.4.4.C", "RF.5.4.C"],
-        ["5", "Reading Literature", "Key Ideas and Details", "RL.K.1 ", "RL.1.1 ", "RL.2.1 ", "RL.3.1",
-         "RL.4.1 ", "RL.5.1 "],
-        ["", "", "", "RL.K.2 ", "RL.1.2 ", "RL.2.2 ", "RL.3.2 ", "RL.4.2 ", "RL.5.2 "],
-        ["", "", "", "RL.K.3 ", "RL.1.3", "RL.2.3", "RL.3.3", "RL.4.3", "RL.5.3"],
-        ["", "", "Craft and Structure", "RL.K.4", " RL.1.4", "RL.2.4", "RL.3.4", "RL.4.4", "RL.5.4"],
+        ["5", "Reading Literature", "Key Ideas and Details", "RL.K.1", "RL.1.1", "RL.2.1", "RL.3.1",
+         "RL.4.1", "RL.5.1"],
+        ["", "", "", "RL.K.2", "RL.1.2", "RL.2.2", "RL.3.2", "RL.4.2", "RL.5.2"],
+        ["", "", "", "RL.K.3", "RL.1.3", "RL.2.3", "RL.3.3", "RL.4.3", "RL.5.3"],
+        ["", "", "Craft and Structure", "RL.K.4", "RL.1.4", "RL.2.4", "RL.3.4", "RL.4.4", "RL.5.4"],
         ["", "", "", "RL.K.5", "RL.1.5", "RL.2.5", "RL.3.5", "RL.4.5", "RL.5.5"],
         ["", "", "", "RL.K.6", "RL.1.6", "RL.2.6", "RL.3.6", "RL.4.6", "RL.5.6"],
         ["", "", "Integration of Knowledge and Ideas", "RL.K.7", "RL.1.7", "RL.2.7", "RL.3.7", "RL.4.7", "RL.5.7"],
