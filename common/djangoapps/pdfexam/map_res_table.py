@@ -2,11 +2,10 @@ import logging
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import numpy
 from django.conf import settings
 
-from .map_table_tmplate import reading_2_5
-from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
+from .map_table_tmplate import reading_2_5, indexes_dict
+# from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -142,12 +141,11 @@ def draw_map_table(map_pro):
         ["", "", "Range of Reading and Level of Text Complexity", "RI.K.10", "RI.1.10", "RI.2.10", "RI.3.10",
          "RI.4.10", "RI.5.10"]]
 
-    matrix = numpy.array(cell_text)
     fig, ax = plt.subplots()
     ax.axis('tight')
     ax.axis('off')
     the_table = ax.table(cellText=cell_text, cellColours=None,
-                         colLabels=columns, loc='center', cellLoc='left')
+                         colLabels=columns, loc='center', cellLoc='center')
     fig.set_size_inches(14, 30)
     # plt.figure(figsize=(1800, 1000))
     the_table.auto_set_font_size(False)
@@ -157,27 +155,33 @@ def draw_map_table(map_pro):
 
     map_res = map_pro.map_ext_results.all()
 
-    for item_result in map_res:
-        item_name = item_result.check_item.item_name
-        reading_2_5.remove(item_name)
-        item_level = item_result.item_level
-        indexes = numpy.argwhere(matrix == item_name)
-        if indexes.size > 0:
-            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['red'])
-            elif item_level == "REINFORCE":
-                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-
     log.info("Length of green cell is {}.".format(len(reading_2_5)))
     for green_item_name in reading_2_5:
-        indexes = numpy.argwhere(matrix == green_item_name)
-        log.info("Item {}'s index is {}".format(green_item_name, indexes))
-        if indexes.size > 0:
-            the_table[(indexes[0][0] + 1, indexes[0][1])].set_facecolor(mcolors.CSS4_COLORS['green'])
+        try:
+            indexes = indexes_dict[green_item_name]
+        except KeyError as err:
+            log.info("Item {} is not exist in map test table, error is: {}".format(green_item_name, err))
+        else:
+            the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
+
+    for item_result in map_res:
+        item_name = item_result.check_item.item_name
+        item_level = item_result.item_level
+        try:
+            indexes = indexes_dict[item_name]
+        except KeyError as err:
+            log.info("Item {} is not exist in map test table, error is: {}".format(green_item_name, err))
+        else:
+            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
+                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
+            elif item_level == "REINFORCE":
+                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
+            else:
+                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
+            log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
+
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
-    plt.savefig(file_path, dpi=200)
+    plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
     map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,

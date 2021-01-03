@@ -1120,7 +1120,7 @@ def ExtractDataMap(pathfilename, phonenumber):
     log.info(CheckItem_GKtoG5)
 
     for GKtoG5CheckItem in CheckItem_GKtoG5:
-        check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem).first()
+        check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem.upper()).first()
         MapProfileExtResults.objects.update_or_create(map_student_profile=stu_map_pro, check_item=check_item,
                                                       defaults={
                                                           "item_level":

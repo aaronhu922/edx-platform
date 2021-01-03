@@ -16,6 +16,7 @@ from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, ExtractDataMap
+from pdfexam.star_reading_table import draw_star_reading_table
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -108,6 +109,8 @@ def handle_pdf_data(request):
         elif test_type == "map_test":
             stu_map_pro = ExtractDataMap(txtfilestored, phonenumber)
             draw_map_table(stu_map_pro)
+        elif test_type == "star_reading":
+            draw_star_reading_table()
         else:
             raise
     except Exception as err:
