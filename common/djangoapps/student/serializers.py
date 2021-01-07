@@ -44,7 +44,7 @@ class CourseOverviewExtendInfoSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = CourseOverviewExtendInfo
-        fields = ('course_outside', "course_link")
+        fields = ('course_outside', 'course_link', 'course_grade', 'course_price', 'course_recommend_level', 'course_highlight')
 
 
 class CourseOverviewSerializer(serializers.ModelSerializer):

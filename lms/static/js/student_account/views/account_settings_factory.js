@@ -180,8 +180,9 @@
                                 emailAttribute: 'email',
                                 passwordResetSupportUrl: passwordResetSupportUrl,
                                 linkTitle: gettext('Reset Your Password'),
-                                linkHref: fieldsData.password.url,
-                                helpMessage: gettext('Check your email account for instructions to reset your password.')  // eslint-disable-line max-len
+//                                linkHref: fieldsData.password.url,
+                                linkHref: '/front/pdf',
+                                helpMessage: gettext('跳转到新的密码重置页面，然后重置密码.')
                             })
                         },
                         {

@@ -16,7 +16,7 @@ from django.conf.urls import url
 from django.contrib.auth.views import PasswordResetCompleteView
 
 from .views import auto_auth, login, logout, password_reset, register
-from .views.password_reset import PasswordResetConfirmWrapper
+from .views.password_reset import PasswordResetConfirmWrapper, PasswordResetWithPhoneNumber
 
 urlpatterns = [
     # Registration
@@ -41,6 +41,12 @@ urlpatterns = [
 
     url(r'^api/user/v1/sendsms$', register.SendSmsCodeView.as_view(),
         name='send_sms_code'),
+
+    url(r'^api/front/sendsms$', register.SendSmsCodeView.as_view(),
+        name="send_sms_code_reset_pass"),
+
+    url(r'^api/front/passreset', password_reset.PasswordResetWithPhoneNumber.as_view(),
+        name="pass_reset_with_phone"),
 
     url(r'^login_ajax$', login.login_user, name="login_api"),
 

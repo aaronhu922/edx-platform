@@ -2,19 +2,29 @@
 <html lang="zh-hans">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>测试报告导入</title>
 </head>
 <body>
-    <form enctype="multipart/form-data" action="/api/pdf/handle/" method="post">
-        {% csrf_token %}
-        <label for="myfile">上传报告:</label>
-        <input type="file" id="myfile" name="myfile"/><br><br>
-        <label for="phone_number">电话号码:</label>
-        <input type="text" id="phone_number" name="phone_number"><br><br>
+<!--<p id="res_message"></p>-->
+<p><input type="button" onclick="location.href='/home';" value="返回"/></p>
+<form enctype="multipart/form-data" action="/api/manage/handle/" method="post">
+    {% csrf_token %}
+    <label for="test_type">选择测试报告类型:</label>
+    <select id="test_type" name="test_type">
+        <option value="star_early">Star Early Test</option>
+        <option value="map_test">Map Test</option>
+        <option value="star_reading">Star Reading Test</option>
+        <option value="other">Other</option>
+    </select><br><br>
+    <label for="myfile">上传报告:</label>
+    <input type="file" id="myfile" name="myfile"/><br><br>
+    <label for="phone_number">电话号码:</label>
+    <input type="text" id="phone_number" name="phone_number"><br><br>
+    <input type="submit" value="upload"/>
+</form>
 
-        <br/>
-        <input type="submit" value="upload"/>
-    </form>
-
+<!--<script>-->
+<!--  document.getElementById("res_message").innerHTML = ${res_message};-->
+<!--</script>-->
 </body>
 </html>

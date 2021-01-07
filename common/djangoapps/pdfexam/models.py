@@ -5,7 +5,6 @@ from django.core.validators import RegexValidator
 # Create your models here.
 
 class EarlyliteracySkillSetScores(models.Model):
-
     phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
     phone_number = models.CharField(validators=[phone_regex], blank=False, null=False, max_length=50)
     SkillSetScoresReportID = models.AutoField(primary_key=True)
@@ -123,3 +122,62 @@ class EarlyliteracySkillSetScores(models.Model):
 
     class Meta:
         unique_together = ('phone_number', 'TestDate')
+
+
+class MapStudentProfile(models.Model):
+    phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
+    phone_number = models.CharField(blank=False, null=False, max_length=50)
+    ExportDate = models.DateField()
+    ExportStaff = models.CharField(max_length=50)
+    FirstName = models.CharField(max_length=20)
+    FamilyName = models.CharField(max_length=20)
+    Grade = models.CharField(max_length=10)
+    MapID = models.CharField(max_length=64)
+    TestCategory = models.CharField(max_length=20)
+    Standard_Error = models.CharField(max_length=16)
+    Possible_range = models.CharField(max_length=16)
+    TestDate = models.DateField()
+    TestDuration = models.CharField(max_length=10)
+    Rapid_Guessing_Percent = models.CharField(max_length=10)
+    Est_Impact_of_Rapid_Guessing_Percent_on_RIT = models.CharField(max_length=10)
+    Growth = models.CharField(max_length=50)
+    Semester = models.CharField(max_length=30)
+    Score = models.CharField(max_length=10)
+    HIGHLIGHTS = models.CharField(max_length=2000)
+    Group_by = models.CharField(max_length=50)
+    Grades = models.CharField(max_length=50)
+    Concepts_to = models.CharField(max_length=50)
+    Informational_Text_Key_Ideas_and_Details_SCORE = models.CharField(max_length=10)
+    Informational_Text_Key_Ideas_and_Details_STANDARD_ERROR = models.CharField(max_length=16)
+    Vocabulary_Acquisition_and_Use_SCORE = models.CharField(max_length=10)
+    Vocabulary_Acquisition_and_Use_STANDARD_ERROR = models.CharField(max_length=16)
+    Informational_Text_Language_Craft_and_Structure_SCORE = models.CharField(max_length=10)
+    Informational_Text_Language_Craft_and_Structure_STANDARD_ERROR = models.CharField(max_length=16)
+    Literary_Text_Language_Craft_and_Structure_SCORE = models.CharField(max_length=10)
+    Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR = models.CharField(max_length=16)
+    Literary_Text_Key_Ideas_and_Details_SCORE = models.CharField(max_length=10)
+    Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR = models.CharField(max_length=16)
+    map_pdf_url = models.TextField(null=True)
+
+    class Meta:
+        unique_together = ('phone_number', 'TestDate')
+
+
+class MapTestCheckItem(models.Model):
+    l1_domain = models.CharField(max_length=64)
+    l2_sub_domain = models.CharField(max_length=64)
+    l3_grade = models.CharField(max_length=10)
+    item_name = models.CharField(max_length=10, unique=True)
+    item_desc = models.CharField(max_length=256)
+
+
+class MapProfileExtResults(models.Model):
+    map_student_profile = models.ForeignKey(MapStudentProfile, db_index=True, related_name="map_ext_results",
+                                            on_delete=models.CASCADE)
+    item_level = models.CharField(max_length=50)
+    check_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="checked_items",
+                                   on_delete=models.CASCADE)
+    recommend_description = models.TextField(null=True)
+
+    class Meta:
+        unique_together = ('map_student_profile', 'check_item')

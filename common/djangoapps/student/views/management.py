@@ -39,6 +39,8 @@ import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
+from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
+
 from common.djangoapps.student.serializers import StudentSerializer
 
 from lms.djangoapps.courseware.courses import get_courses, sort_by_announcement, sort_by_start_date
@@ -876,8 +878,9 @@ def text_me_the_app(request):
     return render_to_response('text-me-the-app.html', context)
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def course_enrollment_info(request, id=None, stu_id=None):
     """
     List all code snippets, or create a new snippet.
@@ -978,8 +981,9 @@ def course_enrollment_info(request, id=None, stu_id=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def customer_service_info(request, pk=None):
     """
     List all code snippets, or create a new snippet.
@@ -1041,8 +1045,9 @@ def customer_service_info(request, pk=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def students_management(request, pk=None):
     """
     "phone_number": "",
@@ -1118,7 +1123,7 @@ def students_management(request, pk=None):
                                  "success": False}, status=401)
 
     elif request.method == 'DELETE':
-        instance = User.objects.get(id=pk)
+        instance = User.objects.filter(id=pk)
         ret = instance.delete()
         log.warning(ret)
         return JsonResponse({"errorCode": "200",
@@ -1128,8 +1133,9 @@ def students_management(request, pk=None):
 
 
 
-@login_required
-@ensure_csrf_cookie
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def course_overview_info(request):
     """
     List all code snippets, or create a new snippet.
@@ -1153,22 +1159,247 @@ def course_overview_info(request):
         try:
             course_ext = CourseOverviewExtendInfo.objects.get(course_overview=course_overview_id)
         except CourseOverviewExtendInfo.DoesNotExist:
+            log.warning("Course ext info of course {} not exist, create a new record!".format(course_overview_id))
             course_overview = CourseOverview.get_from_id(course_overview_id)
             course_ext = CourseOverviewExtendInfo(
                 course_overview=course_overview,
                 course_outside=data['course_outside'],
-                course_link=data['course_link']
+                course_link=data['course_link'],
+                course_grade=data['course_grade'],
+                course_price=data['course_price'],
+                course_recommend_level=data['course_recommend_level'],
+                course_highlight=data['course_highlight']
             )
         else:
             course_ext.course_outside = data['course_outside']
             course_ext.course_link = data['course_link']
+            course_ext.course_grade = data['course_grade']
+            course_ext.course_price = data['course_price']
+            course_ext.course_recommend_level = data['course_recommend_level']
+            course_ext.course_highlight = data['course_highlight']
+        try:
+            course_ext.save()
+            return JsonResponse({
+                "course_overview": data['course_overview'],
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to update course to a direct access outside course!",
+                "success": True
+            }, status=201)
+        except Exception:
+            return JsonResponse({
+                "course_overview": data['course_overview'],
+                "errorCode": "401",
+                "executed": True,
+                "message": "Failed to update course!",
+                "success": False
+            }, status=200)
 
-        course_ext.save()
-        return JsonResponse({
-            "course_overview": data['course_overview'],
-            "errorCode": "201",
-            "executed": True,
-            "message": "Succeed to update course to a direct access outside course!",
-            "success": True
-        }, status=201)
-        # return JsonResponse(serializer.errors, status=400)
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def course_overview_ccss_items_info(request, cour_id=None):
+    if request.method == 'GET':
+        if cour_id:
+            try:
+                course_ext = CourseOverviewExtendInfo.objects.get(id=cour_id)
+                added_items_qs = course_ext.course_ccss_items.all().values('id')
+                added_items = []
+                for item in added_items_qs:
+                    added_items.append(item['id'])
+            except CourseOverviewExtendInfo.DoesNotExist:
+                return JsonResponse({
+                    "errorCode": "404",
+                    "executed": True,
+                    "message": "Course extend info does not exist {}!".format(cour_id),
+                    "success": False}, status=200)
+            return JsonResponse({
+                "added_items": added_items,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get all existed items for course {}!".format(cour_id),
+                "success": True
+            }, status=200)
+        else:
+            gk_items = list(MapTestCheckItem.objects.filter(l3_grade="GK").order_by('id').values('id', 'item_name'))
+            g1_items = list(MapTestCheckItem.objects.filter(l3_grade="G1").order_by('id').values('id', 'item_name'))
+            g2_items = list(MapTestCheckItem.objects.filter(l3_grade="G2").order_by('id').values('id', 'item_name'))
+            g3_items = list(MapTestCheckItem.objects.filter(l3_grade="G3").order_by('id').values('id', 'item_name'))
+            g4_items = list(MapTestCheckItem.objects.filter(l3_grade="G4").order_by('id').values('id', 'item_name'))
+            g5_items = list(MapTestCheckItem.objects.filter(l3_grade="G5").order_by('id').values('id', 'item_name'))
+            # course_ids = list(CourseOverview.objects.all().values('id', 'display_name'))
+            course_ids = list(CourseOverviewExtendInfo.objects.all().values('id', 'course_overview__display_name'))
+            # for course_item in course_ids:
+            #     course_item['id'] = str(course_item['id'])
+            return JsonResponse({
+                "gk_items": gk_items,
+                "g1_items": g1_items,
+                "g2_items": g2_items,
+                "g3_items": g3_items,
+                "g4_items": g4_items,
+                "g5_items": g5_items,
+                "course_ids": course_ids,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get all the map test items!",
+                "success": True
+            }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        course_overview_id = data['course_overview']
+        check_items = data['check_items']
+        log.warning(data)
+        try:
+            course_ext = CourseOverviewExtendInfo.objects.get(id=course_overview_id)
+        except CourseOverviewExtendInfo.DoesNotExist:
+            return JsonResponse({
+                "errorCode": "404",
+                "executed": True,
+                "message": "Course extend info does not exist {}!".format(course_overview_id),
+                "success": False}, status=200)
+        else:
+            course_ext.course_ccss_items.clear()
+            course_ext.course_ccss_items.add(*check_items)
+            return JsonResponse({
+                "errorCode": "201",
+                "executed": True,
+                "message": "Succeed to add ccss test items for course {}!".format(course_overview_id),
+                "success": True
+            }, status=201)
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def my_map_test_info(request, phone):
+    if request.method == 'GET':
+        map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+        if len(map_pro) <= 0:
+            log.error("No map test results for user {}".format(phone))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "success": False}, status=200)
+        else:
+            rit_score = map_pro[0].Score
+            test_duration = map_pro[0].TestDuration
+            test_date = map_pro[0].TestDate
+            map_pdf_url = map_pro[0].map_pdf_url
+            map_score_trend_date = []
+            map_score_trend_value = []
+            for result in reversed(map_pro):
+                map_score_trend_date.append(result.TestDate)
+                map_score_trend_value.append(result.Score)
+
+            sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
+                                 map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                 map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
+                                 map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
+                                 map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
+            sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
+                                "Vocabulary Acquisition and Use SCORE",
+                                "Informational Text Language Craft and Structure SCORE",
+                                "Literary Text Language Craft and Structure SCORE",
+                                "Literary Text Key Ideas and Details SCORE"]
+
+            return JsonResponse({
+                "test_date": test_date,
+                "test_duration": test_duration,
+                "rit_score": rit_score,
+                "map_score_trend_date": map_score_trend_date,
+                "map_score_trend_value": map_score_trend_value,
+                "sub_domains_score": sub_domains_score,
+                "sub_domains_name": sub_domains_name,
+                "map_pdf_url": map_pdf_url,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get latest map result of user {}!".format(phone),
+                "success": True
+            }, status=200)
+
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def my_i_picture_info(request, phone):
+    if request.method == 'GET':
+        map_pro = MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate').first()
+        if not map_pro:
+            log.error("No map test results for user {}".format(phone))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "success": False}, status=200)
+        else:
+            ext_list = MapProfileExtResults.objects.filter(map_student_profile=map_pro,
+                                                           item_level__contains='DEVELOP').values(
+                "check_item__item_name", "item_level", "check_item__item_desc")
+            language_standards = []
+            reading_foundational_skills = []
+            reading_standards_informational_text = []
+            reading_literature = []
+            speaking_listening = []
+            writing = []
+
+            for item in ext_list:
+                if item['check_item__item_name'].startswith('L'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    language_standards.append(check_item_and_course_info)
+                if item['check_item__item_name'].startswith('RF'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_foundational_skills.append(check_item_and_course_info)
+                if item['check_item__item_name'].startswith('RI'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_standards_informational_text.append(check_item_and_course_info)
+                if item['check_item__item_name'].startswith('RL'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    reading_literature.append(check_item_and_course_info)
+                if item['check_item__item_name'].startswith('SL'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    speaking_listening.append(check_item_and_course_info)
+                if item['check_item__item_name'].startswith('W'):
+                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
+                    writing.append(check_item_and_course_info)
+
+            count_of_develop_items = [len(language_standards), len(reading_foundational_skills),
+                                      len(reading_standards_informational_text), len(reading_literature),
+                                      len(speaking_listening), len(writing)]
+            return JsonResponse({
+                "count_of_develop_items": count_of_develop_items,
+                "language_standards": language_standards,
+                "reading_foundational_skills": reading_foundational_skills,
+                "reading_standards_informational_text": reading_standards_informational_text,
+                "reading_literature": reading_literature,
+                "speaking_listening": speaking_listening,
+                "writing": writing,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get latest map result of user {}!".format(phone),
+                "success": True
+            }, status=200)
+
+
+def get_course_and_ccss_items_map(item_name):
+    check_item = MapTestCheckItem.objects.get(item_name=item_name)
+    course_list = check_item.courseoverviewextendinfo_set.all()
+    courses_info = []
+    for course in course_list:
+        courses_info.append({
+            "course_grade": course.course_grade,
+            "course_price": course.course_price,
+            "course_recommend_level": course.course_recommend_level,
+            "course_highlight": course.course_highlight,
+            "course_image_url": course.course_overview.course_image_url,
+            "course_display_name": course.course_overview.display_name,
+        })
+    check_item_and_course_info = {
+        "item_name": item_name,
+        "item_desc": check_item.item_desc,
+        "courses_info": courses_info,
+        "courses_info_count": len(courses_info)
+    }
+
+    return check_item_and_course_info

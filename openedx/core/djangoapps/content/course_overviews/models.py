@@ -24,6 +24,7 @@ from six import text_type  # pylint: disable=ungrouped-imports
 from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
 from simple_history.models import HistoricalRecords
 
+from pdfexam.models import MapTestCheckItem
 from lms.djangoapps.discussion import django_comment_client
 from openedx.core.djangoapps.catalog.models import CatalogIntegration
 from openedx.core.djangoapps.lang_pref.api import get_closest_released_language
@@ -887,11 +888,16 @@ class CourseOverviewExtendInfo(models.Model):
     """
     course_overview = models.OneToOneField(CourseOverview, related_name="course_ext_info", on_delete=models.CASCADE)
     course_outside = models.BooleanField(default=False)
-    course_link = models.TextField(max_length=1024, blank=True, null=True)
+    course_link = models.TextField(max_length=512, blank=True, null=True)
+    course_grade = models.CharField(max_length=10, null=True)
+    course_price = models.CharField(max_length=10, null=True)
+    course_recommend_level = models.CharField(max_length=5, null=True)
+    course_highlight = models.CharField(max_length=256, null=True)
+    course_ccss_items = models.ManyToManyField(MapTestCheckItem)
 
     def __str__(self):
-        return "CourseOverviewExtendInfo(course_outside={}, course_link={})".format(
-            self.course_outside, self.course_link
+        return "CourseOverviewExtendInfo(course_name={}, course_link={})".format(
+            self.course_overview.display_name, self.course_link
         )
 
 

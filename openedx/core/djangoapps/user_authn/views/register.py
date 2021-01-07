@@ -796,9 +796,15 @@ class SendSmsCodeView(APIView):
 
         obj = Aliyun()
         res = obj.send_sms(phone_number, sign, template, params)
-
         jsonStr = json.loads(str(res, encoding='utf-8'))
 
         if jsonStr['Code'] == 'OK':
-            return Response({"status": "success", "detail": "短信发送成功！"})
-        return Response({"status": "failed", "detail": jsonStr['Message']})
+            AUDIT_LOG.info("SMS code sent for phone %s.", phone_number)
+            return JsonResponse({"errorCode": "200",
+                                 "executed": True,
+                                 "message": "短信发送成功!",
+                                 "success": True}, status=200)
+        return JsonResponse({"errorCode": "401",
+                             "executed": True,
+                             "message": jsonStr['Message'],
+                             "success": False}, status=400)

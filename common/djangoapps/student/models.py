@@ -563,7 +563,7 @@ class UserProfile(models.Model):
     bio = models.CharField(blank=True, null=True, max_length=3000, db_index=False)
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
     phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
-    phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, max_length=50)
+    phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, unique=True, max_length=50)
     web_accelerator_name = models.CharField(blank=True, max_length=255, null=True)
     web_accelerator_link = models.CharField(blank=True, max_length=255, null=True)
 
@@ -2401,6 +2401,12 @@ def get_user_by_username_or_email(username_or_email):
 def get_user(email):
     user = User.objects.get(email=email)
     u_prof = UserProfile.objects.get(user=user)
+    return user, u_prof
+
+
+def get_user_by_phone(phone_number):
+    u_prof = UserProfile.objects.get(phone_number=phone_number)
+    user = u_prof.user
     return user, u_prof
 
 
