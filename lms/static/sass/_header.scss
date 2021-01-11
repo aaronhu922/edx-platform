@@ -3,6 +3,11 @@
   navigation bar that can exist on any of the v1, v2 or bootstrap
   pages.
 */
+
+a.register-btn{
+  display: none !important;
+}
+
 .global-header {
   box-sizing: border-box;
   width: 100%;
@@ -75,10 +80,6 @@
     .edx-cookie-banner {
       min-width: 0;
     }
-  }
-
-  .global-header a.register-btn{
-    display: none !important;
   }
   /*
     Main navigation buttons for Courses, programs, profile and explore buttons.
