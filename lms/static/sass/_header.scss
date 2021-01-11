@@ -77,8 +77,8 @@
     }
   }
 
-  .global-header .nav-links .secondary a.register-btn{
-    display: none;
+  .global-header a.register-btn{
+    display: none !important;
   }
   /*
     Main navigation buttons for Courses, programs, profile and explore buttons.
