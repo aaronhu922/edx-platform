@@ -39,7 +39,7 @@ from openedx.core.djangoapps.user_api.accounts.toggles import should_redirect_to
   % endif
   % if allows_login:
     % if can_discover_courses:
-      <div class="mobile-nav-item hidden-mobile nav-item">
+      <div class="mobile-nav-item hidden-mobile nav-item" style="display: none;">
         <a href="/courses">${_('Explore courses')}</a>
       </div>
     %endif
