@@ -86,8 +86,8 @@ from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
-
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, \
+    CourseOverviewExtendInfoSerializer
 
 log = logging.getLogger("edx.student")
 
@@ -980,8 +980,6 @@ def course_enrollment_info(request, id=None, stu_id=None):
                                  "success": True}, status=200)
 
 
-
-
 # @login_required
 # @ensure_csrf_cookie
 @csrf_exempt
@@ -1045,7 +1043,6 @@ def customer_service_info(request, pk=None):
                              "success": True}, status=200)
 
 
-
 # @login_required
 # @ensure_csrf_cookie
 @csrf_exempt
@@ -1059,32 +1056,37 @@ def students_search(request, key=None):
     "web_accelerator_link": "http://47.114.176.127/test.pac",
     """
     if request.method == 'GET':
-        User.objects.filter()
-        list_user = User.objects.filter(Q(username__contains=key) | Q(email__contains=key))
-        res_list = []
-        for user in list_user:
-            log.info("user object is {}".format(user))
+        try:
+            list_user = User.objects.filter(Q(username__icontains=key) | Q(email__icontains=key))
+            res_list = []
+            for user in list_user:
+                log.info("user object is {}".format(user))
             num = CourseEnrollment.objects.filter(user=user, is_active=1).count()
-            if user.profile:
-                user_obj = {
-                    "user": {
-                        "id": user.id,
-                        "password": user.password,
-                        "username": user.username
-                    },
-                    "phone_number": user.profile.phone_number,
-                    "web_accelerator_name": user.profile.phone_number,
-                    "web_accelerator_link": user.profile.phone_number,
-                    "courses_count": num
-                }
-                res_list.append(user_obj)
-        return JsonResponse({
-            "data_list": res_list,
-            "errorCode": "200",
-            "executed": True,
-            "message": "Succeed to get students by searching.",
-            "success": True
-        })
+            user_obj = {
+                "user": {
+                    "id": user.id,
+                    "password": user.password,
+                    "username": user.username
+                },
+                "phone_number": user.profile.phone_number,
+                "web_accelerator_name": user.profile.phone_number,
+                "web_accelerator_link": user.profile.phone_number,
+                "courses_count": num
+            }
+            res_list.append(user_obj)
+        except Exception as err:
+            log.error("Failed to search student with error {}".format(err))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": err,
+                                 "success": False}, status=200)
+    return JsonResponse({
+        "data_list": res_list,
+        "errorCode": "200",
+        "executed": True,
+        "message": "Succeed to get students by searching.",
+        "success": True
+    })
 
 
 # @login_required
@@ -1174,7 +1176,6 @@ def students_management(request, pk=None):
                              "executed": True,
                              "message": "Deleted a student account!",
                              "success": True}, status=200)
-
 
 
 # @login_required
@@ -1362,7 +1363,6 @@ def my_map_test_info(request, phone):
                 "message": "Succeed to get latest map result of user {}!".format(phone),
                 "success": True
             }, status=200)
-
 
 
 # @login_required
