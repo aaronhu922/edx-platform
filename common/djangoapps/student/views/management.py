@@ -1080,13 +1080,13 @@ def students_search(request, key=None):
                                  "executed": True,
                                  "message": str(err),
                                  "success": False}, status=200)
-    return JsonResponse({
-        "data_list": res_list,
-        "errorCode": "200",
-        "executed": True,
-        "message": "Succeed to get students by searching.",
-        "success": True
-    })
+        return JsonResponse({
+            "data_list": res_list,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get students by searching.",
+            "success": True
+        })
 
 
 # @login_required
