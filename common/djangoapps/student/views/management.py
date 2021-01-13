@@ -1075,10 +1075,10 @@ def students_search(request, key=None):
                 }
                 res_list.append(user_obj)
         except Exception as err:
-            log.error("Failed to search student with error {}".format(err))
+            log.error(err)
             return JsonResponse({"errorCode": "400",
                                  "executed": True,
-                                 "message": err,
+                                 "message": str(err),
                                  "success": False}, status=200)
     return JsonResponse({
         "data_list": res_list,
