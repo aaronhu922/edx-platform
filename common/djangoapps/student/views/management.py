@@ -1056,24 +1056,24 @@ def students_search(request, key=None):
     "web_accelerator_link": "http://47.114.176.127/test.pac",
     """
     if request.method == 'GET':
+        list_user = User.objects.filter(Q(username__icontains=key) | Q(email__icontains=key))
+        res_list = []
         try:
-            list_user = User.objects.filter(Q(username__icontains=key) | Q(email__icontains=key))
-            res_list = []
             for user in list_user:
                 log.info("user object is {}".format(user))
-            num = CourseEnrollment.objects.filter(user=user, is_active=1).count()
-            user_obj = {
-                "user": {
-                    "id": user.id,
-                    "password": user.password,
-                    "username": user.username
-                },
-                "phone_number": user.profile.phone_number,
-                "web_accelerator_name": user.profile.phone_number,
-                "web_accelerator_link": user.profile.phone_number,
-                "courses_count": num
-            }
-            res_list.append(user_obj)
+                num = CourseEnrollment.objects.filter(user=user, is_active=1).count()
+                user_obj = {
+                    "user": {
+                        "id": user.id,
+                        "password": user.password,
+                        "username": user.username
+                    },
+                    "phone_number": user.profile.phone_number,
+                    "web_accelerator_name": user.profile.phone_number,
+                    "web_accelerator_link": user.profile.phone_number,
+                    "courses_count": num
+                }
+                res_list.append(user_obj)
         except Exception as err:
             log.error("Failed to search student with error {}".format(err))
             return JsonResponse({"errorCode": "400",
