@@ -43,5 +43,7 @@ urlpatterns = [
         name='my_i_picture_info'),
     url(r'^api/front/map_stats/(?P<phone>[0-9]+)$', views.my_map_test_info,
         name='my_map_test_info'),
+    url(r'^api/manage/stu_search/(?P<key>.+)$', views.students_search, name='students_management_search'),
+
 
 ]
