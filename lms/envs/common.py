@@ -3955,7 +3955,7 @@ LOGISTRATION_RATELIMIT_RATE = '100/5m'
 
 ##### PASSWORD RESET RATE LIMIT SETTINGS #####
 PASSWORD_RESET_IP_RATE = '1/m'
-PASSWORD_RESET_EMAIL_RATE = '2/h'
+PASSWORD_RESET_EMAIL_RATE = '5/h'
 
 ############### Settings for Retirement #####################
 RETIRED_USERNAME_PREFIX = 'retired__user_'
@@ -4122,10 +4122,11 @@ MAX_BLOCKS_PER_CONTENT_LIBRARY = 1000
 # https://github.com/SmileyChris/django-countries#show-certain-countries-first
 COUNTRIES_FIRST = []
 
+
 SMS = {
     'default': 'aliyun',
-    'appid': 'LTAI4G8yDGBb45iffkDvpAQL',
-    'secret': '',
+    'appid': 'LTAI4Fypp2WvapUCi92dckds',
+    'secret': os.environ.get("ALI_SMS_SECRET", ""),
     'signname': 'ILMEnglish',
     'template': 'SMS_205090469',
 }
