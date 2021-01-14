@@ -15,8 +15,8 @@ from .map_res_table import draw_map_table
 from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from .parse_helper import ExtractStarData, ExtractDataMap
-from pdfexam.star_reading_table import draw_star_reading_table
+from .parse_helper import ExtractStarData, extract_map_data
+from .star_reading_table import draw_star_reading_table
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -87,42 +87,32 @@ def handle_pdf_data(request):
                 # pdf.pages[i] 是读取PDF文档第i+1页
                 page = pdf.pages[i]
                 # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
-                page_content = '\n'.join(page.extract_text().split('\n')[:-1])
+                page_content = '\n'.join(page.extract_text().split('\n')[1:-1])
                 content = content + page_content
             # print(content)
-
-        pdffilenameportion = os.path.splitext(myFile.name)
-
-        txtfilename = pdffilenameportion[0] + '.txt'
-
-        txtfilestored = os.path.join(settings.MEDIA_ROOT, txtfilename)
-
-        with open(txtfilestored, "w", encoding='utf-8') as f:
-            f.write(content)
 
         ################################################################
         #  trans end
         ################################################################
-    try:
-        if test_type == "star_early":
-            ExtractStarData(txtfilestored, phonenumber)
-        elif test_type == "map_test":
-            stu_map_pro = ExtractDataMap(txtfilestored, phonenumber)
-            draw_map_table(stu_map_pro)
-        elif test_type == "star_reading":
-            draw_star_reading_table()
+        try:
+            if test_type == "star_early":
+                ExtractStarData(content, phonenumber)
+            elif test_type == "map_test":
+                stu_map_pro = extract_map_data(content, phonenumber)
+                draw_map_table(stu_map_pro)
+            elif test_type == "star_reading":
+                draw_star_reading_table()
+            else:
+                raise
+        except Exception as err:
+            log.error(err)
+            log.error("Upload pdf {} failed!".format(myFile.name))
+            temp = loader.get_template('pdf2MySQL/show_failed.html')
         else:
-            raise
-    except Exception as err:
-        log.error(err)
-        log.error("Upload pdf {} failed!".format(myFile.name))
-        temp = loader.get_template('pdf2MySQL/show_failed.html')
-    else:
-        temp = loader.get_template('pdf2MySQL/show_success.html')
+            temp = loader.get_template('pdf2MySQL/show_success.html')
 
-    os.remove(pdffilestored)
-    os.remove(txtfilestored)
-    return HttpResponse(temp.render())
+        os.remove(pdffilestored)
+        return HttpResponse(temp.render())
 
 
 def show(self, request):

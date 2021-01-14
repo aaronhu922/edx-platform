@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.conf import settings
 
-from .map_table_tmplate import reading_2_5, indexes_dict
+from .map_table_tmplate import reading_2_5, indexes_dict, reading_k_2
+
 # from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
 
 log = logging.getLogger("edx.pdfexam")
@@ -155,8 +156,17 @@ def draw_map_table(map_pro):
 
     map_res = map_pro.map_ext_results.all()
 
-    log.info("Length of green cell is {}.".format(len(reading_2_5)))
-    for green_item_name in reading_2_5:
+    log.info("growth type is {}.".format(map_pro.Growth))
+    if map_pro.Growth.startswith('Reading 2-5'):
+        green_background = reading_2_5
+        log.info("Green cell is {}, has {} cells.".format('reading 2-5', len(green_background)))
+    elif map_pro.Growth.startswith('Reading K-2'):
+        green_background = reading_k_2
+        log.info("Green cell is {}, has {} cells.".format('reading 2-5', len(green_background)))
+    else:
+        green_background = reading_2_5
+
+    for green_item_name in green_background:
         try:
             indexes = indexes_dict[green_item_name]
         except KeyError as err:
@@ -178,7 +188,7 @@ def draw_map_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
             else:
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
+            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=300)
