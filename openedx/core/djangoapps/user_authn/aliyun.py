@@ -21,6 +21,7 @@ class Aliyun:
         template: 短信模板
         data: 短信内容
         """
+
         request = CommonRequest()
         request.set_accept_format('json')
         request.set_domain('dysmsapi.aliyuncs.com')
@@ -34,7 +35,6 @@ class Aliyun:
         request.add_query_param('SignName', sign)
         request.add_query_param('TemplateCode', template)
         request.add_query_param('TemplateParam', data)
-        logging.warning("Sign name: {sign}, template: {template}".format(sign=sign, template=template))
+        logging.info("Sign name: {sign}, template: {template}".format(sign=sign, template=template))
         response = self.client.do_action_with_exception(request)
-        logging.warning(response)
         return response

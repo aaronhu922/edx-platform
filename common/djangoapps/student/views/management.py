@@ -15,6 +15,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.sites.models import Site
 from django.core.validators import ValidationError, validate_email
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
@@ -85,8 +86,8 @@ from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
-
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, \
+    CourseOverviewExtendInfoSerializer
 
 log = logging.getLogger("edx.student")
 
@@ -979,8 +980,6 @@ def course_enrollment_info(request, id=None, stu_id=None):
                                  "success": True}, status=200)
 
 
-
-
 # @login_required
 # @ensure_csrf_cookie
 @csrf_exempt
@@ -1044,6 +1043,51 @@ def customer_service_info(request, pk=None):
                              "success": True}, status=200)
 
 
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def students_search(request, key=None):
+    """
+    "phone_number": "",
+    "username": "",
+    "password": "test",
+    "name": "",
+    "web_accelerator_name": "洛杉矶",
+    "web_accelerator_link": "http://47.114.176.127/test.pac",
+    """
+    if request.method == 'GET':
+        list_user = User.objects.filter(Q(username__icontains=key) | Q(email__icontains=key))
+        res_list = []
+        try:
+            for user in list_user:
+                log.info("user object is {}".format(user))
+                num = CourseEnrollment.objects.filter(user=user, is_active=1).count()
+                user_obj = {
+                    "user": {
+                        "id": user.id,
+                        "password": user.password,
+                        "username": user.username
+                    },
+                    "phone_number": user.profile.phone_number,
+                    "web_accelerator_name": user.profile.phone_number,
+                    "web_accelerator_link": user.profile.phone_number,
+                    "courses_count": num
+                }
+                res_list.append(user_obj)
+        except Exception as err:
+            log.error(err)
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": str(err),
+                                 "success": False}, status=200)
+        return JsonResponse({
+            "data_list": res_list,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get students by searching.",
+            "success": True
+        })
+
 
 # @login_required
 # @ensure_csrf_cookie
@@ -1081,8 +1125,10 @@ def students_management(request, pk=None):
                                      "success": False}, status=200)
             else:
                 from common.djangoapps.util.password_policy_validators import normalize_password
-
-                user.set_password(normalize_password(data["password"]))
+                log.info("legacy password {}, new password {}".format(user.password, data['password']))
+                if user.password != data['password']:
+                    user.set_password(normalize_password(data["password"]))
+                    log.info("new password {}".format(data['password']))
                 user.username = data["username"]
                 # user.update(username=data["username"])
                 user.save()
@@ -1130,7 +1176,6 @@ def students_management(request, pk=None):
                              "executed": True,
                              "message": "Deleted a student account!",
                              "success": True}, status=200)
-
 
 
 # @login_required
@@ -1318,7 +1363,6 @@ def my_map_test_info(request, phone):
                 "message": "Succeed to get latest map result of user {}!".format(phone),
                 "success": True
             }, status=200)
-
 
 
 # @login_required
