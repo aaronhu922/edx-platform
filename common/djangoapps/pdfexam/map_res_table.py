@@ -162,7 +162,7 @@ def draw_map_table(map_pro):
         log.info("Green cell is {}, has {} cells.".format('reading 2-5', len(green_background)))
     elif map_pro.Growth.startswith('Reading K-2'):
         green_background = reading_k_2
-        log.info("Green cell is {}, has {} cells.".format('reading 2-5', len(green_background)))
+        log.info("Green cell is {}, has {} cells.".format('reading_k_2', len(green_background)))
     else:
         green_background = reading_2_5
 
