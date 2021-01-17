@@ -163,6 +163,9 @@ def draw_map_table(map_pro):
     elif map_pro.Growth.startswith('Reading K-2'):
         green_background = reading_k_2
         log.info("Green cell is {}, has {} cells.".format('reading_k_2', len(green_background)))
+        for i in range(1, len(cell_text) + 1):
+            the_table[(i, 7)].set_facecolor(mcolors.CSS4_COLORS['lightgrey'])
+            the_table[(i, 8)].set_facecolor(mcolors.CSS4_COLORS['lightgrey'])
     else:
         green_background = reading_2_5
 

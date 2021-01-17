@@ -158,6 +158,13 @@ class MapStudentProfile(models.Model):
     Literary_Text_Key_Ideas_and_Details_SCORE = models.CharField(max_length=10)
     Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR = models.CharField(max_length=16)
     map_pdf_url = models.TextField(null=True)
+    vocabulary_use_and_function = models.CharField(max_length=10, default="")
+    foundational_skills = models.CharField(max_length=10, default="")
+    language_and_writing = models.CharField(max_length=10, default="")
+    literature_and_informational_text = models.CharField(max_length=10, default="")
+    writing_write_revise_texts_for_purpose_and_audience = models.CharField(max_length=10, default="")
+    language_understarnd_edit_for_grammar_usage = models.CharField(max_length=10, default="")
+    language_understarnd_edit_for_mechanics = models.CharField(max_length=10, default="")
 
     class Meta:
         unique_together = ('phone_number', 'TestDate')

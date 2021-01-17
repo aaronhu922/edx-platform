@@ -644,7 +644,12 @@ def extract_map_data(data, phonenumber):
                                         'Literary Text: Language, Craft, and Structure SCORE', \
                                         'Literary Text: Language, Craft, and Structure STANDARD ERROR', \
                                         'Literary Text: Key Ideas and Details SCORE', \
-                                        'Literary Text: Key Ideas and Details STANDARD ERROR']
+                                        'Literary Text: Key Ideas and Details STANDARD ERROR',
+                                        'Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                        'Literature and Informational Text',
+                                        'Writing: Write Revise Texts for Purpose and Audience',
+                                        'Language: Understarnd, Edit for Grammar, Usage',
+                                        'Language: Understarnd, Edit for Mechanics']
 
     mapnwea_student_profile_summary_info_dict = {}
 
@@ -740,6 +745,20 @@ def extract_map_data(data, phonenumber):
             temp_source0 = "Literary Text: Key Ideas and Details"
             temp_source1 = "Draw Conclusions, Infer, Predict"
             extract_regex = temp_source0 + "(.*?)" + temp_source1
+        elif source == "Vocabulary Use and Functions":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Foundational Skills":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language and Writing":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Literature and Informational Text":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Writing: Write Revise Texts for Purpose and Audience":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language: Understarnd, Edit for Grammar, Usage":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language: Understarnd, Edit for Mechanics":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         else:
             pass
         logging.info("-----regex of {}-----{}---".format(source, extract_regex))
@@ -805,7 +824,7 @@ def extract_map_data(data, phonenumber):
             elif ("REINFORCE" in str(desc)) and ("DEVELOP" not in str(desc)):
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE"
             elif ("REINFORCE" not in str(desc)) and (
-                    "DEVELOP" in str(desc)):
+                "DEVELOP" in str(desc)):
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "DEVELOP"
             else:
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
@@ -888,6 +907,27 @@ def extract_map_data(data, phonenumber):
                     KeyItem]
         elif KeyItem == 'Literary Text: Key Ideas and Details STANDARD ERROR':
             extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Vocabulary Use and Functions':
+            extract_data_dict_ready2_my_sql_model['vocabulary_use_and_function'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Foundational Skills':
+            extract_data_dict_ready2_my_sql_model['foundational_skills'] = mapnwea_student_profile_summary_info_dict[
+                KeyItem]
+        elif KeyItem == 'Language and Writing':
+            extract_data_dict_ready2_my_sql_model['language_and_writing'] = mapnwea_student_profile_summary_info_dict[
+                KeyItem]
+        elif KeyItem == 'Literature and Informational Text':
+            extract_data_dict_ready2_my_sql_model['literature_and_informational_text'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Writing: Write Revise Texts for Purpose and Audience':
+            extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Language: Understarnd, Edit for Grammar, Usage':
+            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_grammar_usage'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Language: Understarnd, Edit for Mechanics':
+            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_mechanics'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
             pass

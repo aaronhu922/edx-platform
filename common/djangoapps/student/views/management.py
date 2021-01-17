@@ -1338,16 +1338,31 @@ def my_map_test_info(request, phone):
                 map_score_trend_date.append(result.TestDate)
                 map_score_trend_value.append(result.Score)
 
-            sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
-                                 map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
-                                 map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
-                                 map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
-                                 map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
-            sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
-                                "Vocabulary Acquisition and Use SCORE",
-                                "Informational Text Language Craft and Structure SCORE",
-                                "Literary Text Language Craft and Structure SCORE",
-                                "Literary Text Key Ideas and Details SCORE"]
+            if map_pro[0].Growth.startswith('Reading 2-5'):
+                sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
+                                     map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                     map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
+                sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
+                                    "Vocabulary Acquisition and Use SCORE",
+                                    "Informational Text Language Craft and Structure SCORE",
+                                    "Literary Text Language Craft and Structure SCORE",
+                                    "Literary Text Key Ideas and Details SCORE"]
+            elif map_pro[0].Growth.startswith('Reading K-2'):
+                sub_domains_score = [map_pro[0].vocabulary_use_and_function,
+                                     map_pro[0].foundational_skills,
+                                     map_pro[0].language_and_writing,
+                                     map_pro[0].literature_and_informational_text]
+                sub_domains_name = ['Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                    'Literature and Informational Text']
+            else:
+                sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
+                                     map_pro[0].language_understarnd_edit_for_grammar_usage,
+                                     map_pro[0].language_understarnd_edit_for_mechanics]
+                sub_domains_name = ['Writing: Write Revise Texts for Purpose and Audience',
+                                    'Language: Understarnd, Edit for Grammar, Usage',
+                                    'Language: Understarnd, Edit for Mechanics']
 
             return JsonResponse({
                 "test_date": test_date,
