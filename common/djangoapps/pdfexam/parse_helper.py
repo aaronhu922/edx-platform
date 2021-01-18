@@ -818,7 +818,7 @@ def extract_map_data(data, phonenumber):
         check_item_desc_reg = item + ':(.*?)CCSS.ELA-Literacy'
         desc_text = re.findall(check_item_desc_reg, data)
         for desc in desc_text:
-            logging.info("text ---{}".format(desc))
+            # logging.info("text ---{}".format(desc))
             if ("REINFORCE" in str(desc)) and ("DEVELOP" in str(desc)):
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE_DEVELOP"
             elif ("REINFORCE" in str(desc)) and ("DEVELOP" not in str(desc)):
