@@ -2,21 +2,21 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.conf import settings
 
-from .map_table_tmplate import cell_text, columns, indexes_dict
+from .map_table_tmplate import all_cells_no_text, columns, all_map_indexes_dict
 
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
 
 def draw_star_reading_table():
-    table_len = len(cell_text)
+    table_len = len(all_cells_no_text)
 
     fig, ax = plt.subplots()
     ax.axis('tight')
     ax.axis('off')
-    the_table = ax.table(cellText=cell_text, cellColours=None,
+    the_table = ax.table(cellText=all_cells_no_text, cellColours=None,
                          colLabels=columns, loc='center', cellLoc='center')
 
-    for index in indexes_dict.values():
+    for index in all_map_indexes_dict.values():
         the_table[(index[0], index[1])].set_facecolor(mcolors.CSS4_COLORS['lightgrey'])
         the_table[(index[0], index[1] + 7)].set_facecolor(mcolors.CSS4_COLORS['lightgrey'])
 
