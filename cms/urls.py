@@ -9,7 +9,7 @@ from django.contrib.admin import autodiscover as django_autodiscover
 from django.utils.translation import ugettext_lazy as _
 from edx_api_doc_tools import make_docs_urls
 from ratelimitbackend import admin
-
+from django.views.static import serve
 import contentstore.views
 import openedx.core.djangoapps.common_views.xblock
 import openedx.core.djangoapps.debug.views
@@ -261,6 +261,10 @@ if settings.DEBUG:
         urlpatterns += dev_urlpatterns
     except ImportError:
         pass
+
+    urlpatterns += [
+        url(r'^media/(?P<path>.*)$', serve, {"document_root": "/edx/var/edxapp/media/"}),
+    ]
 
     urlpatterns += static(
         settings.VIDEO_IMAGE_SETTINGS['STORAGE_KWARGS']['base_url'],
