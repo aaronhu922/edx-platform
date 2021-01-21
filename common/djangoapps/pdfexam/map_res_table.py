@@ -17,6 +17,7 @@ def draw_map_table(map_pro):
     draw_reading_2_5_map_table(map_pro)
     draw_reading_2_5_in_all_table(map_pro)
     draw_reading_2_5_no_txt_all_table(map_pro)
+    map_pro.save()
 
 
 def draw_reading_2_5_map_table(map_pro):
@@ -57,7 +58,7 @@ def draw_reading_2_5_map_table(map_pro):
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
-    map_pro.save()
+
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
     plt.clf()
@@ -101,10 +102,9 @@ def draw_reading_2_5_in_all_table(map_pro):
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
     plt.savefig(file_path, dpi=300)
-    # map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
-    # map_pro.save()
+    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + phone_number + '_all.pdf'
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             map_pro.map_pdf_url))
+                                                                                             map_pro.map_pdf_url_all_items))
     plt.clf()
 
 
@@ -144,10 +144,10 @@ def draw_reading_2_5_no_txt_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
             # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
-    file_path = settings.MEDIA_ROOT + phone_number + '_all_no_items.pdf'
+    file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
     plt.savefig(file_path, dpi=300)
-    # map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
+    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + phone_number + '_all_no_txt.pdf'
     # map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             map_pro.map_pdf_url))
+                                                                                             map_pro.map_pdf_url_all_items_no_txt))
     plt.clf()

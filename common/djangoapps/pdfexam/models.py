@@ -165,6 +165,8 @@ class MapStudentProfile(models.Model):
     writing_write_revise_texts_for_purpose_and_audience = models.CharField(max_length=10, default="")
     language_understarnd_edit_for_grammar_usage = models.CharField(max_length=10, default="")
     language_understarnd_edit_for_mechanics = models.CharField(max_length=10, default="")
+    map_pdf_url_all_items = models.CharField(max_length=200, null=True)
+    map_pdf_url_all_items_no_txt = models.CharField(max_length=200, null=True)
 
     class Meta:
         unique_together = ('phone_number', 'TestDate')

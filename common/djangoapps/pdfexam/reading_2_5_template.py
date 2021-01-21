@@ -6,7 +6,7 @@ short_columns = (
     'Number', 'Domain', 'Items', '  GK  ', '  G1  ', '  G2  ', '  G3  ', '  G4  ', '  G5  ')
 
 reading_2_5_short_txt = [
-    ["1", "Language Standards", "Vocabulary Acquisition \nand Use", "L.K.4.A", "L.1.4.A", "L.2.4.A", "L.3.4.A",
+    ["1", "Language Standards K-5", "Vocabulary Acquisition \nand Use", "L.K.4.A", "L.1.4.A", "L.2.4.A", "L.3.4.A",
      "L.4.4.A", "L.5.4.A"],
     ["", "", "", "L.K.4.B", "L.1.4.B", "L.2.4.B", "L.3.4.B", "L.4.4.B", "L.5.4.B"],
     ["", "", "", "", "L.1.4.C", "L.2.4.C", "L.3.4.C", "L.4.4.C", "L.5.4.C"],
@@ -17,7 +17,7 @@ reading_2_5_short_txt = [
     ["", "", "", "L.K.5.C", "L.1.5.C", "", "L.3.5.C", "L.4.5.C", "L.5.5.C"],
     ["", "", "", "L.K.5.D", "L.1.5.D", "", "", "", ""],
     ["", "", "", "L.K.6", "L.1.6", "L.2.6", "L.3.6", "L.4.6", "L.5.6"],
-    ["2", "Reading Literature", "Key Ideas and Details", "RL.K.1", "RL.1.1", "RL.2.1", "RL.3.1", "RL.4.1", "RL.5.1"],
+    ["2", "Reading Literature K-5", "Key Ideas and Details", "RL.K.1", "RL.1.1", "RL.2.1", "RL.3.1", "RL.4.1", "RL.5.1"],
     ["", "", "", "RL.K.2", "RL.1.2", "RL.2.2", "RL.3.2", "RL.4.2", "RL.5.2"],
     ["", "", "", "RL.K.3", "RL.1.3", "RL.2.3", "RL.3.3", "RL.4.3", "RL.5.3"],
     ["", "", "Craft and Structure", "RL.K.4", "RL.1.4", "RL.2.4", "RL.3.4", "RL.4.4", "RL.5.4"],
@@ -36,7 +36,7 @@ reading_2_5_short_txt = [
     ["", "", "", "RI.K.8", "RI.1.8", "RI.2.8", "RI.3.8", "RI.4.8", "RI.5.8"],
     ["", "", "", "RI.K.9", "RI.1.9", "RI.2.9", "RI.3.9", "RI.4.9", "RI.5.9"]]
 
-reading_2_5_no_txt = [["1", "Language Standards", "Vocabulary Acquisition\n and Use", "", "", "", "", "", ""],
+reading_2_5_no_txt = [["1", "Language Standards K-5", "Vocabulary Acquisition\n and Use", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
@@ -46,7 +46,7 @@ reading_2_5_no_txt = [["1", "Language Standards", "Vocabulary Acquisition\n and 
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
-                      ["2", "Reading Literature", "Key Ideas and Details", "", "", "", "", "", ""],
+                      ["2", "Reading Literature K-5", "Key Ideas and Details", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "", "", "", "", "", "", ""],
                       ["", "", "Craft and Structure", "", "", "", "", "", ""],
