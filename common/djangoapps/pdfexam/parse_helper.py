@@ -1,11 +1,12 @@
 import logging
-from io import open
 import re
 import datetime
 from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults, MapTestCheckItem
+
 log = logging.getLogger("edx.pdfexam")
 
-def ExtractStarData(pathfilename, phonenumber):
+
+def ExtractStarData(data, phonenumber):
     StarEarlyLiteracyPDFReportExtractListBriefInfo = ['FirstName', 'FamilyName', 'ID', 'PrintedDay', 'PrintedDateTime',
                                                       'Reporting Period', 'SchoolYear', 'School', 'Class', 'Grade',
                                                       'Teacher', 'Test Date', 'SS', 'Lexile® Measure', \
@@ -52,13 +53,6 @@ def ExtractStarData(pathfilename, phonenumber):
         StarEarlyLiteracyPDFReportExtractListSubDomainDetail)
 
     ExtractSubDomainNStepSymbolDict = {}
-
-    ##################################################################
-    ##    Open the data txtfile, which from pdfplumber
-    #################################################################
-
-    with open(pathfilename) as f:
-        data = f.read()
 
     ##################################################################
     ##    定制对报告的简要信息的提取正则表达式  Extract Brief Info
@@ -113,8 +107,8 @@ def ExtractStarData(pathfilename, phonenumber):
         if source == 'SchoolYear':
             value[0] = value[0].strip('(')
             value[0] = value[0].strip(')')
-
-        ExtractDataFromStarEarlyLiteracyBriefInfoDict[KeyItem] = value[0]
+        if value and len(value) > 0:
+            ExtractDataFromStarEarlyLiteracyBriefInfoDict[KeyItem] = value[0]
 
         if KeyItem == 'Test Date':
             ##################################################################################
@@ -315,7 +309,10 @@ def ExtractStarData(pathfilename, phonenumber):
             ExtractDataDictReady2DjangoModel['LexileRange'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'Estimated Oral Reading Fluency (Words Correct Per Minute)':
-            ExtractDataDictReady2DjangoModel['EstORF'] = ExtractDataDictMergeTemp[KeyItem]
+            if ExtractDataDictMergeTemp[KeyItem]:
+                ExtractDataDictReady2DjangoModel['EstORF'] = ExtractDataDictMergeTemp[KeyItem]
+            else:
+                ExtractDataDictReady2DjangoModel['EstORF'] = ''
 
         if KeyItem == 'Alphabetic Principle':
             ExtractDataDictReady2DjangoModel['AlphabeticPrinciple'] = ExtractDataDictMergeTemp[KeyItem]
@@ -632,11 +629,10 @@ def ExtractStarData(pathfilename, phonenumber):
                                                          defaults=ExtractDataDictReady2DjangoModel)
 
 
-def ExtractDataMap(pathfilename, phonenumber):
-
-    InstructionalAreas = ["Informational Text: Key Ideas and Details", "Vocabulary: Acquisition and Use", \
-                          "Informational Text: Language, Craft, and Structure", \
-                          "Literary Text: Language, Craft, and Structure", "Literary Text: Key Ideas and Details"]
+def extract_map_data(data, phonenumber):
+    # InstructionalAreas = ["Informational Text: Key Ideas and Details", "Vocabulary: Acquisition and Use", \
+    #                       "Informational Text: Language, Craft, and Structure", \
+    #                       "Literary Text: Language, Craft, and Structure", "Literary Text: Key Ideas and Details"]
 
     MapnweaStudentProfileSummaryINFO = ['ExportDate', 'ExportStaff', 'FirstName', 'FamilyName', 'Grade', 'ID', \
                                         'TestCategory', 'Standard Error', 'Possible range', 'TestDate', 'TestDuration', \
@@ -651,148 +647,134 @@ def ExtractDataMap(pathfilename, phonenumber):
                                         'Literary Text: Language, Craft, and Structure SCORE', \
                                         'Literary Text: Language, Craft, and Structure STANDARD ERROR', \
                                         'Literary Text: Key Ideas and Details SCORE', \
-                                        'Literary Text: Key Ideas and Details STANDARD ERROR']
+                                        'Literary Text: Key Ideas and Details STANDARD ERROR',
+                                        'Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                        'Literature and Informational Text',
+                                        'Writing: Write Revise Texts for Purpose and Audience',
+                                        'Language: Understarnd, Edit for Grammar, Usage',
+                                        'Language: Understarnd, Edit for Mechanics']
 
-    MapnweaStudentProfileSummaryINFO_Dict = dict.fromkeys(MapnweaStudentProfileSummaryINFO)
+    mapnwea_student_profile_summary_info_dict = {}
 
-    ##################################################################
-    ##    Open the data txtfile, which from pdfplumber
-    #################################################################
+    data = data.replace('\n', ' ')
+    data = data.replace('\xa0', ' ')
+    data = data.replace('NBSP', ' ')
+    data = data.replace(' ', ' ')
 
-    with open(pathfilename, encoding='utf-8-sig') as f:
-        data0 = f.read()
-        data = data0.replace("2020/11/30 Student Profile", ' ')
-        data = data.replace('\n', ' ')
-        data = data.replace('\xa0', ' ')
-        data = data.replace('NBSP', ' ')
-        ExtractRegPageNUM = "(?<=" + "https://teach.mapnwea.org/nextgen-report/students/profile" + "\s)\d+/\d+"
-        PageNUM = re.findall(ExtractRegPageNUM, data)
-
-        j = len(PageNUM)
-        while j >= 1:
-            replacePageNUM = str(j) + '/' + str(len(PageNUM))
-            data = data.replace(replacePageNUM, ' ')
-            j = j - 1
-        else:
-            pass
-
-        data = data.replace("https://teach.mapnwea.org/nextgen-report/students/profile", ' ')
-
+    # with open(phonenumber + ".txt", "w+", encoding='utf-8') as f:
+    #     f.write(data)
+    # f.close()
     ##################################################################
     ##    定制对报告的简要信息的提取正则表达式  Extract Brief Info
     #################################################################
-    for KeyItem in MapnweaStudentProfileSummaryINFO:
-        source = KeyItem
+    for source in MapnweaStudentProfileSummaryINFO:
 
         if source == "ExportDate":
             # 日期格式 月/日/年
-            ExtractRegex = "(?<=" + 'on' + "\s)\d+/\d+/\d+"
+            extract_regex = "(?<=" + 'on' + "\s)\d+/\d+/\d+"
         elif source == "ExportStaff":
             # use email address as a staff name, so match a email
-            ExtractRegex = "(?<=" + 'Exported by' + "\s)[0-9a-zA-Z.]+@[0-9a-zA-Z.]+?com"
+            extract_regex = "(?<=Exported by )[0-9a-zA-Z.@]+"
         elif source == "FirstName":
             # temp extract as family name, waiting for extracting split
-            ExtractRegex = ExtractRegexPrefixForName + "(.*?)" + 'Grade:'
+            extract_regex = '/\d{4}\s(.*?)Grade:'
         elif source == "Grade":
-            ExtractRegex = "(?<=" + source + "\:\s)\S+"
+            extract_regex = "(?<=" + source + "\:\s)\S+"
         elif source == "ID":
-            ExtractRegex = "(?<=" + source + "\:\s)\S+"
+            extract_regex = "(?<=" + source + "\:\s)\S+"
         elif source == "TestCategory":
-            ExtractRegex = "READING"
+            extract_regex = "READING"
         elif source == "Score":
-            ExtractRegex = "(?<=" + 'READING' + "\s)\d{3}"
+            extract_regex = "(?<=" + 'READING' + "\s)\d{3}"
         elif source == "Standard Error":
-            ExtractRegex = "Standard Error:" + "(.*?)" + "Rapid-Guessing %:"
+            extract_regex = "Standard Error:" + "(.*?)" + "Rapid-Guessing %:"
         elif source == "Rapid-Guessing %":
             # don't know what value could be, except for 'N/A'
-            ExtractRegex = "(?<=" + source + "\:\s)\S+"
+            extract_regex = "(?<=" + source + "\:\s)\S+"
         elif source == "Semester":
-            ExtractRegex = "\S+\s\S+" + "(?=" + "\s" + "Possible range" + ")"
+            extract_regex = "\S+\s\S+" + "(?=" + "\s" + "Possible range" + ")"
         elif source == "Possible range":
-            ExtractRegex = "(?<=" + source + "\:\s)\d{3}\-\d{3}"
+            extract_regex = "(?<=" + source + "\:\s)\d{3}\-\d{3}"
         elif source == "Est. Impact of Rapid-Guessing % on RIT":
-            ExtractRegex = "(?<=" + source + "\:\s)\S+"
+            extract_regex = "(?<=" + source + "\:\s)\S+"
         elif source == "TestDate":
             # 日期格式 月/日/年
-            ExtractRegex = "\d+/\d+/\d+\s\-\s\d{3}"
+            extract_regex = "\d+/\d+/\d+\s\-\s\d{1,3}"
         elif source == "TestDuration":
-            ExtractRegex = "\d+/\d+/\d+\s\-\s\d{3}"
+            extract_regex = "\d+/\d+/\d+\s\-\s\d{1,3}"
         elif source == "Growth":
-            ExtractRegex = source + ":\s+" + "(.*?)" + "\s+" + "HIGHLIGHTS"
+            extract_regex = source + ":\s+" + "(.*?)" + "\s+" + "HIGHLIGHTS"
         elif source == "HIGHLIGHTS":
-            ExtractRegex = source + "\s+(.*?)\s+" + "INSTRUCTIONAL"
+            extract_regex = source + "\s+(.*?)\s+" + "INSTRUCTIONAL"
         elif source == "Group by":
-            ExtractRegex = "(?<=" + source + "\s\:\s)\S+"
+            extract_regex = "(?<=" + source + "\s\:\s)\S+"
         elif source == "Grade(s)":
             tempSource = "Grade[(]s[)]"
-            ExtractRegex = tempSource + "\s\:\s" + "(.*?)" + "\s" + "Concepts to :"
-        elif source == "Concepts to":
-            ExtractRegex = source + "\s\:\s" + "(.*?)" + "\s" + "Informational Text"
+            extract_regex = tempSource + "\s\:\s" + "(.*?)" + "\s" + "Concepts to :"
+        # elif source == "Concepts to":
+        #     ExtractRegex = source + "\s\:\s" + "(.*?)" + "\s" + "Informational Text"
         elif source == "Informational Text: Key Ideas and Details SCORE":
-            TempSource = "Informational Text: Key Ideas and Details"
-            ExtractRegex = "(?<=" + TempSource + ")\s\d{3}"
+            temp_source = "Informational Text: Key Ideas and Details"
+            extract_regex = "(?<=" + temp_source + ")\s\d{1,3}"
         elif source == "Informational Text: Key Ideas and Details STANDARD ERROR":
-            TempSource1 = "Draw Conclusions, Infer, Predict"
-            TempSource0 = "Informational Text: Key Ideas and Details" + ExtractRegexPrefixForITKIDSE
-            ExtractRegex = TempSource0 + "(.*?)" + TempSource1
+            temp_source1 = "Draw Conclusions, Infer, Predict"
+            temp_source0 = "Informational Text: Key Ideas and Details"
+            extract_regex = temp_source0 + "(.*?)" + temp_source1
         elif source == "Vocabulary: Acquisition and Use SCORE":
-            TempSource = "Vocabulary: Acquisition and Use"
-            ExtractRegex = "(?<=" + TempSource + ")\s+\d{3}"
+            temp_source = "Vocabulary: Acquisition and Use"
+            extract_regex = "(?<=" + temp_source + ")\s+\d{3}"
         elif source == "Vocabulary: Acquisition and Use STANDARD ERROR":
-            TempSource0 = "Vocabulary: Acquisition and Use" + ExtractRegexPrefixForVAUSSE
-            TempSource1 = "Context Clues and Multiple-Meaning Words"
-            ExtractRegex = TempSource0 + "(.*?)" + TempSource1
+            temp_source0 = "Vocabulary: Acquisition and Use"
+            temp_source1 = "Context Clues and Multiple-Meaning Words"
+            extract_regex = temp_source0 + "(.*?)" + temp_source1
         elif source == "Informational Text: Language, Craft, and Structure SCORE":
-            TempSource = "Informational Text: Language, Craft, and Structure"
-            ExtractRegex = "(?<=" + TempSource + ")\s+\d{3}"
+            temp_source = "Informational Text: Language, Craft, and Structure"
+            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Informational Text: Language, Craft, and Structure STANDARD ERROR":
-            TempSource0 = "Informational Text: Language, Craft, and Structure" + ExtractRegexPrefixForITLCSSE
-            TempSource1 = "Point of View, Purpose, Perspective, Figurative and Rhetorical Language"
-            ExtractRegex = TempSource0 + "(.*?)" + TempSource1
+            temp_source0 = "Informational Text: Language, Craft, and Structure"
+            temp_source1 = "Point of View, Purpose, Perspective, Figurative and Rhetorical Language"
+            extract_regex = temp_source0 + "(.*?)" + temp_source1
         elif source == "Literary Text: Language, Craft, and Structure SCORE":
-            TempSource = "Literary Text: Language, Craft, and Structure"
-            ExtractRegex = "(?<=" + TempSource + ")\s+\d{3}"
+            temp_source = "Literary Text: Language, Craft, and Structure"
+            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Literary Text: Language, Craft, and Structure STANDARD ERROR":
-            TempSource0 = "Literary Text: Language, Craft, and Structure" + ExtractRegexPrefixForLTLCSSE
-            TempSource1 = "Figurative, Connotative Meanings; Tone"
-            ExtractRegex = TempSource0 + "(.*?)" + TempSource1
+            temp_source0 = "Literary Text: Language, Craft, and Structure"
+            temp_source1 = "Figurative, Connotative Meanings; Tone"
+            extract_regex = temp_source0 + "(.*?)" + temp_source1
         elif source == "Literary Text: Key Ideas and Details SCORE":
-            TempSource = "Literary Text: Key Ideas and Details"
-            ExtractRegex = "(?<=" + TempSource + ")\s+\d{3}"
+            temp_source = "Literary Text: Key Ideas and Details"
+            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Literary Text: Key Ideas and Details STANDARD ERROR":
-            TempSource0 = "Literary Text: Key Ideas and Details" + ExtractRegexPrefixForLTKIDSSE
-            TempSource1 = "Draw Conclusions, Infer, Predict"
-            ExtractRegex = TempSource0 + "(.*?)" + TempSource1
+            temp_source0 = "Literary Text: Key Ideas and Details"
+            temp_source1 = "Draw Conclusions, Infer, Predict"
+            extract_regex = temp_source0 + "(.*?)" + temp_source1
+        elif source == "Vocabulary Use and Functions":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Foundational Skills":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language and Writing":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Literature and Informational Text":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Writing: Write Revise Texts for Purpose and Audience":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language: Understarnd, Edit for Grammar, Usage":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        elif source == "Language: Understarnd, Edit for Mechanics":
+            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         else:
             pass
+        logging.info("-----regex of {}-----{}---".format(source, extract_regex))
 
-        value = re.findall(ExtractRegex, data)
+        value = re.findall(extract_regex, data)
+        logging.info("-----{}-----{}---".format(source, value))
+        if value and len(value) > 0:
+            mapnwea_student_profile_summary_info_dict[source] = value[0].strip()
 
-        if KeyItem == "ExportDate":
-            ExtractRegexPrefixForName = value[0]
-
-        if KeyItem == "Informational Text: Key Ideas and Details SCORE":
-            ExtractRegexPrefixForITKIDSE = value[0]
-
-        if KeyItem == "Vocabulary: Acquisition and Use SCORE":
-            ExtractRegexPrefixForVAUSSE = value[0]
-
-        if KeyItem == "Informational Text: Language, Craft, and Structure SCORE":
-            ExtractRegexPrefixForITLCSSE = value[0]
-
-        if KeyItem == "Literary Text: Key Ideas and Details SCORE":
-            ExtractRegexPrefixForLTKIDSSE = value[0]
-
-        if KeyItem == "Literary Text: Language, Craft, and Structure SCORE":
-            ExtractRegexPrefixForLTLCSSE = value[0]
-
-        MapnweaStudentProfileSummaryINFO_Dict[KeyItem] = value[0]
-
-    MapnweaStudentProfileSummaryINFO_Dict["FirstName"] = str(
-        MapnweaStudentProfileSummaryINFO_Dict["FirstName"]).lstrip()
-    Name = str(MapnweaStudentProfileSummaryINFO_Dict["FirstName"]).split()
-    MapnweaStudentProfileSummaryINFO_Dict["FirstName"] = str(Name[0])
-    MapnweaStudentProfileSummaryINFO_Dict["FamilyName"] = str(Name[1])
+    name = str(mapnwea_student_profile_summary_info_dict["FirstName"]).strip()
+    mapnwea_student_profile_summary_info_dict["FirstName"] = name
+    mapnwea_student_profile_summary_info_dict["FamilyName"] = name
+    logging.info("---name is ----{}---".format(name))
 
     ##################################################################################
     ##  change date format MM/DD/YYYY to YYYY-MM-DD
@@ -800,14 +782,14 @@ def ExtractDataMap(pathfilename, phonenumber):
     ##  #import datetime
     #   datetime.datetime.strptime("21/12/2008", "%d/%m/%Y").strftime("%Y-%m-%d")
     ##################################################################################
-    MapnweaStudentProfileSummaryINFO_Dict["ExportDate"] = datetime.datetime.strptime(
-        MapnweaStudentProfileSummaryINFO_Dict["ExportDate"], "%m/%d/%Y").strftime("%Y-%m-%d")
+    mapnwea_student_profile_summary_info_dict["ExportDate"] = datetime.datetime.strptime(
+        mapnwea_student_profile_summary_info_dict["ExportDate"], "%m/%d/%Y").strftime("%Y-%m-%d")
 
     #################################################################
     ## Change date format END
     #################################################################
 
-    TestDateAndDuration = str(MapnweaStudentProfileSummaryINFO_Dict["TestDate"]).split("-")
+    TestDateAndDuration = str(mapnwea_student_profile_summary_info_dict["TestDate"]).split("-")
 
     ##################################################################################
     ##  change date format MM/DD/YYYY to YYYY-MM-DD
@@ -815,317 +797,167 @@ def ExtractDataMap(pathfilename, phonenumber):
     ##  #import datetime
     #   datetime.datetime.strptime("21/12/2008", "%d/%m/%Y").strftime("%Y-%m-%d")
     ##################################################################################
-    MapnweaStudentProfileSummaryINFO_Dict["TestDate"] = datetime.datetime.strptime(str(TestDateAndDuration[0]).rstrip(),
-                                                                                   "%m/%d/%Y").strftime("%Y-%m-%d")
+    mapnwea_student_profile_summary_info_dict["TestDate"] = datetime.datetime.strptime(
+        str(TestDateAndDuration[0]).rstrip(),
+        "%m/%d/%Y").strftime("%Y-%m-%d")
 
     #################################################################
     ## Change date format END
     #################################################################
 
-    MapnweaStudentProfileSummaryINFO_Dict["TestDuration"] = str(TestDateAndDuration[1])
+    mapnwea_student_profile_summary_info_dict["TestDuration"] = str(TestDateAndDuration[1])
 
     ####################################################################
     ##  Extract the CheckItemlist
     ####################################################################
-    TempCheckListSource = "CCSS.ELA-Literacy."
-    CheckListExtractRegex = TempCheckListSource + "(.*?)" + ":"
-    CheckListValue = re.findall(CheckListExtractRegex, data)
-    CheckListValue2 = []
+    check_list_extract_regex = "CCSS.ELA-Literacy.(.*?):"
+    check_list_value = re.findall(check_list_extract_regex, data)
 
-    REINFORE_DEVELOP_Status_List = []
+    mapnwea_student_profile_reinfore_develop_status_dict = {}
+    logging.info("---check items list:{}".format(check_list_value))
+    logging.info("---check items list size:{}".format(len(check_list_value)))
 
-    for Item in CheckListValue:
-        FieldName = "CCSS.ELA-Literacy." + Item
-        CheckListValue2.append(FieldName)
-        REINFORE_DEVELOP_Status_List.append(Item)
+    for item in check_list_value:
+        check_item_desc_reg = item + ':(.*?)CCSS.ELA-Literacy'
+        desc_text = re.findall(check_item_desc_reg, data)
+        for desc in desc_text:
+            # logging.info("text ---{}".format(desc))
+            if ("REINFORCE" in str(desc)) and ("DEVELOP" in str(desc)):
+                mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE_DEVELOP"
+            elif ("REINFORCE" in str(desc)) and ("DEVELOP" not in str(desc)):
+                mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE"
+            elif ("REINFORCE" not in str(desc)) and (
+                "DEVELOP" in str(desc)):
+                mapnwea_student_profile_reinfore_develop_status_dict[item] = "DEVELOP"
+            else:
+                mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
 
-    MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict = dict.fromkeys(REINFORE_DEVELOP_Status_List)
+    logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
 
-    ############################################
-    ## remove the CheckItem Category from data
-    ############################################
+    extract_data_dict_ready2_my_sql_model = {}
 
-    CheckCategory1 = ["Draw Conclusions, Infer, Predict", "Summarize; Analyze Central Ideas, Concepts, and Events", \
-                      "Context Clues and Multiple-Meaning Words", "Word Parts, Reference, and Academic Vocabulary", \
-                      "Word Relationships and Nuance",
-                      "Point of View, Purpose, Perspective, Figurative and Rhetorical Language", \
-                      "Text Structures, Text Features", "Figurative, Connotative Meanings; Tone"]
-
-    Score = [MapnweaStudentProfileSummaryINFO_Dict["Informational Text: Key Ideas and Details SCORE"], \
-             MapnweaStudentProfileSummaryINFO_Dict["Vocabulary: Acquisition and Use SCORE"], \
-             MapnweaStudentProfileSummaryINFO_Dict["Informational Text: Language, Craft, and Structure SCORE"], \
-             MapnweaStudentProfileSummaryINFO_Dict["Literary Text: Language, Craft, and Structure SCORE"], \
-             MapnweaStudentProfileSummaryINFO_Dict["Literary Text: Key Ideas and Details SCORE"]]
-
-    StandardError = [MapnweaStudentProfileSummaryINFO_Dict["Informational Text: Key Ideas and Details STANDARD ERROR"], \
-                     MapnweaStudentProfileSummaryINFO_Dict["Vocabulary: Acquisition and Use STANDARD ERROR"], \
-                     MapnweaStudentProfileSummaryINFO_Dict[
-                         "Informational Text: Language, Craft, and Structure STANDARD ERROR"], \
-                     MapnweaStudentProfileSummaryINFO_Dict[
-                         "Literary Text: Language, Craft, and Structure STANDARD ERROR"], \
-                     MapnweaStudentProfileSummaryINFO_Dict["Literary Text: Key Ideas and Details STANDARD ERROR"]]
-
-    i = 0
-    while i < len(CheckCategory1):
-        data = data.replace(CheckCategory1[i], ' ')
-        i = i + 1
-    else:
-        pass
-
-    i = 0
-    while i < len(InstructionalAreas):
-        RemoveStr = InstructionalAreas[i] + Score[i] + StandardError[i]
-        data = data.replace(RemoveStr, ' ')
-        i = i + 1
-    else:
-        pass
-
-    ############################################################################################################
-    ##
-    ## Extract All CheckItem Section in the Report
-    ##
-    ############################################################################################################
-    CheckItemSectionDict = {}
-    CheckItemSectionlist = CheckListValue2
-    CheckItemSectionDict = dict.fromkeys(CheckItemSectionlist)
-    CheckItemSectionContentValue = []
-    Counter = len(CheckItemSectionlist)
-
-    i = 0
-    while (i < (Counter - 1)):
-        SectionBeginTag = CheckItemSectionlist[i]
-        SectionEndTag = CheckItemSectionlist[i + 1]
-        CheckItemSectionContentExtractReg = SectionBeginTag + "\:\s(.*?)" + SectionEndTag
-        CheckItemSectionContentValue = re.findall(CheckItemSectionContentExtractReg, data)
-        CheckItemSectionDict[CheckItemSectionlist[i]] = CheckItemSectionContentValue
-
-        i = i + 1
-        if i == (Counter - 1):
-            SectionBeginTag = CheckItemSectionlist[i]
-            SectionEndTag = "CONFIDENTIALITY NOTICE"
-            CheckItemSectionContentExtractReg = SectionBeginTag + "\:\s(.*?)" + SectionEndTag
-            CheckItemSectionContentValue = re.findall(CheckItemSectionContentExtractReg, data)
-            CheckItemSectionDict[CheckItemSectionlist[i]] = CheckItemSectionContentValue
-    else:
-        pass
-
-    ###################################################################
-    ## Setup  CheckItem REINFORCE AND DEVELOP Recommendation Status
-    ###################################################################
-
-    i = 0
-    while (i <= (Counter - 1)):
-        SectionData = str(CheckItemSectionDict[CheckItemSectionlist[i]])
-        if ("REINFORCE" in str(CheckItemSectionDict[CheckItemSectionlist[i]])) and (
-            "DEVELOP" in str(CheckItemSectionDict[CheckItemSectionlist[i]])):
-            MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[REINFORE_DEVELOP_Status_List[i]] = "REINFORCE_DEVELOP"
-        elif ("REINFORCE" in str(CheckItemSectionDict[CheckItemSectionlist[i]])) and (
-            "DEVELOP" not in str(CheckItemSectionDict[CheckItemSectionlist[i]])):
-            MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[REINFORE_DEVELOP_Status_List[i]] = "REINFORCE"
-        elif ("REINFORCE" not in str(CheckItemSectionDict[CheckItemSectionlist[i]])) and (
-            "DEVELOP" in str(CheckItemSectionDict[CheckItemSectionlist[i]])):
-            MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[REINFORE_DEVELOP_Status_List[i]] = "DEVELOP"
-        else:
-            MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[
-                REINFORE_DEVELOP_Status_List[i]] = "No More Recommendation"
-
-        i = i + 1
-
-    ##################################################################################
-    ##
-    ## Drop the CheckItem ( G5 < Grade)
-    ##
-    ###################################################################################
-
-    CheckItem_GKtoG5 = []
-    CounterCheckItem = len(CheckListValue)
-
-    i = 0
-
-    while (i <= (CounterCheckItem - 1)):
-        TempStrList = str(CheckListValue[i]).split(".")
-        if (int(TempStrList[1]) < 6):
-            CheckItem_GKtoG5.append(CheckListValue[i])
-
-        i = i + 1
-
-    ###################################################################
-    ## Extract   CheckItem REINFORCE AND DEVELOP Recommendation List  GK TO G5
-    ###################################################################
-
-    MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict_GKtoG5 = dict.fromkeys(CheckItem_GKtoG5)
-    MapProfileExtResultsListReady2MySQLModel = []
-    tempDict = {}
-    KeyItemNormalization = ''
-    tempDictKey = ''
-    for GKtoG5CheckItem in CheckItem_GKtoG5:
-        KeyItemNormalization = GKtoG5CheckItem
-        tempDictKey = KeyItemNormalization.replace('.', '_')
-        tempDict[tempDictKey] = MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[GKtoG5CheckItem]
-        MapProfileExtResultsListReady2MySQLModel.append(tempDict.copy())
-
-        #       MapProfileExtResultsListReady2MySQLModel.append(MapProfileExtResults(item_level=tempDict[tempDictKey], check_item=tempDictKey))
-        tempDict = {}
-
-    ##########################################################################################
-    ExtractStudentProfileDictMerge = MapnweaStudentProfileSummaryINFO_Dict.copy()
-
-    for key in ExtractStudentProfileDictMerge:
-        ExtractStudentProfileDictMerge[key] = ExtractStudentProfileDictMerge[key].strip()
-
-    #################################################################################################
-
-    #################################################################################################
-    ## alignment the dict's key for importing  into Django MySQL Models
-    #################################################################################################
-    DictKeys2List = ExtractStudentProfileDictMerge.keys()
-
-    ExtractDataDictReady2MySQLModel = {}
-
-    for KeyItem in DictKeys2List:
+    for KeyItem in mapnwea_student_profile_summary_info_dict.keys():
         if KeyItem == 'ExportDate':
-            ExtractDataDictReady2MySQLModel['ExportDate'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['ExportDate'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'ExportStaff':
-            ExtractDataDictReady2MySQLModel['ExportStaff'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['ExportStaff'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'FirstName':
-            ExtractDataDictReady2MySQLModel['FirstName'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['FirstName'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'FamilyName':
-            ExtractDataDictReady2MySQLModel['FamilyName'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['FamilyName'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Grade':
-            ExtractDataDictReady2MySQLModel['Grade'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Grade'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'ID':
-            ExtractDataDictReady2MySQLModel['MapID'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['MapID'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'TestCategory':
-            ExtractDataDictReady2MySQLModel['TestCategory'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['TestCategory'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Standard Error':
-            ExtractDataDictReady2MySQLModel['Standard_Error'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Standard_Error'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Possible range':
-            ExtractDataDictReady2MySQLModel['Possible_range'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Possible_range'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'TestDate':
-            ExtractDataDictReady2MySQLModel['TestDate'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['TestDate'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'TestDuration':
-            ExtractDataDictReady2MySQLModel['TestDuration'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['TestDuration'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Growth':
-            ExtractDataDictReady2MySQLModel['Growth'] = ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Growth'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Rapid-Guessing %':
-            ExtractDataDictReady2MySQLModel['Rapid_Guessing_Percent'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Est. Impact of Rapid-Guessing % on RIT':
-            ExtractDataDictReady2MySQLModel['Est_Impact_of_Rapid_Guessing_Percent_on_RIT'] = \
-                ExtractStudentProfileDictMerge[
-                    KeyItem]
-        elif KeyItem == 'Semester':
-            ExtractDataDictReady2MySQLModel['Semester'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Score':
-            ExtractDataDictReady2MySQLModel['Score'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'HIGHLIGHTS':
-            ExtractDataDictReady2MySQLModel['HIGHLIGHTS'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Group by':
-            ExtractDataDictReady2MySQLModel['Group_by'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Grade(s)':
-            ExtractDataDictReady2MySQLModel['Grades'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Concepts to':
-            ExtractDataDictReady2MySQLModel['Concepts_to'] = ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Informational Text: Key Ideas and Details SCORE':
-            ExtractDataDictReady2MySQLModel['Informational_Text_Key_Ideas_and_Details_SCORE'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Informational Text: Key Ideas and Details STANDARD ERROR':
-            ExtractDataDictReady2MySQLModel['Informational_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
-        elif KeyItem == 'Vocabulary: Acquisition and Use SCORE':
-            ExtractDataDictReady2MySQLModel['Vocabulary_Acquisition_and_Use_SCORE'] = ExtractStudentProfileDictMerge[
+            extract_data_dict_ready2_my_sql_model['Rapid_Guessing_Percent'] = mapnwea_student_profile_summary_info_dict[
                 KeyItem]
+        elif KeyItem == 'Est. Impact of Rapid-Guessing % on RIT':
+            extract_data_dict_ready2_my_sql_model['Est_Impact_of_Rapid_Guessing_Percent_on_RIT'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Semester':
+            extract_data_dict_ready2_my_sql_model['Semester'] = mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Score':
+            extract_data_dict_ready2_my_sql_model['Score'] = mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'HIGHLIGHTS':
+            extract_data_dict_ready2_my_sql_model['HIGHLIGHTS'] = mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Group by':
+            extract_data_dict_ready2_my_sql_model['Group_by'] = mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Grade(s)':
+            extract_data_dict_ready2_my_sql_model['Grades'] = mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Concepts to':
+            extract_data_dict_ready2_my_sql_model['Concepts_to'] = 'Reinforce, Develop'
+        elif KeyItem == 'Informational Text: Key Ideas and Details SCORE':
+            extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_SCORE'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Informational Text: Key Ideas and Details STANDARD ERROR':
+            extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Vocabulary: Acquisition and Use SCORE':
+            extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_SCORE'] = \
+                mapnwea_student_profile_summary_info_dict[
+                    KeyItem]
         elif KeyItem == 'Vocabulary: Acquisition and Use STANDARD ERROR':
-            ExtractDataDictReady2MySQLModel['Vocabulary_Acquisition_and_Use_STANDARD_ERROR'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Informational Text: Language, Craft, and Structure SCORE':
-            ExtractDataDictReady2MySQLModel['Informational_Text_Language_Craft_and_Structure_SCORE'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_SCORE'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Informational Text: Language, Craft, and Structure STANDARD ERROR':
-            ExtractDataDictReady2MySQLModel['Informational_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Literary Text: Language, Craft, and Structure SCORE':
-            ExtractDataDictReady2MySQLModel['Literary_Text_Language_Craft_and_Structure_SCORE'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_SCORE'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Literary Text: Language, Craft, and Structure STANDARD ERROR':
-            ExtractDataDictReady2MySQLModel['Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Literary Text: Key Ideas and Details SCORE':
-            ExtractDataDictReady2MySQLModel['Literary_Text_Key_Ideas_and_Details_SCORE'] = \
-                ExtractStudentProfileDictMerge[
+            extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_SCORE'] = \
+                mapnwea_student_profile_summary_info_dict[
                     KeyItem]
         elif KeyItem == 'Literary Text: Key Ideas and Details STANDARD ERROR':
-            ExtractDataDictReady2MySQLModel['Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
-                ExtractStudentProfileDictMerge[KeyItem]
+            extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Vocabulary Use and Functions':
+            extract_data_dict_ready2_my_sql_model['vocabulary_use_and_function'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Foundational Skills':
+            extract_data_dict_ready2_my_sql_model['foundational_skills'] = mapnwea_student_profile_summary_info_dict[
+                KeyItem]
+        elif KeyItem == 'Language and Writing':
+            extract_data_dict_ready2_my_sql_model['language_and_writing'] = mapnwea_student_profile_summary_info_dict[
+                KeyItem]
+        elif KeyItem == 'Literature and Informational Text':
+            extract_data_dict_ready2_my_sql_model['literature_and_informational_text'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Writing: Write Revise Texts for Purpose and Audience':
+            extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Language: Understarnd, Edit for Grammar, Usage':
+            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_grammar_usage'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
+        elif KeyItem == 'Language: Understarnd, Edit for Mechanics':
+            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_mechanics'] = \
+                mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
             pass
 
-    ##################################################################
-    ##     Extract Data END
-    ##################################################################
-
-    ##############################################################################
-    ## Save the Extract Info in a txtfile, and the name in parttern xxxx.dict.txt
-    ##############################################################################
-
-    # ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictReady2MySQLModel)
-    #
-    # Dictfilenameportion = os.path.splitext(pathfilename)
-    #
-    # Dicttxtfilename = Dictfilenameportion[0] + '.dict.txt'
-    #
-    # Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
-    #
-    # with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
-    #     f.write(ExtractDataDictMergeTempConvert2Str)
-
-    ##############################################################################
-
-    #    ExtractDataDictMergeTempConvert2Str = json.dumps(ExtractDataDictReady2MySQLModel)
-
-    # Dictfilenameportion = os.path.splitext(pathfilename)
-    #
-    # Dicttxtfilename = Dictfilenameportion[0] + '.list.txt'
-    #
-    # Dicttxtfilestored = os.path.join(settings.MEDIA_ROOT, Dicttxtfilename)
-    #
-    # with open(Dicttxtfilestored, "w", encoding='utf-8') as f:
-    #     f.write(str(MapProfileExtResultsListReady2MySQLModel))
-
-    ##############################################################################
-    ## Save the Extract Info END
-    ##############################################################################
-
-    #######################################################################################
-    ## write Map Student Profile Data to MySQL
-    ##
-    #######################################################################################
-
-    # ReportDataStr = json.dumps(ExtractDataDictReady2DjangoModel)
-    ExtractDataDictReady2MySQLModel['phone_number'] = phonenumber
+    extract_data_dict_ready2_my_sql_model['phone_number'] = phonenumber
 
     stu_map_pro, created = MapStudentProfile.objects.update_or_create(phone_number=phonenumber,
-                                                                      TestDate=ExtractDataDictReady2MySQLModel[
+                                                                      TestDate=extract_data_dict_ready2_my_sql_model[
                                                                           'TestDate'],
-                                                                      defaults=ExtractDataDictReady2MySQLModel)
+                                                                      defaults=extract_data_dict_ready2_my_sql_model)
 
-    # e.objects.bulk_create(MapProfileExtResultsListReady2MySQLModel)
-
-    # obj = p(ExtractDataDictReady2MySQLModel)
-    # obj.save()
-    # os.remove(Dicttxtfilestored)
     if not created:
-        log.warning("It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
+        log.warning(
+            "It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
         MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
-    log.info(CheckItem_GKtoG5)
+    log.info(mapnwea_student_profile_reinfore_develop_status_dict)
+    log.info(len(mapnwea_student_profile_reinfore_develop_status_dict))
 
-    for GKtoG5CheckItem in CheckItem_GKtoG5:
-        check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem).first()
-        MapProfileExtResults.objects.update_or_create(map_student_profile=stu_map_pro, check_item=check_item,
-                                                      defaults={
-                                                          "item_level":
-                                                              MapnweaStudentProfile_REINFORE_DEVELOP_Status_Dict[
-                                                                  GKtoG5CheckItem]
-                                                      }
-                                                      )
+    for GKtoG5CheckItem in mapnwea_student_profile_reinfore_develop_status_dict.keys():
+        check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem.upper()).first()
+        if check_item:
+            MapProfileExtResults.objects.update_or_create(map_student_profile=stu_map_pro, check_item=check_item,
+                                                          defaults={
+                                                              "item_level":
+                                                                  mapnwea_student_profile_reinfore_develop_status_dict[
+                                                                      GKtoG5CheckItem]
+                                                          }
+                                                          )
     return stu_map_pro

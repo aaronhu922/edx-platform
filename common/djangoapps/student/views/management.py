@@ -15,6 +15,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.sites.models import Site
 from django.core.validators import ValidationError, validate_email
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
@@ -85,8 +86,8 @@ from xmodule.modulestore.django import modulestore
 
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, CourseOverviewExtendInfoSerializer
-
+from student.serializers import CourseEnrollmentInfoSerializer, CustomerServiceSerializer, CourseOverviewSerializer, \
+    CourseOverviewExtendInfoSerializer
 
 log = logging.getLogger("edx.student")
 
@@ -979,8 +980,6 @@ def course_enrollment_info(request, id=None, stu_id=None):
                                  "success": True}, status=200)
 
 
-
-
 # @login_required
 # @ensure_csrf_cookie
 @csrf_exempt
@@ -1044,6 +1043,51 @@ def customer_service_info(request, pk=None):
                              "success": True}, status=200)
 
 
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def students_search(request, key=None):
+    """
+    "phone_number": "",
+    "username": "",
+    "password": "test",
+    "name": "",
+    "web_accelerator_name": "洛杉矶",
+    "web_accelerator_link": "http://47.114.176.127/test.pac",
+    """
+    if request.method == 'GET':
+        list_user = User.objects.filter(Q(username__icontains=key) | Q(email__icontains=key))
+        res_list = []
+        try:
+            for user in list_user:
+                log.info("user object is {}".format(user))
+                num = CourseEnrollment.objects.filter(user=user, is_active=1).count()
+                user_obj = {
+                    "user": {
+                        "id": user.id,
+                        "password": user.password,
+                        "username": user.username
+                    },
+                    "phone_number": user.profile.phone_number,
+                    "web_accelerator_name": user.profile.phone_number,
+                    "web_accelerator_link": user.profile.phone_number,
+                    "courses_count": num
+                }
+                res_list.append(user_obj)
+        except Exception as err:
+            log.error(err)
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": str(err),
+                                 "success": False}, status=200)
+        return JsonResponse({
+            "data_list": res_list,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get students by searching.",
+            "success": True
+        })
+
 
 # @login_required
 # @ensure_csrf_cookie
@@ -1081,8 +1125,10 @@ def students_management(request, pk=None):
                                      "success": False}, status=200)
             else:
                 from common.djangoapps.util.password_policy_validators import normalize_password
-
-                user.set_password(normalize_password(data["password"]))
+                log.info("legacy password {}, new password {}".format(user.password, data['password']))
+                if user.password != data['password']:
+                    user.set_password(normalize_password(data["password"]))
+                    log.info("new password {}".format(data['password']))
                 user.username = data["username"]
                 # user.update(username=data["username"])
                 user.save()
@@ -1130,7 +1176,6 @@ def students_management(request, pk=None):
                              "executed": True,
                              "message": "Deleted a student account!",
                              "success": True}, status=200)
-
 
 
 # @login_required
@@ -1293,16 +1338,31 @@ def my_map_test_info(request, phone):
                 map_score_trend_date.append(result.TestDate)
                 map_score_trend_value.append(result.Score)
 
-            sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
-                                 map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
-                                 map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
-                                 map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
-                                 map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
-            sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
-                                "Vocabulary Acquisition and Use SCORE",
-                                "Informational Text Language Craft and Structure SCORE",
-                                "Literary Text Language Craft and Structure SCORE",
-                                "Literary Text Key Ideas and Details SCORE"]
+            if map_pro[0].Growth.startswith('Reading 2-5'):
+                sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
+                                     map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                     map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
+                sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
+                                    "Vocabulary Acquisition and Use SCORE",
+                                    "Informational Text Language Craft and Structure SCORE",
+                                    "Literary Text Language Craft and Structure SCORE",
+                                    "Literary Text Key Ideas and Details SCORE"]
+            elif map_pro[0].Growth.startswith('Reading K-2'):
+                sub_domains_score = [map_pro[0].vocabulary_use_and_function,
+                                     map_pro[0].foundational_skills,
+                                     map_pro[0].language_and_writing,
+                                     map_pro[0].literature_and_informational_text]
+                sub_domains_name = ['Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                    'Literature and Informational Text']
+            else:
+                sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
+                                     map_pro[0].language_understarnd_edit_for_grammar_usage,
+                                     map_pro[0].language_understarnd_edit_for_mechanics]
+                sub_domains_name = ['Writing: Write Revise Texts for Purpose and Audience',
+                                    'Language: Understarnd, Edit for Grammar, Usage',
+                                    'Language: Understarnd, Edit for Mechanics']
 
             return JsonResponse({
                 "test_date": test_date,
@@ -1319,6 +1379,79 @@ def my_map_test_info(request, phone):
                 "success": True
             }, status=200)
 
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def stu_map_test_info(request, id):
+    if request.method == 'GET':
+        user_pro = UserProfile.objects.filter(user_id=id).first()
+        map_pro = []
+        if user_pro:
+            phone = user_pro.phone_number
+            log.info("user id {}, phone is {}".format(id, phone))
+            map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+        if len(map_pro) <= 0:
+            log.error("No map test results for user {}".format(id))
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User with id {} does not have any test result!".format(id),
+                                 "success": False}, status=200)
+        else:
+            rit_score = map_pro[0].Score
+            test_duration = map_pro[0].TestDuration
+            test_date = map_pro[0].TestDate
+            map_pdf_url = map_pro[0].map_pdf_url
+            map_pdf_url_all_items = map_pro[0].map_pdf_url_all_items
+            map_pdf_url_all_items_no_txt = map_pro[0].map_pdf_url_all_items_no_txt
+            map_score_trend_date = []
+            map_score_trend_value = []
+            for result in reversed(map_pro):
+                map_score_trend_date.append(result.TestDate)
+                map_score_trend_value.append(result.Score)
+
+            if map_pro[0].Growth.startswith('Reading 2-5'):
+                sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
+                                     map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                     map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
+                                     map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
+                sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
+                                    "Vocabulary Acquisition and Use SCORE",
+                                    "Informational Text Language Craft and Structure SCORE",
+                                    "Literary Text Language Craft and Structure SCORE",
+                                    "Literary Text Key Ideas and Details SCORE"]
+            elif map_pro[0].Growth.startswith('Reading K-2'):
+                sub_domains_score = [map_pro[0].vocabulary_use_and_function,
+                                     map_pro[0].foundational_skills,
+                                     map_pro[0].language_and_writing,
+                                     map_pro[0].literature_and_informational_text]
+                sub_domains_name = ['Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                    'Literature and Informational Text']
+            else:
+                sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
+                                     map_pro[0].language_understarnd_edit_for_grammar_usage,
+                                     map_pro[0].language_understarnd_edit_for_mechanics]
+                sub_domains_name = ['Writing: Write Revise Texts for Purpose and Audience',
+                                    'Language: Understarnd, Edit for Grammar, Usage',
+                                    'Language: Understarnd, Edit for Mechanics']
+
+            return JsonResponse({
+                "test_date": test_date,
+                "test_duration": test_duration,
+                "rit_score": rit_score,
+                "map_score_trend_date": map_score_trend_date,
+                "map_score_trend_value": map_score_trend_value,
+                "sub_domains_score": sub_domains_score,
+                "sub_domains_name": sub_domains_name,
+                "pdf1": map_pdf_url,
+                "pdf2": map_pdf_url_all_items,
+                "pdf3": map_pdf_url_all_items_no_txt,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get latest map result of user {}!".format(phone),
+                "success": True
+            }, status=200)
 
 
 # @login_required

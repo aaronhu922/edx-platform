@@ -793,7 +793,7 @@ class SendSmsCodeView(APIView):
         template = settings.SMS.get('template', 'SMS_205090469')
 
         log.warning("SMS str {jsonstr}, sign name {sign}, template {template}".format(jsonstr=params, sign=sign, template=template))
-
+        logging.info("----secret is: {}".format(settings.SMS.get('secret', None)))
         obj = Aliyun()
         res = obj.send_sms(phone_number, sign, template, params)
         jsonStr = json.loads(str(res, encoding='utf-8'))
