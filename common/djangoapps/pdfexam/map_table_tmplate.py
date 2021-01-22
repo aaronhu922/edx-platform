@@ -110,7 +110,7 @@ all_map_cell_text = [
     ["", "", "", "RL.K.9", "RL.1.9", "RL.2.9", "RL.3.9", "RL.4.9", "RL.5.9"],
     ["", "", "Range of Reading and\n Level of Text Complexity", "RL.K.10", "RL.1.10", "RL.2.10", "RL.3.10",
      "RL.4.10", "RL.5.10"],
-    ["6", "Reading Standards for \nInformational Text K-5", "Key Ideas and Details", "RI.K.1", "RI.1.1",
+    ["6", "Reading Informational Text K–5", "Key Ideas and Details", "RI.K.1", "RI.1.1",
      "RI.2.1", "RI.3.1", "RI.4.1", "RI.5.1"],
     ["", "", "", "RI.K.2", "RI.1.2", "RI.2.2", "RI.3.2", "RI.4.2", "RI.5.2"],
     ["", "", "", "RI.K.3", "RI.1.3", "RI.2.3", "RI.3.3", "RI.4.3", "RI.5.3"],

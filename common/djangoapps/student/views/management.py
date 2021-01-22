@@ -1386,15 +1386,16 @@ def my_map_test_info(request, phone):
 def stu_map_test_info(request, id):
     if request.method == 'GET':
         user_pro = UserProfile.objects.filter(user_id=id).first()
+        map_pro = []
         if user_pro:
             phone = user_pro.phone_number
             log.info("user id {}, phone is {}".format(id, phone))
-        map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+            map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
         if len(map_pro) <= 0:
-            log.error("No map test results for user {}".format(phone))
+            log.error("No map test results for user {}".format(id))
             return JsonResponse({"errorCode": "400",
                                  "executed": True,
-                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "message": "User with id {} does not have any test result!".format(id),
                                  "success": False}, status=200)
         else:
             rit_score = map_pro[0].Score
