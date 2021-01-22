@@ -107,8 +107,8 @@ def ExtractStarData(data, phonenumber):
         if source == 'SchoolYear':
             value[0] = value[0].strip('(')
             value[0] = value[0].strip(')')
-
-        ExtractDataFromStarEarlyLiteracyBriefInfoDict[KeyItem] = value[0]
+        if value and len(value) > 0:
+            ExtractDataFromStarEarlyLiteracyBriefInfoDict[KeyItem] = value[0]
 
         if KeyItem == 'Test Date':
             ##################################################################################
@@ -309,7 +309,10 @@ def ExtractStarData(data, phonenumber):
             ExtractDataDictReady2DjangoModel['LexileRange'] = ExtractDataDictMergeTemp[KeyItem]
 
         if KeyItem == 'Estimated Oral Reading Fluency (Words Correct Per Minute)':
-            ExtractDataDictReady2DjangoModel['EstORF'] = ExtractDataDictMergeTemp[KeyItem]
+            if ExtractDataDictMergeTemp[KeyItem]:
+                ExtractDataDictReady2DjangoModel['EstORF'] = ExtractDataDictMergeTemp[KeyItem]
+            else:
+                ExtractDataDictReady2DjangoModel['EstORF'] = ''
 
         if KeyItem == 'Alphabetic Principle':
             ExtractDataDictReady2DjangoModel['AlphabeticPrinciple'] = ExtractDataDictMergeTemp[KeyItem]
