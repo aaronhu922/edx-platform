@@ -703,7 +703,7 @@ def extract_map_data(data, phonenumber):
         elif source == "TestDuration":
             extract_regex = "\d+/\d+/\d+\s\-\s\d{1,3}"
         elif source == "Growth":
-            extract_regex = source + ":\s+" + "(.*?)" + "\s+" + "HIGHLIGHTS"
+            extract_regex = source + ":\s+" + "(.*?)" + "\s+" + "CCSS"
         elif source == "HIGHLIGHTS":
             extract_regex = source + "\s+(.*?)\s+" + "INSTRUCTIONAL"
         elif source == "Group by":
