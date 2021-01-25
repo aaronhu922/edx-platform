@@ -69,8 +69,6 @@ def draw_reading_2_5_map_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
             # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
@@ -114,9 +112,6 @@ def draw_reading_2_5_in_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
     plt.savefig(file_path, dpi=300)
@@ -158,9 +153,6 @@ def draw_reading_2_5_no_txt_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
     plt.savefig(file_path, dpi=300)
@@ -206,9 +198,6 @@ def draw_reading_k_2_simple_map_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=300)
@@ -251,9 +240,6 @@ def draw_reading_k_2_in_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
     plt.savefig(file_path, dpi=300)
@@ -295,9 +281,6 @@ def draw_reading_k_2_no_txt_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
     plt.savefig(file_path, dpi=300)
@@ -339,9 +322,6 @@ def draw_language_2_12_simple_map_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=300)
@@ -383,9 +363,6 @@ def draw_language_2_12_in_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
     plt.savefig(file_path, dpi=300)
@@ -426,9 +403,6 @@ def draw_language_2_12_no_txt_all_table(map_pro):
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
             elif item_level == "REINFORCE":
                 the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            else:
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['green'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
     plt.savefig(file_path, dpi=300)
