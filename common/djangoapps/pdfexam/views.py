@@ -107,6 +107,7 @@ def handle_pdf_data(request):
         except Exception as err:
             log.error(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
+            raise err
             temp = loader.get_template('pdf2MySQL/show_failed.html')
         else:
             temp = loader.get_template('pdf2MySQL/show_success.html')

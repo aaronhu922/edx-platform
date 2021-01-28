@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.conf import settings
 
-from .reading_2_5_template import short_columns, reading_2_5_short_txt, reading_2_5_no_txt, reading_2_5_indexes
+from .reading_2_5_template import short_columns, reading_2_5_no_txt, reading_2_5_indexes, \
+    reading_2_5_cells_color, reading_2_5_items_name
 from .map_table_tmplate import all_map_indexes_dict, all_map_cell_text, all_cells_no_text
 from .reading_k_2_template import reading_k_2_indexes, reading_k_2_cell_no_text
 from .lanuage_2_12_template import language_2_12_indexes, language_2_12_simple_no_txt, map_2_12_columns
 from .map_2_12_table_template import map_2_12_simple_table, map_2_12_table, map_2_12_table_indexes
+
 # from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
 
 log = logging.getLogger("edx.pdfexam")
@@ -16,10 +18,12 @@ plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
 
 def draw_map_table(map_pro):
+    log.info("Start to drawing map table!")
     if map_pro.Growth.startswith('Reading 2-5'):
-        draw_reading_2_5_map_table(map_pro)
-        draw_reading_2_5_in_all_table(map_pro)
-        draw_reading_2_5_no_txt_all_table(map_pro)
+        colors_dict = create_table_colors_dict(map_pro, reading_2_5_items_name)
+        draw_reading_2_5_map_table(map_pro, colors_dict)
+        draw_reading_2_5_in_all_table(map_pro, colors_dict)
+        draw_reading_2_5_no_txt_all_table(map_pro, colors_dict)
         log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
     elif map_pro.Growth.startswith('Reading K-2'):
         draw_reading_k_2_simple_map_table(map_pro)
@@ -38,7 +42,7 @@ def draw_map_table(map_pro):
     map_pro.save()
 
 
-def draw_reading_2_5_map_table(map_pro):
+def draw_reading_2_5_map_table(map_pro, colors_dict):
     phone_number = map_pro.phone_number
 
     fig, ax = plt.subplots()
@@ -53,23 +57,7 @@ def draw_reading_2_5_map_table(map_pro):
     the_table.auto_set_column_width(col=list(range(len(short_columns))))
     the_table.scale(1, 0.85)
 
-    map_res = map_pro.map_ext_results.all()
-    for index in reading_2_5_indexes.values():
-        the_table[(index[0], index[1])].set_facecolor(mcolors.CSS4_COLORS['limegreen'])
-
-    for item_result in map_res:
-        item_name = item_result.check_item.item_name
-        item_level = item_result.item_level
-        try:
-            indexes = reading_2_5_indexes[item_name]
-        except KeyError as err:
-            log.info("Item {} is not exist in map test table, error is: {}".format(item_name, err))
-        else:
-            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
-            elif item_level == "REINFORCE":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
-            # log.info("Item {}'s index is {}, with level {}".format(item_name, indexes, item_level))
+    set_color_for_table(colors_dict, the_table, reading_2_5_indexes)
 
     file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
     plt.savefig(file_path, dpi=300)
@@ -80,7 +68,50 @@ def draw_reading_2_5_map_table(map_pro):
     plt.clf()
 
 
-def draw_reading_2_5_in_all_table(map_pro):
+def set_color_for_table(colors_dict, the_table, table_indexes):
+    for name, color in colors_dict.items():
+        try:
+            indexes = table_indexes[name]
+        except KeyError as err:
+            log.info("Item {} is not exist in map test table, error is: {}".format(name, err))
+        else:
+            # log.info("item {}'s color is {}, index is {}".format(name, color, indexes))
+            if color == 0:
+                the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['limegreen'])
+            elif color == 1:
+                the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['yellow'])
+            else:
+                the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['red'])
+
+
+def create_table_colors_dict(map_pro, ccss_items_template):
+    map_res = map_pro.map_ext_results.all()
+    colors_dict = reading_2_5_cells_color.copy()
+    log.info("map file {}'s init color is {}".format(map_pro.Growth, colors_dict))
+    for item_result in map_res:
+        item_name = item_result.check_item.item_name
+        item_level = item_result.item_level
+
+        if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
+            colors_dict[item_name] = 2
+        elif item_level == "REINFORCE":
+            colors_dict[item_name] = 1
+    for item in ccss_items_template:
+        i = 0
+        green_back = True
+        while i < len(item):
+            if green_back and colors_dict[item[i]] == 0:
+                i += 1
+            else:
+                green_back = False
+                if colors_dict[item[i]] == 0:
+                    colors_dict[item[i]] = 2
+                i += 1
+    log.info("map file {}'s color index after filling green is {}".format(map_pro.Growth, colors_dict))
+    return colors_dict
+
+
+def draw_reading_2_5_in_all_table(map_pro, colors_dict):
     phone_number = map_pro.phone_number
 
     fig, ax = plt.subplots()
@@ -95,23 +126,7 @@ def draw_reading_2_5_in_all_table(map_pro):
     the_table.auto_set_column_width(col=list(range(len(short_columns))))
     the_table.scale(1, 0.24)
 
-    map_res = map_pro.map_ext_results.all()
-    for index_name in reading_2_5_indexes.keys():
-        index = all_map_indexes_dict[index_name]
-        the_table[(index[0], index[1])].set_facecolor(mcolors.CSS4_COLORS['limegreen'])
-
-    for item_result in map_res:
-        item_name = item_result.check_item.item_name
-        item_level = item_result.item_level
-        try:
-            indexes = all_map_indexes_dict[item_name]
-        except KeyError as err:
-            log.info("Item {} is not exist in map test table, error is: {}".format(item_name, err))
-        else:
-            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
-            elif item_level == "REINFORCE":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
+    set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
     plt.savefig(file_path, dpi=300)
@@ -121,7 +136,7 @@ def draw_reading_2_5_in_all_table(map_pro):
     plt.clf()
 
 
-def draw_reading_2_5_no_txt_all_table(map_pro):
+def draw_reading_2_5_no_txt_all_table(map_pro, colors_dict):
     phone_number = map_pro.phone_number
 
     fig, ax = plt.subplots()
@@ -135,24 +150,7 @@ def draw_reading_2_5_no_txt_all_table(map_pro):
     the_table.set_fontsize(9)
     the_table.auto_set_column_width(col=list(range(len(short_columns))))
     the_table.scale(1, 0.24)
-
-    map_res = map_pro.map_ext_results.all()
-    for index_name in reading_2_5_indexes.keys():
-        index = all_map_indexes_dict[index_name]
-        the_table[(index[0], index[1])].set_facecolor(mcolors.CSS4_COLORS['limegreen'])
-
-    for item_result in map_res:
-        item_name = item_result.check_item.item_name
-        item_level = item_result.item_level
-        try:
-            indexes = all_map_indexes_dict[item_name]
-        except KeyError as err:
-            log.info("Item {} is not exist in map test table, error is: {}".format(item_name, err))
-        else:
-            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['red'])
-            elif item_level == "REINFORCE":
-                the_table[(indexes[0], indexes[1])].set_facecolor(mcolors.CSS4_COLORS['yellow'])
+    set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
 
     file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
     plt.savefig(file_path, dpi=300)
