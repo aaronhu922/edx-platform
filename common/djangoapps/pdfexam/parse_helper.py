@@ -717,37 +717,32 @@ def extract_map_data(data, phonenumber):
             temp_source = "Informational Text: Key Ideas and Details"
             extract_regex = "(?<=" + temp_source + ")\s\d{1,3}"
         elif source == "Informational Text: Key Ideas and Details STANDARD ERROR":
-            temp_source1 = "Draw Conclusions, Infer, Predict"
             temp_source0 = "Informational Text: Key Ideas and Details"
-            extract_regex = temp_source0 + "(.*?)" + temp_source1
+            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
         elif source == "Vocabulary: Acquisition and Use SCORE":
             temp_source = "Vocabulary: Acquisition and Use"
             extract_regex = "(?<=" + temp_source + ")\s+\d{3}"
         elif source == "Vocabulary: Acquisition and Use STANDARD ERROR":
             temp_source0 = "Vocabulary: Acquisition and Use"
-            temp_source1 = "Context Clues and Multiple-Meaning Words"
-            extract_regex = temp_source0 + "(.*?)" + temp_source1
+            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
         elif source == "Informational Text: Language, Craft, and Structure SCORE":
             temp_source = "Informational Text: Language, Craft, and Structure"
             extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Informational Text: Language, Craft, and Structure STANDARD ERROR":
             temp_source0 = "Informational Text: Language, Craft, and Structure"
-            temp_source1 = "Point of View, Purpose, Perspective, Figurative and Rhetorical Language"
-            extract_regex = temp_source0 + "(.*?)" + temp_source1
+            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
         elif source == "Literary Text: Language, Craft, and Structure SCORE":
             temp_source = "Literary Text: Language, Craft, and Structure"
             extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Literary Text: Language, Craft, and Structure STANDARD ERROR":
             temp_source0 = "Literary Text: Language, Craft, and Structure"
-            temp_source1 = "Figurative, Connotative Meanings; Tone"
-            extract_regex = temp_source0 + "(.*?)" + temp_source1
+            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
         elif source == "Literary Text: Key Ideas and Details SCORE":
             temp_source = "Literary Text: Key Ideas and Details"
             extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
         elif source == "Literary Text: Key Ideas and Details STANDARD ERROR":
             temp_source0 = "Literary Text: Key Ideas and Details"
-            temp_source1 = "Draw Conclusions, Infer, Predict"
-            extract_regex = temp_source0 + "(.*?)" + temp_source1
+            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
         elif source == "Vocabulary Use and Functions":
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         elif source == "Foundational Skills":
