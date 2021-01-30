@@ -827,7 +827,7 @@ def extract_map_data(data, phonenumber):
             else:
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
 
-    logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
+    # logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
 
     extract_data_dict_ready2_my_sql_model = {}
 
@@ -942,8 +942,8 @@ def extract_map_data(data, phonenumber):
             "It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
         MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
-    log.info(mapnwea_student_profile_reinfore_develop_status_dict)
-    log.info(len(mapnwea_student_profile_reinfore_develop_status_dict))
+    # log.info(mapnwea_student_profile_reinfore_develop_status_dict)
+    log.info("Parsed {} items from this pdf!".format(len(mapnwea_student_profile_reinfore_develop_status_dict)))
 
     for GKtoG5CheckItem in mapnwea_student_profile_reinfore_develop_status_dict.keys():
         check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem.upper()).first()
