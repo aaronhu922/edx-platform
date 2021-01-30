@@ -1273,7 +1273,14 @@ def course_overview_ccss_items_info(request, cour_id=None):
             g3_items = list(MapTestCheckItem.objects.filter(l3_grade="G3").order_by('id').values('id', 'item_name'))
             g4_items = list(MapTestCheckItem.objects.filter(l3_grade="G4").order_by('id').values('id', 'item_name'))
             g5_items = list(MapTestCheckItem.objects.filter(l3_grade="G5").order_by('id').values('id', 'item_name'))
-            # course_ids = list(CourseOverview.objects.all().values('id', 'display_name'))
+            g6_items = list(MapTestCheckItem.objects.filter(l3_grade="G6").order_by('id').values('id', 'item_name'))
+            g7_items = list(MapTestCheckItem.objects.filter(l3_grade="G7").order_by('id').values('id', 'item_name'))
+            g8_items = list(MapTestCheckItem.objects.filter(l3_grade="G8").order_by('id').values('id', 'item_name'))
+            g9_g10_items = list(
+                MapTestCheckItem.objects.filter(l3_grade="G9-G10").order_by('id').values('id', 'item_name'))
+            g11_g12_items = list(
+                MapTestCheckItem.objects.filter(l3_grade="G11-G12").order_by('id').values('id', 'item_name'))
+
             course_ids = list(CourseOverviewExtendInfo.objects.all().values('id', 'course_overview__display_name'))
             # for course_item in course_ids:
             #     course_item['id'] = str(course_item['id'])
@@ -1284,6 +1291,11 @@ def course_overview_ccss_items_info(request, cour_id=None):
                 "g3_items": g3_items,
                 "g4_items": g4_items,
                 "g5_items": g5_items,
+                "g6_items": g6_items,
+                "g7_items": g7_items,
+                "g8_items": g8_items,
+                "g9_g10_items": g9_g10_items,
+                "g11_g12_items": g11_g12_items,
                 "course_ids": course_ids,
                 "errorCode": "200",
                 "executed": True,
