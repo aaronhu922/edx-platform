@@ -34,10 +34,10 @@ def draw_map_table(map_pro):
         draw_reading_k_2_no_txt_all_table(map_pro, colors_dict)
         log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
     elif map_pro.Growth.startswith('Language'):
-        colors_dict = create_table_colors_dict(map_pro, language_2_12_items_array, language_2_12_cells_color)
-        draw_language_2_12_simple_map_table(map_pro, colors_dict)
-        draw_language_2_12_in_all_table(map_pro, colors_dict)
-        draw_language_2_12_no_txt_all_table(map_pro, colors_dict)
+        # colors_dict = create_table_colors_dict(map_pro, language_2_12_items_array, language_2_12_cells_color)
+        # draw_language_2_12_simple_map_table(map_pro, colors_dict)
+        # draw_language_2_12_in_all_table(map_pro, colors_dict)
+        # draw_language_2_12_no_txt_all_table(map_pro, colors_dict)
         log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
     else:
         log.info("Wrong map type {}".format(map_pro.Growth))
