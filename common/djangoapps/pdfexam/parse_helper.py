@@ -637,7 +637,8 @@ def extract_map_data(data, phonenumber):
     MapnweaStudentProfileSummaryINFO = ['ExportDate', 'ExportStaff', 'FirstName', 'FamilyName', 'Grade', 'ID', \
                                         'TestCategory', 'Standard Error', 'Possible range', 'TestDate', 'TestDuration', \
                                         'Rapid-Guessing %', 'Est. Impact of Rapid-Guessing % on RIT', 'Growth', \
-                                        'Semester', 'Score', 'HIGHLIGHTS', 'Group by', 'Grade(s)', 'Concepts to', \
+                                        'Semester', 'Score', 'LANGUAGE USAGE', 'HIGHLIGHTS', 'Group by', 'Grade(s)',
+                                        # 'Concepts to', \
                                         'Informational Text: Key Ideas and Details SCORE', \
                                         'Informational Text: Key Ideas and Details STANDARD ERROR', \
                                         'Vocabulary: Acquisition and Use SCORE', \
@@ -650,9 +651,9 @@ def extract_map_data(data, phonenumber):
                                         'Literary Text: Key Ideas and Details STANDARD ERROR',
                                         'Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
                                         'Literature and Informational Text',
-                                        'Writing: Write Revise Texts for Purpose and Audience',
-                                        'Language: Understarnd, Edit for Grammar, Usage',
-                                        'Language: Understarnd, Edit for Mechanics']
+                                        'Writing: Write, Revise Texts for Purpose and Audience',
+                                        'Language: Understand, Edit for Grammar, Usage',
+                                        'Language: Understand, Edit for Mechanics']
 
     mapnwea_student_profile_summary_info_dict = {}
 
@@ -686,6 +687,8 @@ def extract_map_data(data, phonenumber):
             extract_regex = "READING"
         elif source == "Score":
             extract_regex = "(?<=" + 'READING' + "\s)\d{3}"
+        elif source == "LANGUAGE USAGE":
+            extract_regex = "(?<=" + source + "\s)\d{3}"
         elif source == "Standard Error":
             extract_regex = "Standard Error:" + "(.*?)" + "Rapid-Guessing %:"
         elif source == "Rapid-Guessing %":
@@ -751,11 +754,11 @@ def extract_map_data(data, phonenumber):
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         elif source == "Literature and Informational Text":
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Writing: Write Revise Texts for Purpose and Audience":
+        elif source == "Writing: Write, Revise Texts for Purpose and Audience":
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Language: Understarnd, Edit for Grammar, Usage":
+        elif source == "Language: Understand, Edit for Grammar, Usage":
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Language: Understarnd, Edit for Mechanics":
+        elif source == "Language: Understand, Edit for Mechanics":
             extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         else:
             pass
@@ -766,6 +769,8 @@ def extract_map_data(data, phonenumber):
         if value and len(value) > 0:
             mapnwea_student_profile_summary_info_dict[source] = value[0].strip()
 
+    if mapnwea_student_profile_summary_info_dict["Growth"].startswith('Language'):
+        mapnwea_student_profile_summary_info_dict['Score'] = mapnwea_student_profile_summary_info_dict['LANGUAGE USAGE']
     name = str(mapnwea_student_profile_summary_info_dict["FirstName"]).strip()
     mapnwea_student_profile_summary_info_dict["FirstName"] = name
     mapnwea_student_profile_summary_info_dict["FamilyName"] = name
@@ -827,7 +832,7 @@ def extract_map_data(data, phonenumber):
             else:
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
 
-    logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
+    # logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
 
     extract_data_dict_ready2_my_sql_model = {}
 
@@ -918,13 +923,13 @@ def extract_map_data(data, phonenumber):
         elif KeyItem == 'Literature and Informational Text':
             extract_data_dict_ready2_my_sql_model['literature_and_informational_text'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Writing: Write Revise Texts for Purpose and Audience':
+        elif KeyItem == 'Writing: Write, Revise Texts for Purpose and Audience':
             extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Language: Understarnd, Edit for Grammar, Usage':
+        elif KeyItem == 'Language: Understand, Edit for Grammar, Usage':
             extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_grammar_usage'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Language: Understarnd, Edit for Mechanics':
+        elif KeyItem == 'Language: Understand, Edit for Mechanics':
             extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_mechanics'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
@@ -942,8 +947,8 @@ def extract_map_data(data, phonenumber):
             "It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
         MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
-    log.info(mapnwea_student_profile_reinfore_develop_status_dict)
-    log.info(len(mapnwea_student_profile_reinfore_develop_status_dict))
+    # log.info(mapnwea_student_profile_reinfore_develop_status_dict)
+    log.info("Parsed {} items from this pdf!".format(len(mapnwea_student_profile_reinfore_develop_status_dict)))
 
     for GKtoG5CheckItem in mapnwea_student_profile_reinfore_develop_status_dict.keys():
         check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem.upper()).first()

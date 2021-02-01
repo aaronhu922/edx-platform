@@ -1356,11 +1356,11 @@ def my_map_test_info(request, phone):
                                      map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
                                      map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
                                      map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
-                sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
-                                    "Vocabulary Acquisition and Use SCORE",
-                                    "Informational Text Language Craft and Structure SCORE",
-                                    "Literary Text Language Craft and Structure SCORE",
-                                    "Literary Text Key Ideas and Details SCORE"]
+                sub_domains_name = ["Informational Text Key Ideas and Details",
+                                    "Vocabulary Acquisition and Use",
+                                    "Informational Text Language Craft and Structure",
+                                    "Literary Text Language Craft and Structure",
+                                    "Literary Text Key Ideas and Details"]
             elif map_pro[0].Growth.startswith('Reading K-2'):
                 sub_domains_score = [map_pro[0].vocabulary_use_and_function,
                                      map_pro[0].foundational_skills,
@@ -1372,9 +1372,9 @@ def my_map_test_info(request, phone):
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
                                      map_pro[0].language_understarnd_edit_for_grammar_usage,
                                      map_pro[0].language_understarnd_edit_for_mechanics]
-                sub_domains_name = ['Writing: Write Revise Texts for Purpose and Audience',
-                                    'Language: Understarnd, Edit for Grammar, Usage',
-                                    'Language: Understarnd, Edit for Mechanics']
+                sub_domains_name = ['Writing: Write, Revise Texts for Purpose and Audience',
+                                    'Language: Understand, Edit for Grammar, Usage',
+                                    'Language: Understand, Edit for Mechanics']
 
             return JsonResponse({
                 "test_date": test_date,
@@ -1428,11 +1428,11 @@ def stu_map_test_info(request, id):
                                      map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
                                      map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
                                      map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
-                sub_domains_name = ["Informational Text Key Ideas and Details SCORE",
-                                    "Vocabulary Acquisition and Use SCORE",
-                                    "Informational Text Language Craft and Structure SCORE",
-                                    "Literary Text Language Craft and Structure SCORE",
-                                    "Literary Text Key Ideas and Details SCORE"]
+                sub_domains_name = ["Informational Text Key Ideas and Details",
+                                    "Vocabulary Acquisition and Use",
+                                    "Informational Text Language Craft and Structure",
+                                    "Literary Text Language Craft and Structure",
+                                    "Literary Text Key Ideas and Details"]
             elif map_pro[0].Growth.startswith('Reading K-2'):
                 sub_domains_score = [map_pro[0].vocabulary_use_and_function,
                                      map_pro[0].foundational_skills,
@@ -1444,9 +1444,9 @@ def stu_map_test_info(request, id):
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
                                      map_pro[0].language_understarnd_edit_for_grammar_usage,
                                      map_pro[0].language_understarnd_edit_for_mechanics]
-                sub_domains_name = ['Writing: Write Revise Texts for Purpose and Audience',
-                                    'Language: Understarnd, Edit for Grammar, Usage',
-                                    'Language: Understarnd, Edit for Mechanics']
+                sub_domains_name = ['Writing: Write, Revise Texts for Purpose and Audience',
+                                    'Language: Understand, Edit for Grammar, Usage',
+                                    'Language: Understand, Edit for Mechanics']
 
             return JsonResponse({
                 "test_date": test_date,
