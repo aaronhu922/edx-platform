@@ -947,10 +947,10 @@ def extract_map_data(data, phonenumber):
             extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Language: Understand, Edit for Grammar, Usage':
-            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_grammar_usage'] = \
+            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_grammar_usage'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Language: Understand, Edit for Mechanics':
-            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_mechanics'] = \
+            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_mechanics'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
             pass

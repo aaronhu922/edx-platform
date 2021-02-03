@@ -1370,8 +1370,8 @@ def my_map_test_info(request, phone):
                                     'Literature and Informational Text']
             else:
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
-                                     map_pro[0].language_understarnd_edit_for_grammar_usage,
-                                     map_pro[0].language_understarnd_edit_for_mechanics]
+                                     map_pro[0].language_understand_edit_for_grammar_usage,
+                                     map_pro[0].language_understand_edit_for_mechanics]
                 sub_domains_name = ['Writing: Write, Revise Texts for Purpose and Audience',
                                     'Language: Understand, Edit for Grammar, Usage',
                                     'Language: Understand, Edit for Mechanics']
@@ -1442,8 +1442,8 @@ def stu_map_test_info(request, id):
                                     'Literature and Informational Text']
             else:
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
-                                     map_pro[0].language_understarnd_edit_for_grammar_usage,
-                                     map_pro[0].language_understarnd_edit_for_mechanics]
+                                     map_pro[0].language_understand_edit_for_grammar_usage,
+                                     map_pro[0].language_understand_edit_for_mechanics]
                 sub_domains_name = ['Writing: Write, Revise Texts for Purpose and Audience',
                                     'Language: Understand, Edit for Grammar, Usage',
                                     'Language: Understand, Edit for Mechanics']
