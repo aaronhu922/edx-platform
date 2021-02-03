@@ -163,8 +163,8 @@ class MapStudentProfile(models.Model):
     language_and_writing = models.CharField(max_length=10, default="")
     literature_and_informational_text = models.CharField(max_length=10, default="")
     writing_write_revise_texts_for_purpose_and_audience = models.CharField(max_length=10, default="")
-    language_understarnd_edit_for_grammar_usage = models.CharField(max_length=10, default="")
-    language_understarnd_edit_for_mechanics = models.CharField(max_length=10, default="")
+    language_understand_edit_for_grammar_usage = models.CharField(max_length=10, default="")
+    language_understand_edit_for_mechanics = models.CharField(max_length=10, default="")
     map_pdf_url_all_items = models.CharField(max_length=200, null=True)
     map_pdf_url_all_items_no_txt = models.CharField(max_length=200, null=True)
 
@@ -175,8 +175,8 @@ class MapStudentProfile(models.Model):
 class MapTestCheckItem(models.Model):
     l1_domain = models.CharField(max_length=64)
     l2_sub_domain = models.CharField(max_length=64)
-    l3_grade = models.CharField(max_length=10)
-    item_name = models.CharField(max_length=10, unique=True)
+    l3_grade = models.CharField(max_length=20)
+    item_name = models.CharField(max_length=20, unique=True)
     item_desc = models.CharField(max_length=256)
 
 

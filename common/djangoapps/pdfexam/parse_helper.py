@@ -813,11 +813,13 @@ def extract_map_data(data, phonenumber):
     check_list_extract_regex = "CCSS.ELA-Literacy.(.*?):"
     check_list_value = re.findall(check_list_extract_regex, data)
 
+    items_count = len(check_list_value)
     mapnwea_student_profile_reinfore_develop_status_dict = {}
     logging.info("---check items list:{}".format(check_list_value))
-    logging.info("---check items list size:{}".format(len(check_list_value)))
+    logging.info("---check items list size:{}".format(items_count))
 
-    for item in check_list_value:
+    for i in range(items_count - 1):
+        item = check_list_value[i]
         check_item_desc_reg = item + ':(.*?)CCSS.ELA-Literacy'
         desc_text = re.findall(check_item_desc_reg, data)
         for desc in desc_text:
@@ -832,7 +834,25 @@ def extract_map_data(data, phonenumber):
             else:
                 mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
 
-    # logging.info("---check items dict:{}".format(mapnwea_student_profile_reinfore_develop_status_dict))
+    # Last item has no next item, so no can't use ":(.*?)CCSS.ELA-Literacy" to filter the description text,
+    # use ':(.*?)CONFIDENTIALITY'
+    item = check_list_value[-1]
+    check_item_desc_reg = item + ':(.*?)CONFIDENTIALITY'
+    desc_text = re.findall(check_item_desc_reg, data)
+    for desc in desc_text:
+        # logging.info("text ---{}".format(desc))
+        if ("REINFORCE" in str(desc)) and ("DEVELOP" in str(desc)):
+            mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE_DEVELOP"
+        elif ("REINFORCE" in str(desc)) and ("DEVELOP" not in str(desc)):
+            mapnwea_student_profile_reinfore_develop_status_dict[item] = "REINFORCE"
+        elif ("REINFORCE" not in str(desc)) and (
+            "DEVELOP" in str(desc)):
+            mapnwea_student_profile_reinfore_develop_status_dict[item] = "DEVELOP"
+        else:
+            mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
+    logging.info("{} is the last check item of pdf, with level {}.".format(item,
+                                                                           mapnwea_student_profile_reinfore_develop_status_dict[
+                                                                               item]))
 
     extract_data_dict_ready2_my_sql_model = {}
 
@@ -927,10 +947,10 @@ def extract_map_data(data, phonenumber):
             extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Language: Understand, Edit for Grammar, Usage':
-            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_grammar_usage'] = \
+            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_grammar_usage'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Language: Understand, Edit for Mechanics':
-            extract_data_dict_ready2_my_sql_model['language_understarnd_edit_for_mechanics'] = \
+            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_mechanics'] = \
                 mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
             pass
@@ -947,12 +967,18 @@ def extract_map_data(data, phonenumber):
             "It is going to update a student {} map result, need to clear pre checked items.".format(phonenumber))
         MapProfileExtResults.objects.filter(map_student_profile=stu_map_pro).delete()
 
-    # log.info(mapnwea_student_profile_reinfore_develop_status_dict)
+    log.info(mapnwea_student_profile_reinfore_develop_status_dict)
     log.info("Parsed {} items from this pdf!".format(len(mapnwea_student_profile_reinfore_develop_status_dict)))
+
+    # count = 0
 
     for GKtoG5CheckItem in mapnwea_student_profile_reinfore_develop_status_dict.keys():
         check_item = MapTestCheckItem.objects.filter(item_name=GKtoG5CheckItem.upper()).first()
         if check_item:
+            # count += 1
+            # log.info("Item name {}, item level is {}, count {}".format(GKtoG5CheckItem,
+            #                                                            mapnwea_student_profile_reinfore_develop_status_dict[
+            #                                                                GKtoG5CheckItem], count))
             MapProfileExtResults.objects.update_or_create(map_student_profile=stu_map_pro, check_item=check_item,
                                                           defaults={
                                                               "item_level":
@@ -960,4 +986,8 @@ def extract_map_data(data, phonenumber):
                                                                       GKtoG5CheckItem]
                                                           }
                                                           )
+        else:
+            log.warning("there is no item name {}, with level {}".format(GKtoG5CheckItem,
+                                                                         mapnwea_student_profile_reinfore_develop_status_dict[
+                                                                             GKtoG5CheckItem]))
     return stu_map_pro
