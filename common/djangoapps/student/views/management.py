@@ -1069,8 +1069,8 @@ def students_search(request, key=None):
                         "username": user.username
                     },
                     "phone_number": user.profile.phone_number,
-                    "web_accelerator_name": user.profile.phone_number,
-                    "web_accelerator_link": user.profile.phone_number,
+                    "web_accelerator_name": user.profile.web_accelerator_name,
+                    "web_accelerator_link": user.profile.web_accelerator_link,
                     "courses_count": num
                 }
                 res_list.append(user_obj)
