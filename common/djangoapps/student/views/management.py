@@ -1102,7 +1102,7 @@ def students_management(request, pk=None):
     "web_accelerator_link": "http://47.114.176.127/test.pac",
     """
     if request.method == 'GET':
-        test_obj = UserProfile.objects.all().order_by('id')
+        test_obj = UserProfile.objects.all().order_by('id')[:10]
         serializer = StudentSerializer(test_obj, many=True)
         return JsonResponse({
             "data_list": serializer.data,
