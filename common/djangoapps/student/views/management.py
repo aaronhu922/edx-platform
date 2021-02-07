@@ -41,6 +41,7 @@ from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
 from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
+from pdfexam.map_table_tmplate import domain_full_name_list, domain_start_name_list
 
 from common.djangoapps.student.serializers import StudentSerializer
 
@@ -1344,6 +1345,16 @@ def my_map_test_info(request, phone):
             test_duration = map_pro[0].TestDuration
             test_date = map_pro[0].TestDate
             map_pdf_url = map_pro[0].map_pdf_url
+            achievement_above_mean = map_pro[0].achievement_above_mean
+            lexile_score = map_pro[0].lexile_score
+            flesch_kincaid_grade_level = map_pro[0].flesch_kincaid_grade_level
+            growth_goals_date = map_pro[0].growth_goals_date
+            suggested_area_of_focus = map_pro[0].suggested_area_of_focus_list
+            if suggested_area_of_focus:
+                suggested_area_of_focus_list = suggested_area_of_focus.split(',')
+            relative_strength = map_pro[0].relative_strength_list
+            if relative_strength:
+                relative_strength_list = relative_strength.split(',')
             map_score_trend_date = []
             map_score_trend_value = []
             for result in reversed(map_pro):
@@ -1351,39 +1362,80 @@ def my_map_test_info(request, phone):
                 map_score_trend_value.append(result.Score)
 
             if map_pro[0].Growth.startswith('Reading 2-5'):
-                sub_domains_score = [map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE,
-                                     map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                sub_domains_score = [map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE,
                                      map_pro[0].Informational_Text_Language_Craft_and_Structure_SCORE,
                                      map_pro[0].Literary_Text_Language_Craft_and_Structure_SCORE,
-                                     map_pro[0].Literary_Text_Key_Ideas_and_Details_SCORE]
-                sub_domains_name = ["Informational Text Key Ideas and Details",
-                                    "Vocabulary Acquisition and Use",
-                                    "Informational Text Language Craft and Structure",
-                                    "Literary Text Language Craft and Structure",
-                                    "Literary Text Key Ideas and Details"]
+                                     map_pro[0].Vocabulary_Acquisition_and_Use_SCORE,
+                                     map_pro[0].Informational_Text_Key_Ideas_and_Details_SCORE
+                                     ]
+                sub_domains_name = ['Literary Text: Key Ideas and Details',
+                                    'Informational Text: Language, Craft, and Structure',
+                                    'Literary Text: Language, Craft, and Structure',
+                                    'Vocabulary: Acquisition and Use',
+                                    'Informational Text: Key Ideas and Details']
+                sub_domains_focus_or_strength = ['', '', '', '', '']
+                if suggested_area_of_focus:
+                    for item in suggested_area_of_focus_list:
+                        domain_index = int(item)
+                        if domain_index < 5:
+                            sub_domains_focus_or_strength[domain_index] = "Suggested Area of Focus"
+                if relative_strength:
+                    for item in relative_strength_list:
+                        domain_index = int(item)
+                        if domain_index < 5:
+                            sub_domains_focus_or_strength[domain_index] = "Relative Strength"
             elif map_pro[0].Growth.startswith('Reading K-2'):
                 sub_domains_score = [map_pro[0].vocabulary_use_and_function,
-                                     map_pro[0].foundational_skills,
                                      map_pro[0].language_and_writing,
+                                     map_pro[0].foundational_skills,
                                      map_pro[0].literature_and_informational_text]
-                sub_domains_name = ['Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                sub_domains_name = ['Vocabulary Use and Functions',
+                                    'Language and Writing',
+                                    'Foundational Skills',
                                     'Literature and Informational Text']
+                sub_domains_focus_or_strength = ['', '', '', '']
+                if suggested_area_of_focus:
+                    for item in suggested_area_of_focus_list:
+                        domain_index = int(item)
+                        if 4 < domain_index < 9:
+                            sub_domains_focus_or_strength[domain_index] = "Suggested Area of Focus"
+                if relative_strength:
+                    for item in relative_strength_list:
+                        domain_index = int(item)
+                        if 4 < domain_index < 9:
+                            sub_domains_focus_or_strength[domain_index] = "Relative Strength"
             else:
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
-                                     map_pro[0].language_understand_edit_for_grammar_usage,
-                                     map_pro[0].language_understand_edit_for_mechanics]
+                                     map_pro[0].language_understand_edit_for_mechanics,
+                                     map_pro[0].language_understand_edit_for_grammar_usage]
                 sub_domains_name = ['Writing: Write, Revise Texts for Purpose and Audience',
-                                    'Language: Understand, Edit for Grammar, Usage',
-                                    'Language: Understand, Edit for Mechanics']
+                                    'Language: Understand, Edit for Mechanics',
+                                    'Language: Understand, Edit for Grammar, Usage']
+                sub_domains_focus_or_strength = ['', '', '']
+                if suggested_area_of_focus:
+                    for item in suggested_area_of_focus_list:
+                        domain_index = int(item)
+                        if 8 < domain_index < 12:
+                            sub_domains_focus_or_strength[domain_index] = "Suggested Area of Focus"
+                if relative_strength:
+                    for item in relative_strength_list:
+                        domain_index = int(item)
+                        if 8 < domain_index < 12:
+                            sub_domains_focus_or_strength[domain_index] = "Relative Strength"
 
             return JsonResponse({
                 "test_date": test_date,
                 "test_duration": test_duration,
                 "rit_score": rit_score,
+                "achievement_above_mean": achievement_above_mean,
+                "lexile_score": lexile_score,
+                "flesch_kincaid_grade_level": flesch_kincaid_grade_level,
+                "growth_goals_date": growth_goals_date,
                 "map_score_trend_date": map_score_trend_date,
                 "map_score_trend_value": map_score_trend_value,
                 "sub_domains_score": sub_domains_score,
                 "sub_domains_name": sub_domains_name,
+                "sub_domains_focus_or_strength": sub_domains_focus_or_strength,
                 "map_pdf_url": map_pdf_url,
                 "errorCode": "200",
                 "executed": True,

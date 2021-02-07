@@ -15,7 +15,7 @@ from .map_res_table import draw_map_table
 from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
-from .parse_helper import ExtractStarData, extract_map_data
+from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
 from .star_reading_table import draw_star_reading_table
 
 log = logging.getLogger("edx.pdfexam")
@@ -56,6 +56,7 @@ def handle_pdf_data(request):
     if request.method == 'POST':  # 请求方法为POST时，进行处理
         try:
             myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
+            ext_file = request.FILES['ext_file']
         except MultiValueDictKeyError as err:
             log.warning(err)
             return JsonResponse({"errorCode": "400",
@@ -74,10 +75,10 @@ def handle_pdf_data(request):
             destination.write(chunk)
 
         destination.close()
-
-        ################################################################
-        #  trans to txt file and stored in txtintermediate dictionary
-        ################################################################
+        #
+        # ################################################################
+        # #  trans to txt file and stored in txtintermediate dictionary
+        # ################################################################
         pdffilestored = os.path.join(settings.MEDIA_ROOT, myFile.name)
 
         with pdfplumber.open(pdffilestored) as pdf:
@@ -89,7 +90,21 @@ def handle_pdf_data(request):
                 # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
                 page_content = '\n'.join(page.extract_text().split('\n')[1:-1])
                 content = content + page_content
-            # print(content)
+        ext_data = None
+        if ext_file:
+            destination = open(os.path.join(settings.MEDIA_ROOT, ext_file.name), 'wb+')
+            for chunk in ext_file.chunks():
+                destination.write(chunk)
+            destination.close()
+            ext_pdffilestored = os.path.join(settings.MEDIA_ROOT, ext_file.name)
+            with pdfplumber.open(ext_pdffilestored) as pdf1:
+                pages = pdf1.pages
+                tbl = pages[0].extract_tables()
+                ext_data = str(tbl[0][5])
+                ext_data = ext_data.replace('\\n', '&')
+                ext_data = ext_data.replace('\\uf120', '---')
+            log.info("Map ext data is {}".format(ext_data))
+            os.remove(ext_pdffilestored)
 
         ################################################################
         #  trans end
@@ -99,6 +114,8 @@ def handle_pdf_data(request):
                 ExtractStarData(content, phonenumber)
             elif test_type == "map_test":
                 stu_map_pro = extract_map_data(content, phonenumber)
+                if ext_data:
+                    stu_map_pro = extract_map_ext_data(ext_data, stu_map_pro)
                 draw_map_table(stu_map_pro)
             elif test_type == "star_reading":
                 draw_star_reading_table()
@@ -107,7 +124,7 @@ def handle_pdf_data(request):
         except Exception as err:
             log.error(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
-            raise err
+            # raise err
             temp = loader.get_template('pdf2MySQL/show_failed.html')
         else:
             temp = loader.get_template('pdf2MySQL/show_success.html')

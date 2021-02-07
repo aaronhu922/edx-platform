@@ -167,6 +167,12 @@ class MapStudentProfile(models.Model):
     language_understand_edit_for_mechanics = models.CharField(max_length=10, default="")
     map_pdf_url_all_items = models.CharField(max_length=200, null=True)
     map_pdf_url_all_items_no_txt = models.CharField(max_length=200, null=True)
+    achievement_above_mean = models.CharField(max_length=10, default="")
+    lexile_score = models.CharField(max_length=20, default="")
+    flesch_kincaid_grade_level = models.CharField(max_length=20, default="")
+    growth_goals_date = models.CharField(max_length=20, default="")
+    suggested_area_of_focus_list = models.CharField(max_length=20, default="")
+    relative_strength_list = models.CharField(max_length=20, default="")
 
     class Meta:
         unique_together = ('phone_number', 'TestDate')

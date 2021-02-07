@@ -396,3 +396,29 @@ all_map_indexes_dict = {'L.K.1': (1, 3), 'L.1.1': (1, 4), 'L.2.1': (1, 5), 'L.3.
                         'RI.K.10': (114, 3),
                         'RI.1.10': (114, 4), 'RI.2.10': (114, 5), 'RI.3.10': (114, 6), 'RI.4.10': (114, 7),
                         'RI.5.10': (114, 8)}
+
+domain_start_name_list = ['Literary Text: Key Ideas and Details',
+                          'Informational Text: Language, Craft,',
+                          'Literary Text: Language, Craft, and',
+                          'Vocabulary: Acquisition and Use',
+                          'Informational Text: Key Ideas and',
+                          'Vocabulary Use and Functions',
+                          'Language and Writing',
+                          'Foundational Skills',
+                          'Literature and Informational Text',
+                          'Writing: Write, Revise Texts for',
+                          'Language: Understand, Edit for'
+                          ]
+domain_full_name_list = ['Literary Text: Key Ideas and Details',
+                         'Informational Text: Language, Craft, and Structure',
+                         'Literary Text: Language, Craft, and Structure',
+                         'Vocabulary: Acquisition and Use',
+                         'Informational Text: Key Ideas and Details',
+                         'Vocabulary Use and Functions',
+                         'Language and Writing',
+                         'Foundational Skills',
+                         'Literature and Informational Text',
+                         'Writing: Write, Revise Texts for Purpose and Audience',
+                         'Language: Understand, Edit for Mechanics',
+                         'Language: Understand, Edit for Grammar, Usage'
+                         ]

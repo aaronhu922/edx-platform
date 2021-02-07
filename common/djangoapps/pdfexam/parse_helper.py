@@ -2,6 +2,7 @@ import logging
 import re
 import datetime
 from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults, MapTestCheckItem
+from .map_table_tmplate import domain_full_name_list, domain_start_name_list
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -991,3 +992,44 @@ def extract_map_data(data, phonenumber):
                                                                          mapnwea_student_profile_reinfore_develop_status_dict[
                                                                              GKtoG5CheckItem]))
     return stu_map_pro
+
+
+def extract_map_ext_data(ext_data, map_pro):
+    regex1 = '&(\d+ (TH|RD|ST|ND))&'
+    regex2 = '\d\.\d to \d\.\d'
+    regex3 = '\d+L - \d+L'
+    regex4 = 'GROWTH GOALS&([\w ]+)'
+    value1 = re.search(regex1, ext_data)
+    if value1:
+        log.info("Regex {}, value {}.".format(regex1, value1.group()))
+        map_pro.achievement_above_mean = value1.group().strip('&')
+    value = re.findall(regex2, ext_data)
+    if len(value) > 0:
+        log.info("Regex {}, value {}.".format(regex2, value))
+        map_pro.flesch_kincaid_grade_level = value[0]
+    value = re.findall(regex3, ext_data)
+    if len(value) > 0:
+        log.info("Regex {}, value {}.".format(regex3, value))
+        map_pro.lexile_score = value[0]
+    value = re.findall(regex4, ext_data)
+    if len(value) > 0:
+        log.info("Regex {}, value {}.".format(regex4, value))
+        map_pro.growth_goals_date = value[0]
+
+    focus_str = ''
+    strength_str = ''
+    for item in domain_start_name_list:
+        reg_focus = '(' + item + '[ &\d\w,]*)---&Suggested Area of Focus'
+        reg_strength = '(' + item + '[ &\d\w,]*)---&Relative Strength'
+        for domain in re.findall(reg_focus, ext_data):
+            name = re.sub("&[\\d&]*", " ", domain).strip()
+            log.info("Focus item index: {}, domain name: {}".format(domain_full_name_list.index(name), name))
+            focus_str = focus_str + str(domain_full_name_list.index(name)) + ','
+        for domain in re.findall(reg_strength, ext_data):
+            name = re.sub("&[\\d&]*", " ", domain).strip()
+            strength_str = strength_str + str(domain_full_name_list.index(name)) + ','
+            log.info("Strength item index: {}, domain name: {}".format(domain_full_name_list.index(name), name))
+    map_pro.suggested_area_of_focus_list = focus_str.strip(',')
+    map_pro.relative_strength_list = strength_str.strip(',')
+    map_pro.save()
+    return map_pro
