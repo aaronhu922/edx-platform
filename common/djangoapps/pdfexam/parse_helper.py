@@ -1019,8 +1019,8 @@ def extract_map_ext_data(ext_data, map_pro):
     focus_str = ''
     strength_str = ''
     for item in domain_start_name_list:
-        reg_focus = '(' + item + '[ &\d\w,]*)---&Suggested Area of Focus'
-        reg_strength = '(' + item + '[ &\d\w,]*)---&Relative Strength'
+        reg_focus = '(' + item + '[ &\d\w,]*)---[&]?Suggested Area of Focus'
+        reg_strength = '(' + item + '[ &\d\w,]*)---[&]?Relative Strength'
         for domain in re.findall(reg_focus, ext_data):
             name = re.sub("&[\\d&]*", " ", domain).strip()
             log.info("Focus item index: {}, domain name: {}".format(domain_full_name_list.index(name), name))
