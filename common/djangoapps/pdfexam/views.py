@@ -17,6 +17,7 @@ from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
 from .star_reading_table import draw_star_reading_table
+from student.models import UserProfile
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -35,6 +36,9 @@ def upload_file(request):
 @csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
+    context = {
+        'message': "",
+    }
     if 'phone_number' not in request.POST:
         return JsonResponse({"errorCode": "400",
                              "executed": True,
@@ -46,28 +50,19 @@ def handle_pdf_data(request):
     '''  3 types of test report.
     "star_early", "star_reading", "map_test"
     '''
-    log.warning("Import {} report for user {}".format(test_type, phonenumber))
-    if not phonenumber:
-        return JsonResponse({"errorCode": "400",
-                             "executed": True,
-                             "message": "No phone number input for pdf upload!",
-                             "success": False}, status=200)
+    log.info("Import {} report for user {}".format(test_type, phonenumber))
+    user_pro = UserProfile.objects.filter(phone_number=phonenumber).first()
+    if not user_pro:
+        context["message"] = "手机号 {} 不存在，请先用手机号注册。".format(phonenumber)
+        return render(request, 'pdf2MySQL/show_failed.html', context)
 
     if request.method == 'POST':  # 请求方法为POST时，进行处理
         try:
             myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
-            ext_file = request.FILES['ext_file']
         except MultiValueDictKeyError as err:
-            log.warning(err)
-            return JsonResponse({"errorCode": "400",
-                                 "executed": True,
-                                 "message": "Need to choose a PDF file for upload. {}!".format(err),
-                                 "success": False}, status=200)
-        if not myFile:
-            return JsonResponse({"errorCode": "400",
-                                 "executed": True,
-                                 "message": "No file was uploaded!",
-                                 "success": False}, status=200)
+            log.error(err)
+            context["message"] = "请选择要上传的测试pdf。"
+            return render(request, 'pdf2MySQL/show_failed.html', context)
 
         destination = open(os.path.join(settings.MEDIA_ROOT, myFile.name), 'wb+')  # 打开特定的文件进行二进制的写操作
 
@@ -90,25 +85,34 @@ def handle_pdf_data(request):
                 # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
                 page_content = '\n'.join(page.extract_text().split('\n')[1:-1])
                 content = content + page_content
-        ext_data = None
-        if ext_file:
-            destination = open(os.path.join(settings.MEDIA_ROOT, ext_file.name), 'wb+')
-            for chunk in ext_file.chunks():
-                destination.write(chunk)
-            destination.close()
-            ext_pdffilestored = os.path.join(settings.MEDIA_ROOT, ext_file.name)
-            with pdfplumber.open(ext_pdffilestored) as pdf1:
-                pages = pdf1.pages
-                tbl = pages[0].extract_tables()
-                ext_data = str(tbl[0][5])
-                ext_data = ext_data.replace('\\n', '&')
-                ext_data = ext_data.replace('\\uf120', '---')
-            log.info("Map ext data is {}".format(ext_data))
-            os.remove(ext_pdffilestored)
-
+        os.remove(pdffilestored)
+        try:
+            ext_data = None
+            ext_file = request.FILES.get('ext_file')
+            if test_type == "map_test" and ext_file:
+                # ext_file = request.FILES['ext_file']
+                destination = open(os.path.join(settings.MEDIA_ROOT, ext_file.name), 'wb+')
+                for chunk in ext_file.chunks():
+                    destination.write(chunk)
+                destination.close()
+                ext_pdffilestored = os.path.join(settings.MEDIA_ROOT, ext_file.name)
+                with pdfplumber.open(ext_pdffilestored) as pdf1:
+                    pages = pdf1.pages
+                    tbl = pages[0].extract_tables()
+                    ext_data = str(tbl[0][5])
+                    ext_data = ext_data.replace('\\n', '&')
+                    ext_data = ext_data.replace('\\uf120', '---')
+                log.info("Map ext data is {}".format(ext_data))
+                os.remove(ext_pdffilestored)
+        except Exception as err:
+            log.error(err)
+            log.error("Upload pdf {} failed!".format(ext_file.name))
+            context["message"] = "辅助报告上传失败，错误原因：" + str(err)
+            return render(request, 'pdf2MySQL/show_failed.html', context)
         ################################################################
         #  trans end
         ################################################################
+
         try:
             if test_type == "star_early":
                 ExtractStarData(content, phonenumber)
@@ -120,17 +124,18 @@ def handle_pdf_data(request):
             elif test_type == "star_reading":
                 draw_star_reading_table()
             else:
-                raise
+                context["message"] = "类型暂不支持！"
+                return render(request, 'pdf2MySQL/show_failed.html', context)
         except Exception as err:
             log.error(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
-            # raise err
-            temp = loader.get_template('pdf2MySQL/show_failed.html')
+            context["message"] = "解析错误，请选择正确的文件类型！ " + str(err)
+            return render(request, 'pdf2MySQL/show_failed.html', context)
+        if ext_file:
+            context["message"] = "用户{}，上传的报告： {} 和 {}。".format(phonenumber, myFile.name, ext_file.name)
         else:
-            temp = loader.get_template('pdf2MySQL/show_success.html')
-
-        os.remove(pdffilestored)
-        return HttpResponse(temp.render())
+            context["message"] = "用户{}，上传的报告： {}。".format(phonenumber, myFile.name)
+        return render(request, 'pdf2MySQL/show_success.html', context)
 
 
 def show(self, request):

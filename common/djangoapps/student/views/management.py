@@ -1398,12 +1398,12 @@ def my_map_test_info(request, phone):
                     for item in suggested_area_of_focus_list:
                         domain_index = int(item)
                         if 4 < domain_index < 9:
-                            sub_domains_focus_or_strength[domain_index] = "Suggested Area of Focus"
+                            sub_domains_focus_or_strength[domain_index - 5] = "Suggested Area of Focus"
                 if relative_strength:
                     for item in relative_strength_list:
                         domain_index = int(item)
                         if 4 < domain_index < 9:
-                            sub_domains_focus_or_strength[domain_index] = "Relative Strength"
+                            sub_domains_focus_or_strength[domain_index - 5] = "Relative Strength"
             else:
                 sub_domains_score = [map_pro[0].writing_write_revise_texts_for_purpose_and_audience,
                                      map_pro[0].language_understand_edit_for_mechanics,
@@ -1416,12 +1416,12 @@ def my_map_test_info(request, phone):
                     for item in suggested_area_of_focus_list:
                         domain_index = int(item)
                         if 8 < domain_index < 12:
-                            sub_domains_focus_or_strength[domain_index] = "Suggested Area of Focus"
+                            sub_domains_focus_or_strength[domain_index - 9] = "Suggested Area of Focus"
                 if relative_strength:
                     for item in relative_strength_list:
                         domain_index = int(item)
                         if 8 < domain_index < 12:
-                            sub_domains_focus_or_strength[domain_index] = "Relative Strength"
+                            sub_domains_focus_or_strength[domain_index - 9] = "Relative Strength"
 
             return JsonResponse({
                 "test_date": test_date,

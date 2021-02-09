@@ -38,7 +38,7 @@ def draw_map_table(map_pro):
         log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
     else:
         log.info("Wrong map type {}".format(map_pro.Growth))
-        pass
+        raise ValueError("上传了不支持的测试类型 {}，生成pdf发生了错误！".format(map_pro.Growth))
 
     map_pro.save()
 
