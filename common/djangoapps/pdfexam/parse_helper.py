@@ -851,9 +851,9 @@ def extract_map_data(data, phonenumber):
             mapnwea_student_profile_reinfore_develop_status_dict[item] = "DEVELOP"
         else:
             mapnwea_student_profile_reinfore_develop_status_dict[item] = "No More Recommendation"
-    logging.info("{} is the last check item of pdf, with level {}.".format(item,
-                                                                           mapnwea_student_profile_reinfore_develop_status_dict[
-                                                                               item]))
+        logging.info("{} is the last check item of pdf, with level {}.".format(item,
+                                                                               mapnwea_student_profile_reinfore_develop_status_dict[
+                                                                                   item]))
 
     extract_data_dict_ready2_my_sql_model = {}
 
