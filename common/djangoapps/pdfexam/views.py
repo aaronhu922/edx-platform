@@ -99,7 +99,7 @@ def handle_pdf_data(request):
                 with pdfplumber.open(ext_pdffilestored) as pdf1:
                     pages = pdf1.pages
                     tbl = pages[0].extract_tables()
-                    ext_data = str(tbl[0][5])
+                    ext_data = str(tbl[0][-2])
                     ext_data = ext_data.replace('\\n', '&')
                     ext_data = ext_data.replace('\\uf120', '---')
                 log.info("Map ext data is {}".format(ext_data))
@@ -129,7 +129,7 @@ def handle_pdf_data(request):
         except Exception as err:
             log.error(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
-            context["message"] = "解析错误，请选择正确的文件类型！ " + str(err)
+            context["message"] = "解析错误，请选择正确的文件类型！" + str(err)
             return render(request, 'pdf2MySQL/show_failed.html', context)
         if ext_file:
             context["message"] = "用户{}，上传的报告： {} 和 {}。".format(phonenumber, myFile.name, ext_file.name)
