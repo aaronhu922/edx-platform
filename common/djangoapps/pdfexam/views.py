@@ -32,8 +32,9 @@ def choose_file(request):
 def upload_file(request):
     return render(request, 'pdf2MySQL/upload_file.html')
 
-
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
     context = {
@@ -143,9 +144,9 @@ def show(self, request):
     return HttpResponse(temp.render())
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def get_student_exam_stats(request, phone):
     if request.method == 'GET':
         instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
@@ -244,8 +245,9 @@ def get_student_exam_stats(request, phone):
                 "success": True
             }, status=200)
 
-
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def ccss_items_management(request, pk=None):
     if request.method == 'GET':
         items = list(MapTestCheckItem.objects.values().order_by('-id'))
