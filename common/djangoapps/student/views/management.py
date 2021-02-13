@@ -41,7 +41,6 @@ from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
 from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
-from pdfexam.map_table_tmplate import domain_full_name_list, domain_start_name_list
 
 from common.djangoapps.student.serializers import StudentSerializer
 
@@ -880,9 +879,9 @@ def text_me_the_app(request):
     return render_to_response('text-me-the-app.html', context)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def course_enrollment_info(request, id=None, stu_id=None):
     """
     List all code snippets, or create a new snippet.
@@ -981,9 +980,9 @@ def course_enrollment_info(request, id=None, stu_id=None):
                                  "success": True}, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def customer_service_info(request, pk=None):
     """
     List all code snippets, or create a new snippet.
@@ -1044,9 +1043,9 @@ def customer_service_info(request, pk=None):
                              "success": True}, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def students_search(request, key=None):
     """
     "phone_number": "",
@@ -1090,9 +1089,9 @@ def students_search(request, key=None):
         })
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def students_management(request, pk=None):
     """
     "phone_number": "",
@@ -1179,9 +1178,9 @@ def students_management(request, pk=None):
                              "success": True}, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def course_overview_info(request):
     """
     List all code snippets, or create a new snippet.
@@ -1242,9 +1241,9 @@ def course_overview_info(request):
             }, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def course_overview_ccss_items_info(request, cour_id=None):
     if request.method == 'GET':
         if cour_id:
@@ -1328,9 +1327,9 @@ def course_overview_ccss_items_info(request, cour_id=None):
             }, status=201)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def my_map_test_info(request, phone):
     if request.method == 'GET':
         map_pro = list(MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
@@ -1363,6 +1362,7 @@ def my_map_test_info(request, phone):
             if relative_strength:
                 relative_strength_list = relative_strength.split(',')
 
+            # This list order must be the same with pdfexam.map_table_tmplate's domain_full_name_list, and domain_name_reg_list
             sub_domains_info_list = [
                 {
                     "domain_name": "Literary Text: Key Ideas and Details",
@@ -1450,9 +1450,9 @@ def my_map_test_info(request, phone):
             }, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def stu_map_test_info(request, id):
     if request.method == 'GET':
         user_pro = UserProfile.objects.filter(user_id=id).first()
@@ -1580,9 +1580,9 @@ def stu_map_test_info(request, id):
         }, status=200)
 
 
-# @login_required
-# @ensure_csrf_cookie
-@csrf_exempt
+@login_required
+@ensure_csrf_cookie
+# @csrf_exempt
 def my_i_picture_info(request, phone):
     if request.method == 'GET':
         map_pro = MapStudentProfile.objects.filter(phone_number=phone).order_by('-TestDate').first()
