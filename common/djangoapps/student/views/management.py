@@ -41,7 +41,6 @@ from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
 from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
-from pdfexam.map_table_tmplate import domain_full_name_list, domain_start_name_list
 
 from common.djangoapps.student.serializers import StudentSerializer
 
@@ -1363,6 +1362,7 @@ def my_map_test_info(request, phone):
             if relative_strength:
                 relative_strength_list = relative_strength.split(',')
 
+            # This list order must be the same with pdfexam.map_table_tmplate's domain_full_name_list, and domain_name_reg_list
             sub_domains_info_list = [
                 {
                     "domain_name": "Literary Text: Key Ideas and Details",

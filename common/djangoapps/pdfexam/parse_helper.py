@@ -2,7 +2,7 @@ import logging
 import re
 import datetime
 from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults, MapTestCheckItem
-from .map_table_tmplate import domain_full_name_list, domain_start_name_list
+from .map_table_tmplate import domain_full_name_list, domain_name_reg_list
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -1018,17 +1018,17 @@ def extract_map_ext_data(ext_data, map_pro):
 
     focus_str = ''
     strength_str = ''
-    for item in domain_start_name_list:
-        reg_focus = '(' + item + '[ &\d\w,]*)---[&]?Suggested Area of Focus'
-        reg_strength = '(' + item + '[ &\d\w,]*)---[&]?Relative Strength'
+    for i in range(len(domain_name_reg_list)):
+        reg_focus = '(' + domain_name_reg_list[i] + ')[&]?---[&]?Suggested Area of Focus'
+        reg_strength = '(' + domain_name_reg_list[i] + ')[&]?---[&]?Relative Strength'
         for domain in re.findall(reg_focus, ext_data):
             name = re.sub("&[\\d&]*", " ", domain).strip()
-            log.info("Focus item index: {}, domain name: {}".format(domain_full_name_list.index(name), name))
-            focus_str = focus_str + str(domain_full_name_list.index(name)) + ','
+            log.info("Focus item index: {}, domain name: {}".format(i, name))
+            focus_str = focus_str + str(i) + ','
         for domain in re.findall(reg_strength, ext_data):
             name = re.sub("&[\\d&]*", " ", domain).strip()
-            strength_str = strength_str + str(domain_full_name_list.index(name)) + ','
-            log.info("Strength item index: {}, domain name: {}".format(domain_full_name_list.index(name), name))
+            strength_str = strength_str + str(i) + ','
+            log.info("Strength item index: {}, domain name: {}".format(i, name))
     map_pro.suggested_area_of_focus_list = focus_str.strip(',')
     map_pro.relative_strength_list = strength_str.strip(',')
     map_pro.save()
