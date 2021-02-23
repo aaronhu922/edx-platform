@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from django.conf import settings
 from django.utils.datastructures import MultiValueDictKeyError
@@ -18,6 +19,8 @@ from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
 from .star_reading_table import draw_star_reading_table
 from student.models import UserProfile
+from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
+from reportlab.pdfgen import canvas
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -31,6 +34,7 @@ def choose_file(request):
 
 def upload_file(request):
     return render(request, 'pdf2MySQL/upload_file.html')
+
 
 # @login_required
 # @ensure_csrf_cookie
@@ -110,9 +114,17 @@ def handle_pdf_data(request):
             log.error("Upload pdf {} failed!".format(ext_file.name))
             context["message"] = "辅助报告上传失败，错误原因：" + str(err)
             return render(request, 'pdf2MySQL/show_failed.html', context)
-        ################################################################
-        #  trans end
-        ################################################################
+
+        try:
+            instructional_file = request.FILES.get('instructional_file')
+            if test_type == "map_test" and instructional_file:
+                create_instructional_report(phonenumber, instructional_file)
+        except Exception as err:
+            raise err
+            log.error(err)
+            log.error("Upload pdf {} failed!".format(ext_file.name))
+            context["message"] = "指导报告上传失败，错误原因：" + str(err)
+            return render(request, 'pdf2MySQL/show_failed.html', context)
 
         try:
             if test_type == "star_early":
@@ -142,6 +154,76 @@ def handle_pdf_data(request):
 def show(self, request):
     temp = loader.get_template('pdf2MySQL/show_success.html')
     return HttpResponse(temp.render())
+
+
+def create_instructional_report(phonenumber, instructional_file):
+    destination = open(os.path.join(settings.MEDIA_ROOT, instructional_file.name), 'wb+')
+    for chunk in instructional_file.chunks():
+        destination.write(chunk)
+    destination.close()
+    instruct_pdffilestored = os.path.join(settings.MEDIA_ROOT, instructional_file.name)
+    pdf_writer = PdfFileWriter()
+    original_report = PdfFileReader(open(instruct_pdffilestored, "rb"))
+    pages_num = len(original_report.pages)
+    first_page = original_report.getPage(0)
+    up_right = first_page.mediaBox.upperRight
+    first_page.mediaBox.upperLeft = (0, up_right[1] - 320)
+    pdf_writer.addPage(first_page)
+    first_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_0.pdf")
+    last_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_1.pdf")
+    with Path(first_page_new).open(mode="wb") as output_file:
+        pdf_writer.write(output_file)
+
+    with pdfplumber.open(instruct_pdffilestored) as pdf1:
+        pages = pdf1.pages
+        text = pages[-1].extract_text()
+        log.info("Map instructional data of last page is {}".format(text))
+        make_pdf_file(last_page_new, text, up_right)
+    merger = PdfFileMerger()
+    input_first = open(first_page_new, "rb")
+    input_last = open(last_page_new, "rb")
+    merger.append(input_first)
+    merger.append(fileobj=original_report, pages=(1, pages_num - 1))
+    merger.append(input_last)
+    final_name = phonenumber + "_instruction.pdf"
+    final_page = os.path.join(settings.MEDIA_ROOT, final_name)
+    output = open(final_page, "wb")
+    merger.write(output)
+    merger.close()
+    # os.remove(instruct_pdffilestored)
+    return final_name
+
+
+def make_pdf_file(output_filename, text, up_right):
+    inch = 72
+    point = 1
+    # title = output_filename
+    log.warning("Page size of instructional report is {}".format(up_right))
+
+    c = canvas.Canvas(output_filename, pagesize=up_right)
+    v = int(up_right[1]) - 40
+    width = int(up_right[0])
+    txt_arr = text.split('\n')
+    i = 0
+    for subtline in txt_arr:
+        if subtline.startswith("CONFIDENTIALITY NOTICE:"):
+            break
+        if subtline.endswith(":"):
+            c.setFont("Helvetica-Bold", 10 * point)
+            c.drawString(1 * inch, v, subtline)
+        elif i + 1 < len(txt_arr) and txt_arr[i + 1].endswith(":"):
+            c.setFont("Helvetica", 14 * point)
+            v -= 40 * point
+            c.drawString(1 * inch, v, subtline)
+            v -= 8 * point
+            c.line(1 * inch, v, width - 1 * inch, v)
+        else:
+            c.setFont("Helvetica", 10 * point)
+            c.drawString(1 * inch, v, "--" + subtline)
+        v -= 20 * point
+        i += 1
+    c.showPage()
+    c.save()
 
 
 # @login_required
@@ -244,6 +326,7 @@ def get_student_exam_stats(request, phone):
                 "message": "Succeed to get latest test result of user {}!".format(phone),
                 "success": True
             }, status=200)
+
 
 # @login_required
 # @ensure_csrf_cookie

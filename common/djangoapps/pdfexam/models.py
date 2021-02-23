@@ -173,9 +173,10 @@ class MapStudentProfile(models.Model):
     growth_goals_date = models.CharField(max_length=20, default="")
     suggested_area_of_focus_list = models.CharField(max_length=20, default="")
     relative_strength_list = models.CharField(max_length=20, default="")
+    map_pdf_url_instructional_area = models.CharField(max_length=200, null=True)
 
     class Meta:
-        unique_together = ('phone_number', 'TestDate')
+        unique_together = ('phone_number', 'TestDate', 'Growth')
 
 
 class MapTestCheckItem(models.Model):
