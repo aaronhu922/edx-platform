@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 
 from django.conf import settings
@@ -203,17 +204,35 @@ def make_pdf_file(output_filename, text, up_right):
     c = canvas.Canvas(output_filename, pagesize=up_right)
     v = int(up_right[1]) - 40
     width = int(up_right[0])
+    text = re.sub('re.ning', 'refining', text)
+    text = re.sub('on.ction', 'onfiction', text)
+    text = re.sub('speci.c', 'specific', text)
+    text = re.sub('Identi.es', 'Identifies', text)
+    text = re.sub('e.ectiveness', 'effectiveness', text)
+    text = re.sub('di.erent', 'different', text)
+    text = re.sub('re.ects', 'reflects', text)
+    text = re.sub('con.icting', 'conflicting', text)
+    text = re.sub(' .ts', ' fits', text)
     txt_arr = text.split('\n')
     i = 0
     for subtline in txt_arr:
+        if len(subtline) < 5:
+            v -= 20 * point
+            i += 1
+            continue
         if subtline.startswith("CONFIDENTIALITY NOTICE:"):
             break
         if subtline.endswith(":"):
             c.setFont("Helvetica-Bold", 10 * point)
             c.drawString(1 * inch, v, subtline)
+        elif subtline.startswith("CCSS.ELA"):
+            v -= 40 * point
+            c.setFont("Helvetica", 14 * point)
+            c.drawString(1 * inch, v, subtline)
         elif i + 1 < len(txt_arr) and txt_arr[i + 1].endswith(":"):
             c.setFont("Helvetica", 14 * point)
-            v -= 40 * point
+            if i - 1 >= 0 and not txt_arr[i - 1].startswith("CCSS.ELA"):
+                v -= 40 * point
             c.drawString(1 * inch, v, subtline)
             v -= 8 * point
             c.line(1 * inch, v, width - 1 * inch, v)
