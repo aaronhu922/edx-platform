@@ -219,6 +219,7 @@ def make_pdf_file(output_filename, text, up_right):
     txt_arr = text.split('\n')
     i = 0
     for subtline in txt_arr:
+        log.info(subtline)
         if len(subtline) < 5:
             v -= 20 * point
             i += 1
@@ -244,7 +245,7 @@ def make_pdf_file(output_filename, text, up_right):
             c.drawString(1 * inch, v, "--" + subtline)
         v -= 20 * point
         i += 1
-        
+
     c.showPage()
     c.save()
 
