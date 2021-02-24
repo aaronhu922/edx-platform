@@ -191,7 +191,10 @@ def create_instructional_report(phonenumber, instructional_file):
     output = open(final_page, "wb")
     merger.write(output)
     merger.close()
-    # os.remove(instruct_pdffilestored)
+    os.remove(instruct_pdffilestored)
+    os.remove(first_page_new)
+    os.remove(last_page_new)
+
     return final_name
 
 
