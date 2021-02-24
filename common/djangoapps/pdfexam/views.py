@@ -202,7 +202,7 @@ def make_pdf_file(output_filename, text, up_right):
     inch = 72
     point = 1
     # title = output_filename
-    log.warning("Page size of instructional report is {}".format(up_right))
+    log.info("Page size of instructional report is {}".format(up_right))
 
     c = canvas.Canvas(output_filename, pagesize=up_right)
     v = int(up_right[1]) - 40
