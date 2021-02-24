@@ -244,6 +244,7 @@ def make_pdf_file(output_filename, text, up_right):
             c.drawString(1 * inch, v, "--" + subtline)
         v -= 20 * point
         i += 1
+        
     c.showPage()
     c.save()
 
