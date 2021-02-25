@@ -257,103 +257,104 @@ def make_pdf_file(output_filename, text, up_right):
 # @login_required
 # @ensure_csrf_cookie
 @csrf_exempt
-def get_student_exam_stats(request, phone):
+def get_student_exam_stats(request, phone, testdate):
     if request.method == 'GET':
-        instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
-        log.warning("Get {} test results for user {}".format(len(instance), phone))
-        if not instance or len(instance) <= 0:
+        # instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+        star_early = EarlyliteracySkillSetScores.objects.filter(phone_number=phone, TestDate=testdate).first()
+        if not star_early:
             return JsonResponse({"errorCode": "400",
                                  "executed": True,
-                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "message": "User {} has no star early test on {}!".format(phone, testdate),
                                  "success": False}, status=200)
         else:
-            scaled_score = instance[0].ScaledScore
-            lexile_measure = instance[0].LexileMeasure
-            test_date = instance[0].TestDate
+            scaled_score = star_early.ScaledScore
+            lexile_measure = star_early.LexileMeasure
+            test_date = star_early.TestDate
 
-            sub_items_alphabetic_principle = [instance[0].AlphabeticKnowledge,
-                                              instance[0].AlphabeticSequence,
-                                              instance[0].LetterSounds,
-                                              instance[0].PrintConceptsWordLength,
-                                              instance[0].PrintConceptsWordBorders,
-                                              instance[0].PrintConceptsLettersAndWords,
-                                              instance[0].Letters,
-                                              instance[0].IdentificationAndWordMatching]
+            sub_items_alphabetic_principle = [star_early.AlphabeticKnowledge,
+                                              star_early.AlphabeticSequence,
+                                              star_early.LetterSounds,
+                                              star_early.PrintConceptsWordLength,
+                                              star_early.PrintConceptsWordBorders,
+                                              star_early.PrintConceptsLettersAndWords,
+                                              star_early.Letters,
+                                              star_early.IdentificationAndWordMatching]
 
-            sub_items_phonemic_awareness = [instance[0].RhymingAndWordFamilies,
-                                            instance[0].BlendingWordParts,
-                                            instance[0].BlendingPhonemes,
-                                            instance[0].InitialAndFinalPhonemes,
-                                            instance[0].ConsonantBlendsPA,
-                                            instance[0].MedialPhonemeDiscrimination,
-                                            instance[0].PhonemeIsolationORManipulation,
-                                            instance[0].PhonemeSegmentation]
+            sub_items_phonemic_awareness = [star_early.RhymingAndWordFamilies,
+                                            star_early.BlendingWordParts,
+                                            star_early.BlendingPhonemes,
+                                            star_early.InitialAndFinalPhonemes,
+                                            star_early.ConsonantBlendsPA,
+                                            star_early.MedialPhonemeDiscrimination,
+                                            star_early.PhonemeIsolationORManipulation,
+                                            star_early.PhonemeSegmentation]
 
-            sub_items_phonics1 = [instance[0].ShortVowelSounds,
-                                  instance[0].InitialConsonantSounds,
-                                  instance[0].FinalConsonantSounds,
-                                  instance[0].LongVowelSounds,
-                                  instance[0].VariantVowelSounds,
-                                  instance[0].ConsonantBlendsPH]
+            sub_items_phonics1 = [star_early.ShortVowelSounds,
+                                  star_early.InitialConsonantSounds,
+                                  star_early.FinalConsonantSounds,
+                                  star_early.LongVowelSounds,
+                                  star_early.VariantVowelSounds,
+                                  star_early.ConsonantBlendsPH]
 
-            sub_items_phonics2 = [instance[0].ConsonantDigraphs,
-                                  instance[0].OtherVowelSounds,
-                                  instance[0].SoundSymbolCorrespondenceConsonants,
-                                  instance[0].WordBuilding,
-                                  instance[0].SoundSymbolCorrespondenceVowels,
-                                  instance[0].WordFamiliesOrRhyming]
+            sub_items_phonics2 = [star_early.ConsonantDigraphs,
+                                  star_early.OtherVowelSounds,
+                                  star_early.SoundSymbolCorrespondenceConsonants,
+                                  star_early.WordBuilding,
+                                  star_early.SoundSymbolCorrespondenceVowels,
+                                  star_early.WordFamiliesOrRhyming]
 
-            sub_items_structural_vocabulary = [instance[0].WordsWithAffixes,
-                                               instance[0].Syllabification,
-                                               instance[0].CompoundWords,
-                                               instance[0].WordFacility,
-                                               instance[0].Synonyms,
-                                               instance[0].Antonyms]
+            sub_items_structural_vocabulary = [star_early.WordsWithAffixes,
+                                               star_early.Syllabification,
+                                               star_early.CompoundWords,
+                                               star_early.WordFacility,
+                                               star_early.Synonyms,
+                                               star_early.Antonyms]
 
-            sub_items_other_domains = [instance[0].ComprehensionATtheSentenceLevel,
-                                       instance[0].ComprehensionOfParagraphs,
-                                       instance[0].NumberNamingAndNumberIdentification,
-                                       instance[0].NumberObjectCorrespondence,
-                                       instance[0].SequenceCompletion,
-                                       instance[0].ComposingAndDecomposing,
-                                       instance[0].Measurement]
+            sub_items_other_domains = [star_early.ComprehensionATtheSentenceLevel,
+                                       star_early.ComprehensionOfParagraphs,
+                                       star_early.NumberNamingAndNumberIdentification,
+                                       star_early.NumberObjectCorrespondence,
+                                       star_early.SequenceCompletion,
+                                       star_early.ComposingAndDecomposing,
+                                       star_early.Measurement]
 
-            # sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
-            #                     instance[0].VisualDiscrimination,
-            #                     instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
-            #                     instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
-            #                     instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
+            # sub_domain_score = [star_early.AlphabeticPrinciple, star_early.ConceptOfWord,
+            #                     star_early.VisualDiscrimination,
+            #                     star_early.Phonics, star_early.StructuralAnalysis, star_early.Vocabulary,
+            #                     star_early.SentenceLevelComprehension, star_early.PhonemicAwareness,
+            #                     star_early.ParagraphLevelComprehension, star_early.EarlyNumeracy]
 
             sub_domain_score_trend_date = []
             sub_domain_score_trend_value = []
 
-            for result in reversed(instance):
-                sub_domain_score_trend_date.append(result.TestDate)
-                sub_domain_score_data = [
-                    round((result.AlphabeticPrinciple + result.ConceptOfWord + result.VisualDiscrimination) / 3, 1),
-                    result.PhonemicAwareness, result.Phonics, (result.StructuralAnalysis + result.Vocabulary) / 2,
-                    round((
-                              result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3,
-                          1)]
-                sub_domain_score_trend_value.append(sub_domain_score_data)
+            sub_domain_score_trend_date.append(star_early.TestDate)
+            sub_domain_score_data = [
+                round((star_early.AlphabeticPrinciple + star_early.ConceptOfWord + star_early.VisualDiscrimination) / 3,
+                      1),
+                star_early.PhonemicAwareness, star_early.Phonics,
+                (star_early.StructuralAnalysis + star_early.Vocabulary) / 2,
+                round((
+                          star_early.SentenceLevelComprehension + star_early.ParagraphLevelComprehension + star_early.EarlyNumeracy) / 3,
+                      1)]
+            sub_domain_score_trend_value.append(sub_domain_score_data)
 
-            return JsonResponse({
-                "test_date": test_date,
-                "lexile_measure": lexile_measure,
-                "scaled_score": scaled_score,
-                "sub_items_alphabetic_principle": sub_items_alphabetic_principle,
-                "sub_items_phonemic_awareness": sub_items_phonemic_awareness,
-                "sub_items_phonics1": sub_items_phonics1,
-                "sub_items_phonics2": sub_items_phonics2,
-                "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
-                "sub_items_other_domains": sub_items_other_domains,
-                "sub_domain_score_trend_date": sub_domain_score_trend_date,
-                "sub_domain_score_trend_value": sub_domain_score_trend_value,
-                "errorCode": "200",
-                "executed": True,
-                "message": "Succeed to get latest test result of user {}!".format(phone),
-                "success": True
-            }, status=200)
+        return JsonResponse({
+            "test_date": test_date,
+            "lexile_measure": lexile_measure,
+            "scaled_score": scaled_score,
+            "sub_items_alphabetic_principle": sub_items_alphabetic_principle,
+            "sub_items_phonemic_awareness": sub_items_phonemic_awareness,
+            "sub_items_phonics1": sub_items_phonics1,
+            "sub_items_phonics2": sub_items_phonics2,
+            "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
+            "sub_items_other_domains": sub_items_other_domains,
+            "sub_domain_score_trend_date": sub_domain_score_trend_date,
+            "sub_domain_score_trend_value": sub_domain_score_trend_value,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get star early test of user {} on {}!".format(phone, testdate),
+            "success": True
+        }, status=200)
 
 
 # @login_required
