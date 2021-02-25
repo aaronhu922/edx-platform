@@ -41,10 +41,14 @@ urlpatterns = [
     url(r'^api/manage/courses_ccss_items$', views.course_overview_ccss_items_info, name='course_overview_ccss_items_info'),
     url(r'^api/front/i_map/(?P<phone>[0-9]+)$', views.my_i_picture_info,
         name='my_i_picture_info'),
-    url(r'^api/front/map_stats/(?P<phone>[0-9]+)$', views.my_map_test_info,
+    url(r'^api/front/map_stats/(?P<phone>[0-9]+)/(?P<name>.+)$', views.my_map_test_info,
         name='my_map_test_info'),
     url(r'^api/manage/stu_search/(?P<key>.+)$', views.students_search, name='students_management_search'),
     url(r'^api/manage/stu_map_stats/(?P<id>[0-9]+)$', views.stu_map_test_info,
         name='stu_map_test_info'),
+    url(r'^api/front/my_test_list/(?P<phone>[0-9]+)$', views.my_test_list,
+        name='my_test_list'),
+    url(r'^api/manage/stu_test_list/(?P<id>[0-9]+)$', views.stu_test_list,
+        name='stu_test_list'),
 
 ]

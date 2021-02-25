@@ -40,7 +40,7 @@ def draw_map_table(map_pro):
         log.info("Wrong map type {}".format(map_pro.Growth))
         raise ValueError("上传了不支持的测试类型 {}，生成pdf发生了错误！".format(map_pro.Growth))
 
-    map_pro.save()
+    # map_pro.save()
 
 
 def draw_reading_2_5_map_table(map_pro, colors_dict):
@@ -60,9 +60,10 @@ def draw_reading_2_5_map_table(map_pro, colors_dict):
 
     set_color_for_table(colors_dict, the_table, reading_2_5_indexes)
 
-    file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
+    file_name = phone_number + map_pro.TestDate + '_reading2_5.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
+    map_pro.map_pdf_url = settings.MEDIA_URL + file_name
 
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
@@ -129,9 +130,10 @@ def draw_reading_2_5_in_all_table(map_pro, colors_dict):
 
     set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
 
-    file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
+    file_name = phone_number + map_pro.TestDate + '_reading2_5_all.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + phone_number + '_all.pdf'
+    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items))
     plt.clf()
@@ -153,9 +155,11 @@ def draw_reading_2_5_no_txt_all_table(map_pro, colors_dict):
     the_table.scale(1, 0.24)
     set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
 
-    file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
+    file_name = phone_number + map_pro.TestDate + '_reading2_5_all_no_txt.pdf'
+
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + phone_number + '_all_no_txt.pdf'
+    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
     # map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
@@ -183,9 +187,10 @@ def draw_reading_k_2_simple_map_table(map_pro, colors_dict):
 
     set_color_for_table(colors_dict, the_table, reading_k_2_indexes)
 
-    file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
+    file_name = phone_number + map_pro.TestDate + '_reading_k_2.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
+    map_pro.map_pdf_url = settings.MEDIA_URL + file_name
 
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
@@ -208,9 +213,11 @@ def draw_reading_k_2_in_all_table(map_pro, colors_dict):
     the_table.scale(1, 0.24)
 
     set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
-    file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
+
+    file_name = phone_number + map_pro.TestDate + '_reading_k_2_all.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + phone_number + '_all.pdf'
+    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items))
     plt.clf()
@@ -232,9 +239,11 @@ def draw_reading_k_2_no_txt_all_table(map_pro, colors_dict):
     the_table.scale(1, 0.24)
 
     set_color_for_table(colors_dict, the_table, all_map_indexes_dict)
-    file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
+
+    file_name = phone_number + map_pro.TestDate + '_reading_k_2_all_no_txt.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + phone_number + '_all_no_txt.pdf'
+    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
     # map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
@@ -257,9 +266,11 @@ def draw_language_2_12_simple_map_table(map_pro, colors_dict):
     the_table.scale(1, 0.55)
 
     set_color_for_table(colors_dict, the_table, language_2_12_indexes)
-    file_path = settings.MEDIA_ROOT + phone_number + '.pdf'
+
+    file_name = phone_number + map_pro.TestDate + '_language2_12.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url = settings.MEDIA_URL + phone_number + '.pdf'
+    map_pro.map_pdf_url = settings.MEDIA_URL + file_name
 
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
@@ -280,15 +291,17 @@ def draw_language_2_12_in_all_table(map_pro, colors_dict):
     the_table.auto_set_column_width(col=list(range(len(map_2_12_columns))))
     the_table.scale(1, 0.24)
 
-    map_res = map_pro.map_ext_results.all()
+    # map_res = map_pro.map_ext_results.all()
     for index_name in language_2_12_indexes.keys():
         index = map_2_12_table_indexes[index_name]
         the_table[(index[0], index[1])].set_facecolor(mcolors.CSS4_COLORS['limegreen'])
 
     set_color_for_table(colors_dict, the_table, map_2_12_table_indexes)
-    file_path = settings.MEDIA_ROOT + phone_number + '_all.pdf'
+
+    file_name = phone_number + map_pro.TestDate + '_language2_12_all.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + phone_number + '_all.pdf'
+    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items))
     plt.clf()
@@ -310,9 +323,10 @@ def draw_language_2_12_no_txt_all_table(map_pro, colors_dict):
 
     set_color_for_table(colors_dict, the_table, map_2_12_table_indexes)
 
-    file_path = settings.MEDIA_ROOT + phone_number + '_all_no_txt.pdf'
+    file_name = phone_number + map_pro.TestDate + '_language2_12_all_no_txt.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + phone_number + '_all_no_txt.pdf'
+    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
     # map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))

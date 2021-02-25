@@ -118,14 +118,12 @@ def handle_pdf_data(request):
 
         try:
             instructional_file = request.FILES.get('instructional_file')
-            if test_type == "map_test" and instructional_file:
-                create_instructional_report(phonenumber, instructional_file)
+            # if test_type == "map_test" and instructional_file:
+            #     create_instructional_report(phonenumber, instructional_file)
         except Exception as err:
-            raise err
+            # raise err
             log.error(err)
             log.error("Upload pdf {} failed!".format(ext_file.name))
-            context["message"] = "指导报告上传失败，错误原因：" + str(err)
-            return render(request, 'pdf2MySQL/show_failed.html', context)
 
         try:
             if test_type == "star_early":
@@ -135,6 +133,10 @@ def handle_pdf_data(request):
                 if ext_data:
                     stu_map_pro = extract_map_ext_data(ext_data, stu_map_pro)
                 draw_map_table(stu_map_pro)
+                if instructional_file:
+                    instruction_file_name = create_instructional_report(stu_map_pro, instructional_file)
+                    stu_map_pro.map_pdf_url_instructional_area = settings.MEDIA_URL + instruction_file_name
+                stu_map_pro.save()
             elif test_type == "star_reading":
                 draw_star_reading_table()
             else:
@@ -157,7 +159,8 @@ def show(self, request):
     return HttpResponse(temp.render())
 
 
-def create_instructional_report(phonenumber, instructional_file):
+def create_instructional_report(stu_map_pro, instructional_file):
+    phonenumber = stu_map_pro.phone_number
     destination = open(os.path.join(settings.MEDIA_ROOT, instructional_file.name), 'wb+')
     for chunk in instructional_file.chunks():
         destination.write(chunk)
@@ -186,11 +189,12 @@ def create_instructional_report(phonenumber, instructional_file):
     merger.append(input_first)
     merger.append(fileobj=original_report, pages=(1, pages_num - 1))
     merger.append(input_last)
-    final_name = phonenumber + "_instruction.pdf"
+    final_name = phonenumber + stu_map_pro.TestDate + stu_map_pro.Growth + "_instruction.pdf"
     final_page = os.path.join(settings.MEDIA_ROOT, final_name)
     output = open(final_page, "wb")
     merger.write(output)
     merger.close()
+    log.info("Write instruction report as {}".format(final_page))
     os.remove(instruct_pdffilestored)
     os.remove(first_page_new)
     os.remove(last_page_new)
