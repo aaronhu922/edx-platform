@@ -1673,23 +1673,18 @@ def my_i_picture_info(request, phone):
             writing = []
 
             for item in ext_list:
+                check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                 if item['check_item__item_name'].startswith('L'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     language_standards.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RF'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     reading_foundational_skills.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RI'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     reading_standards_informational_text.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('RL'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     reading_literature.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('SL'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     speaking_listening.append(check_item_and_course_info)
                 if item['check_item__item_name'].startswith('W'):
-                    check_item_and_course_info = get_course_and_ccss_items_map(item['check_item__item_name'])
                     writing.append(check_item_and_course_info)
 
             count_of_develop_items = [len(language_standards), len(reading_foundational_skills),

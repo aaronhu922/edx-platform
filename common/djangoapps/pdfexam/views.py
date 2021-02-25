@@ -324,19 +324,19 @@ def get_student_exam_stats(request, phone, testdate):
             #                     star_early.SentenceLevelComprehension, star_early.PhonemicAwareness,
             #                     star_early.ParagraphLevelComprehension, star_early.EarlyNumeracy]
 
-            sub_domain_score_trend_date = []
-            sub_domain_score_trend_value = []
+            # sub_domain_score_trend_date = []
+            # sub_domain_score_trend_value = []
 
-            sub_domain_score_trend_date.append(star_early.TestDate)
-            sub_domain_score_data = [
-                round((star_early.AlphabeticPrinciple + star_early.ConceptOfWord + star_early.VisualDiscrimination) / 3,
-                      1),
-                star_early.PhonemicAwareness, star_early.Phonics,
-                (star_early.StructuralAnalysis + star_early.Vocabulary) / 2,
-                round((
-                          star_early.SentenceLevelComprehension + star_early.ParagraphLevelComprehension + star_early.EarlyNumeracy) / 3,
-                      1)]
-            sub_domain_score_trend_value.append(sub_domain_score_data)
+            # sub_domain_score_trend_date.append(star_early.TestDate)
+            # sub_domain_score_data = [
+            #     round((star_early.AlphabeticPrinciple + star_early.ConceptOfWord + star_early.VisualDiscrimination) / 3,
+            #           1),
+            #     star_early.PhonemicAwareness, star_early.Phonics,
+            #     (star_early.StructuralAnalysis + star_early.Vocabulary) / 2,
+            #     round((
+            #               star_early.SentenceLevelComprehension + star_early.ParagraphLevelComprehension + star_early.EarlyNumeracy) / 3,
+            #           1)]
+            # sub_domain_score_trend_value.append(sub_domain_score_data)
 
         return JsonResponse({
             "test_date": test_date,
@@ -348,8 +348,8 @@ def get_student_exam_stats(request, phone, testdate):
             "sub_items_phonics2": sub_items_phonics2,
             "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
             "sub_items_other_domains": sub_items_other_domains,
-            "sub_domain_score_trend_date": sub_domain_score_trend_date,
-            "sub_domain_score_trend_value": sub_domain_score_trend_value,
+            # "sub_domain_score_trend_date": sub_domain_score_trend_date,
+            # "sub_domain_score_trend_value": sub_domain_score_trend_value,
             "errorCode": "200",
             "executed": True,
             "message": "Succeed to get star early test of user {} on {}!".format(phone, testdate),
