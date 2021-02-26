@@ -1527,7 +1527,7 @@ def stu_map_test_info(request, id, name):
                                  "success": False}, status=200)
         phone = user_pro.phone_number
         log.info("user id {}, phone is {}".format(id, phone))
-        return getStudioMapStats(name, phone)
+        return getStudioMapStats(phone, name)
 
 
 # @login_required
