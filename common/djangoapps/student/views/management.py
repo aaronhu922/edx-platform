@@ -1518,8 +1518,6 @@ def get_all_test_info_list(phone):
 @csrf_exempt
 def stu_map_test_info(request, id, name):
     if request.method == 'GET':
-        testDate = name[:10]
-        growth = name[11:]
         user_pro = UserProfile.objects.filter(user_id=id).first()
         if not user_pro:
             log.error("User {} not exists.".format(id))
@@ -1529,124 +1527,138 @@ def stu_map_test_info(request, id, name):
                                  "success": False}, status=200)
         phone = user_pro.phone_number
         log.info("user id {}, phone is {}".format(id, phone))
-        map_pro = MapStudentProfile.objects.filter(phone_number=phone, TestDate=testDate, Growth=growth).first()
-        if not map_pro:
-            log.error("No {} test for user {} on {}.".format(growth, phone, testDate))
-            return JsonResponse({"errorCode": "400",
-                                 "executed": True,
-                                 "message": "No {} test for user {} on {}.".format(growth, phone, testDate),
-                                 "success": False}, status=200)
+        return getStudioMapStats(name, phone)
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def stu_map_info_phone(request, phone, name):
+    if request.method == 'GET':
+        log.info("user id {}, phone is {}".format(id, phone))
+        return getStudioMapStats(phone, name)
+
+
+def getStudioMapStats(phone, name):
+    testDate = name[:10]
+    growth = name[11:]
+    map_pro = MapStudentProfile.objects.filter(phone_number=phone, TestDate=testDate, Growth=growth).first()
+    if not map_pro:
+        log.error("No {} test for user {} on {}.".format(growth, phone, testDate))
+        return JsonResponse({"errorCode": "400",
+                             "executed": True,
+                             "message": "No {} test for user {} on {}.".format(growth, phone, testDate),
+                             "success": False}, status=200)
+    else:
+        rit_score = map_pro.Score
+        test_duration = map_pro.TestDuration
+        test_date = map_pro.TestDate
+        map_pdf_url = map_pro.map_pdf_url
+        map_pdf_url_all_items = map_pro.map_pdf_url_all_items
+        map_pdf_url_all_items_no_txt = map_pro.map_pdf_url_all_items_no_txt
+        achievement_above_mean = map_pro.achievement_above_mean
+        lexile_score = map_pro.lexile_score
+        flesch_kincaid_grade_level = map_pro.flesch_kincaid_grade_level
+        growth_goals_date = map_pro.growth_goals_date
+        map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
+        # map_score_trend_date = []
+        # map_score_trend_value = []
+        # for result in reversed(map_pro):
+        #     map_score_trend_date.append(result.TestDate)
+        #     map_score_trend_value.append(result.Score)
+
+        suggested_area_of_focus = map_pro.suggested_area_of_focus_list
+        if suggested_area_of_focus:
+            suggested_area_of_focus_list = suggested_area_of_focus.split(',')
+        relative_strength = map_pro.relative_strength_list
+        if relative_strength:
+            relative_strength_list = relative_strength.split(',')
+
+        sub_domains_info_list = [
+            {
+                "domain_name": "Literary Text: Key Ideas and Details",
+                "domain_score": map_pro.Literary_Text_Key_Ideas_and_Details_SCORE,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Informational Text: Language, Craft, and Structure",
+                "domain_score": map_pro.Informational_Text_Language_Craft_and_Structure_SCORE,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Literary Text: Language, Craft, and Structure",
+                "domain_score": map_pro.Literary_Text_Language_Craft_and_Structure_SCORE,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Vocabulary: Acquisition and Use",
+                "domain_score": map_pro.Vocabulary_Acquisition_and_Use_SCORE,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Informational Text: Key Ideas and Details",
+                "domain_score": map_pro.Informational_Text_Key_Ideas_and_Details_SCORE,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Vocabulary Use and Functions",
+                "domain_score": map_pro.vocabulary_use_and_function,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Language and Writing",
+                "domain_score": map_pro.language_and_writing,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Foundational Skills",
+                "domain_score": map_pro.foundational_skills,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Literature and Informational Text",
+                "domain_score": map_pro.literature_and_informational_text,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Writing: Write, Revise Texts for Purpose and Audience",
+                "domain_score": map_pro.writing_write_revise_texts_for_purpose_and_audience,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Language: Understand, Edit for Mechanics",
+                "domain_score": map_pro.language_understand_edit_for_mechanics,
+                "focus_strength_info": ""
+            }, {
+                "domain_name": "Language: Understand, Edit for Grammar, Usage",
+                "domain_score": map_pro.language_understand_edit_for_grammar_usage,
+                "focus_strength_info": ""
+            }
+        ]
+        if suggested_area_of_focus:
+            for item in suggested_area_of_focus_list:
+                domain_index = int(item)
+                if domain_index < 12:
+                    sub_domains_info_list[domain_index]["focus_strength_info"] = "Suggested Area of Focus"
+        if relative_strength:
+            for item in relative_strength_list:
+                domain_index = int(item)
+                if domain_index < 12:
+                    sub_domains_info_list[domain_index]["focus_strength_info"] = "Relative Strength"
+        if map_pro.Growth.startswith('Reading 2-5'):
+            sub_domains_info = sub_domains_info_list[:5]
+        elif map_pro.Growth.startswith('Reading K-2'):
+            sub_domains_info = sub_domains_info_list[5:9]
         else:
-            rit_score = map_pro.Score
-            test_duration = map_pro.TestDuration
-            test_date = map_pro.TestDate
-            map_pdf_url = map_pro.map_pdf_url
-            map_pdf_url_all_items = map_pro.map_pdf_url_all_items
-            map_pdf_url_all_items_no_txt = map_pro.map_pdf_url_all_items_no_txt
-            achievement_above_mean = map_pro.achievement_above_mean
-            lexile_score = map_pro.lexile_score
-            flesch_kincaid_grade_level = map_pro.flesch_kincaid_grade_level
-            growth_goals_date = map_pro.growth_goals_date
-            map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
-            # map_score_trend_date = []
-            # map_score_trend_value = []
-            # for result in reversed(map_pro):
-            #     map_score_trend_date.append(result.TestDate)
-            #     map_score_trend_value.append(result.Score)
-
-            suggested_area_of_focus = map_pro.suggested_area_of_focus_list
-            if suggested_area_of_focus:
-                suggested_area_of_focus_list = suggested_area_of_focus.split(',')
-            relative_strength = map_pro.relative_strength_list
-            if relative_strength:
-                relative_strength_list = relative_strength.split(',')
-
-            sub_domains_info_list = [
-                {
-                    "domain_name": "Literary Text: Key Ideas and Details",
-                    "domain_score": map_pro.Literary_Text_Key_Ideas_and_Details_SCORE,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Informational Text: Language, Craft, and Structure",
-                    "domain_score": map_pro.Informational_Text_Language_Craft_and_Structure_SCORE,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Literary Text: Language, Craft, and Structure",
-                    "domain_score": map_pro.Literary_Text_Language_Craft_and_Structure_SCORE,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Vocabulary: Acquisition and Use",
-                    "domain_score": map_pro.Vocabulary_Acquisition_and_Use_SCORE,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Informational Text: Key Ideas and Details",
-                    "domain_score": map_pro.Informational_Text_Key_Ideas_and_Details_SCORE,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Vocabulary Use and Functions",
-                    "domain_score": map_pro.vocabulary_use_and_function,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Language and Writing",
-                    "domain_score": map_pro.language_and_writing,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Foundational Skills",
-                    "domain_score": map_pro.foundational_skills,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Literature and Informational Text",
-                    "domain_score": map_pro.literature_and_informational_text,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Writing: Write, Revise Texts for Purpose and Audience",
-                    "domain_score": map_pro.writing_write_revise_texts_for_purpose_and_audience,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Language: Understand, Edit for Mechanics",
-                    "domain_score": map_pro.language_understand_edit_for_mechanics,
-                    "focus_strength_info": ""
-                }, {
-                    "domain_name": "Language: Understand, Edit for Grammar, Usage",
-                    "domain_score": map_pro.language_understand_edit_for_grammar_usage,
-                    "focus_strength_info": ""
-                }
-            ]
-            if suggested_area_of_focus:
-                for item in suggested_area_of_focus_list:
-                    domain_index = int(item)
-                    if domain_index < 12:
-                        sub_domains_info_list[domain_index]["focus_strength_info"] = "Suggested Area of Focus"
-            if relative_strength:
-                for item in relative_strength_list:
-                    domain_index = int(item)
-                    if domain_index < 12:
-                        sub_domains_info_list[domain_index]["focus_strength_info"] = "Relative Strength"
-            if map_pro.Growth.startswith('Reading 2-5'):
-                sub_domains_info = sub_domains_info_list[:5]
-            elif map_pro.Growth.startswith('Reading K-2'):
-                sub_domains_info = sub_domains_info_list[5:9]
-            else:
-                sub_domains_info = sub_domains_info_list[9:]
-
-        return JsonResponse({
-            "test_date": test_date,
-            "test_duration": test_duration,
-            "rit_score": rit_score,
-            "map_instructional_report_pdf_url": map_instructional_report_pdf_url,
-            "achievement_above_mean": achievement_above_mean,
-            "lexile_score": lexile_score,
-            "flesch_kincaid_grade_level": flesch_kincaid_grade_level,
-            "growth_goals_date": growth_goals_date,
-            "sub_domains_info": sub_domains_info,
-            "pdf1": map_pdf_url,
-            "pdf2": map_pdf_url_all_items,
-            "pdf3": map_pdf_url_all_items_no_txt,
-            "errorCode": "200",
-            "executed": True,
-            "message": "Succeed to get map result for user {} of {}!".format(phone, name),
-            "success": True
-        }, status=200)
+            sub_domains_info = sub_domains_info_list[9:]
+    return JsonResponse({
+        "test_date": test_date,
+        "test_duration": test_duration,
+        "rit_score": rit_score,
+        "map_instructional_report_pdf_url": map_instructional_report_pdf_url,
+        "achievement_above_mean": achievement_above_mean,
+        "lexile_score": lexile_score,
+        "flesch_kincaid_grade_level": flesch_kincaid_grade_level,
+        "growth_goals_date": growth_goals_date,
+        "sub_domains_info": sub_domains_info,
+        "pdf1": map_pdf_url,
+        "pdf2": map_pdf_url_all_items,
+        "pdf3": map_pdf_url_all_items_no_txt,
+        "errorCode": "200",
+        "executed": True,
+        "message": "Succeed to get map result for user {} of {}!".format(phone, name),
+        "success": True
+    }, status=200)
 
 
 # @login_required
