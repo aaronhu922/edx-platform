@@ -887,12 +887,14 @@ def course_enrollment_info(request, id=None, stu_id=None):
     List all code snippets, or create a new snippet.
     """
     if request.method == 'GET':
-        stu = User.objects.get(id=id)
-        log.warning(stu)
+        # u_prof = UserProfile.objects.filter(phone_number=phone_number).first()
+        # user = u_prof.user
+        stu = User.objects.get(id=stu_id)
+        log.info(stu)
         enroll_list = CourseEnrollment.objects.filter(user=stu)
-        log.warning(enroll_list)
+        log.info(enroll_list)
         test_obj = CourseEnrollmentInfo.objects.filter(course_enrolled__in=enroll_list)
-        log.warning(test_obj)
+        log.info(test_obj)
         serializer = CourseEnrollmentInfoSerializer(test_obj, many=True)
         return JsonResponse({
             "data_list": serializer.data,
@@ -1352,6 +1354,7 @@ def my_map_test_info(request, phone, name):
             flesch_kincaid_grade_level = map_pro.flesch_kincaid_grade_level
             growth_goals_date = map_pro.growth_goals_date
             map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
+            map_growth_pic_url = map_pro.map_growth_pic_url
 
             # map_score_trend_date = []
             # map_score_trend_value = []
@@ -1446,6 +1449,7 @@ def my_map_test_info(request, phone, name):
                 "sub_domains_info": sub_domains_info,
                 "map_pdf_url": map_pdf_url,
                 "map_instructional_report_pdf_url": map_instructional_report_pdf_url,
+                "map_growth_pic_url": map_growth_pic_url,
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get map result for user {} of {}!".format(phone, name),
@@ -1561,6 +1565,7 @@ def getStudioMapStats(phone, name):
         flesch_kincaid_grade_level = map_pro.flesch_kincaid_grade_level
         growth_goals_date = map_pro.growth_goals_date
         map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
+        map_growth_pic_url = map_pro.map_growth_pic_url
         # map_score_trend_date = []
         # map_score_trend_value = []
         # for result in reversed(map_pro):
@@ -1654,6 +1659,7 @@ def getStudioMapStats(phone, name):
         "pdf1": map_pdf_url,
         "pdf2": map_pdf_url_all_items,
         "pdf3": map_pdf_url_all_items_no_txt,
+        "map_growth_pic_url": map_growth_pic_url,
         "errorCode": "200",
         "executed": True,
         "message": "Succeed to get map result for user {} of {}!".format(phone, name),

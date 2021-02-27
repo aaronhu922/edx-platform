@@ -39,6 +39,16 @@ def upload_file(request):
 
 # @login_required
 # @ensure_csrf_cookie
+def handle_growth_pic_data(stu_map_pro, growth_pic_file):
+    pic_name = stu_map_pro.phone_number + growth_pic_file.name
+    with open(os.path.join(settings.MEDIA_ROOT, pic_name), 'wb+') as picfile:
+        for chunk in growth_pic_file.chunks():
+            picfile.write(chunk)
+    picfile.close()
+    log.info("growth pic name is: {}".format(pic_name))
+    stu_map_pro.map_growth_pic_url = settings.MEDIA_URL + pic_name
+
+
 @csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
@@ -91,7 +101,9 @@ def handle_pdf_data(request):
                 # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
                 page_content = '\n'.join(page.extract_text().split('\n')[1:-1])
                 content = content + page_content
+            pdf.close()
         os.remove(pdffilestored)
+
         try:
             ext_data = None
             ext_file = request.FILES.get('ext_file')
@@ -108,6 +120,7 @@ def handle_pdf_data(request):
                     ext_data = str(tbl[0][-2])
                     ext_data = ext_data.replace('\\n', '&')
                     ext_data = ext_data.replace('\\uf120', '---')
+                pdf1.close()
                 log.info("Map ext data is {}".format(ext_data))
                 os.remove(ext_pdffilestored)
         except Exception as err:
@@ -118,6 +131,7 @@ def handle_pdf_data(request):
 
         try:
             instructional_file = request.FILES.get('instructional_file')
+            growth_pic_file = request.FILES.get('growth_pic')
             # if test_type == "map_test" and instructional_file:
             #     create_instructional_report(phonenumber, instructional_file)
         except Exception as err:
@@ -136,6 +150,8 @@ def handle_pdf_data(request):
                 if instructional_file:
                     instruction_file_name = create_instructional_report(stu_map_pro, instructional_file)
                     stu_map_pro.map_pdf_url_instructional_area = settings.MEDIA_URL + instruction_file_name
+                if growth_pic_file:
+                    handle_growth_pic_data(stu_map_pro, growth_pic_file)
                 stu_map_pro.save()
             elif test_type == "star_reading":
                 draw_star_reading_table()
