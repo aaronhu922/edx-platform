@@ -187,7 +187,7 @@ def create_instructional_report(stu_map_pro, instructional_file):
     pages_num = len(original_report.pages)
     first_page = original_report.getPage(0)
     up_right = first_page.mediaBox.upperRight
-    first_page.mediaBox.upperLeft = (0, up_right[1] - 320)
+    first_page.mediaBox.upperLeft = (0, up_right[1] - 380)
     pdf_writer.addPage(first_page)
     first_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_0.pdf")
     last_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_1.pdf")
@@ -236,6 +236,7 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub('re.ects', 'reflects', text)
     text = re.sub('con.icting', 'conflicting', text)
     text = re.sub(' .ts', ' fits', text)
+    text = re.sub('di.ers', 'differs', text)
     txt_arr = text.split('\n')
     i = 0
     for subtline in txt_arr:
