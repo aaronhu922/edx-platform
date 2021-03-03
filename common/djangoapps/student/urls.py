@@ -2,7 +2,6 @@
 URLs for student app
 """
 
-
 from django.conf import settings
 from django.conf.urls import url
 
@@ -31,20 +30,32 @@ urlpatterns = [
 
     url(r'^api/manage/courseenrollments$', views.course_enrollment_info, name='course_enrollment_info'),
     url(r'^api/manage/customerservices$', views.customer_service_info, name='customer_service_info'),
-    url(r'^api/manage/customerservices/(?P<pk>[0-9]+)$', views.customer_service_info, name='customer_service_info_delete'),
+    url(r'^api/manage/customerservices/(?P<pk>[0-9]+)$', views.customer_service_info,
+        name='customer_service_info_delete'),
     url(r'^api/manage/students$', views.students_management, name='students_management'),
     url(r'^api/manage/courses$', views.course_overview_info, name='course_overview_info'),
     url(r'^api/manage/students/(?P<pk>[0-9]+)$', views.students_management, name='students_management_delete'),
-    url(r'^api/manage/courseenrollments/(?P<id>[0-9]+)$', views.course_enrollment_info, name='course_enrollment_info'),
-    url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)/(?P<id>[0-9]+)$', views.course_enrollment_info, name='delete_course_enrollment_info'),
-    url(r'^api/manage/courses_ccss_items/(?P<cour_id>.+)$', views.course_overview_ccss_items_info, name='get_specific_course_overview_ccss_items_info'),
-    url(r'^api/manage/courses_ccss_items$', views.course_overview_ccss_items_info, name='course_overview_ccss_items_info'),
+    url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)$', views.course_enrollment_info, name='course_enrollment_info'),
+    url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)/(?P<id>[0-9]+)$', views.course_enrollment_info,
+        name='delete_course_enrollment_info'),
+    url(r'^api/manage/courses_ccss_items/(?P<cour_id>.+)$', views.course_overview_ccss_items_info,
+        name='get_specific_course_overview_ccss_items_info'),
+    url(r'^api/manage/courses_ccss_items$', views.course_overview_ccss_items_info,
+        name='course_overview_ccss_items_info'),
     url(r'^api/front/i_map/(?P<phone>[0-9]+)$', views.my_i_picture_info,
         name='my_i_picture_info'),
-    url(r'^api/front/map_stats/(?P<phone>[0-9]+)$', views.my_map_test_info,
+    url(r'^api/front/map_stats/(?P<phone>[0-9]+)/(?P<name>.+)$', views.my_map_test_info,
         name='my_map_test_info'),
     url(r'^api/manage/stu_search/(?P<key>.+)$', views.students_search, name='students_management_search'),
-    url(r'^api/manage/stu_map_stats/(?P<id>[0-9]+)$', views.stu_map_test_info,
+    url(r'^api/manage/stu_map_stats/(?P<id>[0-9]+)/(?P<name>.+)$', views.stu_map_test_info,
         name='stu_map_test_info'),
+    url(r'^api/manage/phone_map_stats/(?P<phone>[0-9]+)/(?P<name>.+)$', views.stu_map_info_phone,
+        name='stu_map_info_phone'),
+    url(r'^api/front/my_test_list/(?P<phone>[0-9]+)$', views.my_test_list,
+        name='my_test_list'),
+    url(r'^api/manage/phone_test_list/(?P<phone>[0-9]+)$', views.my_test_list,
+        name='stu_test_list_phone'),
+    url(r'^api/manage/stu_test_list/(?P<id>[0-9]+)$', views.stu_test_list,
+        name='stu_test_list'),
 
 ]

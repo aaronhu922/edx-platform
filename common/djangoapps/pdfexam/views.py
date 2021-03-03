@@ -1,4 +1,6 @@
 import logging
+import re
+from pathlib import Path
 
 from django.conf import settings
 from django.utils.datastructures import MultiValueDictKeyError
@@ -18,6 +20,8 @@ from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
 from .star_reading_table import draw_star_reading_table
 from student.models import UserProfile
+from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
+from reportlab.pdfgen import canvas
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -32,9 +36,20 @@ def choose_file(request):
 def upload_file(request):
     return render(request, 'pdf2MySQL/upload_file.html')
 
-@login_required
-@ensure_csrf_cookie
-# @csrf_exempt
+
+# @login_required
+# @ensure_csrf_cookie
+def handle_growth_pic_data(stu_map_pro, growth_pic_file):
+    pic_name = stu_map_pro.phone_number + growth_pic_file.name
+    with open(os.path.join(settings.MEDIA_ROOT, pic_name), 'wb+') as picfile:
+        for chunk in growth_pic_file.chunks():
+            picfile.write(chunk)
+    picfile.close()
+    log.info("growth pic name is: {}".format(pic_name))
+    stu_map_pro.map_growth_pic_url = settings.MEDIA_URL + pic_name
+
+
+@csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
     context = {
@@ -86,7 +101,9 @@ def handle_pdf_data(request):
                 # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
                 page_content = '\n'.join(page.extract_text().split('\n')[1:-1])
                 content = content + page_content
+            pdf.close()
         os.remove(pdffilestored)
+
         try:
             ext_data = None
             ext_file = request.FILES.get('ext_file')
@@ -103,6 +120,7 @@ def handle_pdf_data(request):
                     ext_data = str(tbl[0][-2])
                     ext_data = ext_data.replace('\\n', '&')
                     ext_data = ext_data.replace('\\uf120', '---')
+                pdf1.close()
                 log.info("Map ext data is {}".format(ext_data))
                 os.remove(ext_pdffilestored)
         except Exception as err:
@@ -110,9 +128,16 @@ def handle_pdf_data(request):
             log.error("Upload pdf {} failed!".format(ext_file.name))
             context["message"] = "辅助报告上传失败，错误原因：" + str(err)
             return render(request, 'pdf2MySQL/show_failed.html', context)
-        ################################################################
-        #  trans end
-        ################################################################
+
+        try:
+            instructional_file = request.FILES.get('instructional_file')
+            growth_pic_file = request.FILES.get('growth_pic')
+            # if test_type == "map_test" and instructional_file:
+            #     create_instructional_report(phonenumber, instructional_file)
+        except Exception as err:
+            # raise err
+            log.error(err)
+            log.error("Upload pdf {} failed!".format(ext_file.name))
 
         try:
             if test_type == "star_early":
@@ -122,6 +147,12 @@ def handle_pdf_data(request):
                 if ext_data:
                     stu_map_pro = extract_map_ext_data(ext_data, stu_map_pro)
                 draw_map_table(stu_map_pro)
+                if instructional_file:
+                    instruction_file_name = create_instructional_report(stu_map_pro, instructional_file)
+                    stu_map_pro.map_pdf_url_instructional_area = settings.MEDIA_URL + instruction_file_name
+                if growth_pic_file:
+                    handle_growth_pic_data(stu_map_pro, growth_pic_file)
+                stu_map_pro.save()
             elif test_type == "star_reading":
                 draw_star_reading_table()
             else:
@@ -144,110 +175,208 @@ def show(self, request):
     return HttpResponse(temp.render())
 
 
-@login_required
-@ensure_csrf_cookie
-# @csrf_exempt
-def get_student_exam_stats(request, phone):
+def create_instructional_report(stu_map_pro, instructional_file):
+    phonenumber = stu_map_pro.phone_number
+    destination = open(os.path.join(settings.MEDIA_ROOT, instructional_file.name), 'wb+')
+    for chunk in instructional_file.chunks():
+        destination.write(chunk)
+    destination.close()
+    instruct_pdffilestored = os.path.join(settings.MEDIA_ROOT, instructional_file.name)
+    pdf_writer = PdfFileWriter()
+    original_report = PdfFileReader(open(instruct_pdffilestored, "rb"))
+    pages_num = len(original_report.pages)
+    first_page = original_report.getPage(0)
+    up_right = first_page.mediaBox.upperRight
+    first_page.mediaBox.upperLeft = (0, up_right[1] - 380)
+    pdf_writer.addPage(first_page)
+    first_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_0.pdf")
+    last_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_1.pdf")
+    with Path(first_page_new).open(mode="wb") as output_file:
+        pdf_writer.write(output_file)
+
+    with pdfplumber.open(instruct_pdffilestored) as pdf1:
+        pages = pdf1.pages
+        text = pages[-1].extract_text()
+        log.info("Map instructional data of last page is {}".format(text))
+        make_pdf_file(last_page_new, text, up_right)
+    merger = PdfFileMerger()
+    input_first = open(first_page_new, "rb")
+    input_last = open(last_page_new, "rb")
+    merger.append(input_first)
+    merger.append(fileobj=original_report, pages=(1, pages_num - 1))
+    merger.append(input_last)
+    final_name = phonenumber + stu_map_pro.TestDate + stu_map_pro.Growth + "_instruction.pdf"
+    final_page = os.path.join(settings.MEDIA_ROOT, final_name)
+    output = open(final_page, "wb")
+    merger.write(output)
+    merger.close()
+    log.info("Write instruction report as {}".format(final_page))
+    os.remove(instruct_pdffilestored)
+    os.remove(first_page_new)
+    os.remove(last_page_new)
+
+    return final_name
+
+
+def make_pdf_file(output_filename, text, up_right):
+    inch = 72
+    point = 1
+    # title = output_filename
+    log.info("Page size of instructional report is {}".format(up_right))
+
+    c = canvas.Canvas(output_filename, pagesize=up_right)
+    v = int(up_right[1]) - 40
+    width = int(up_right[0])
+    text = re.sub('re.ning', 'refining', text)
+    text = re.sub('on.ction', 'onfiction', text)
+    text = re.sub('speci.c', 'specific', text)
+    text = re.sub('Identi.es', 'Identifies', text)
+    text = re.sub('e.ectiveness', 'effectiveness', text)
+    text = re.sub('di.erent', 'different', text)
+    text = re.sub('re.ects', 'reflects', text)
+    text = re.sub('con.icting', 'conflicting', text)
+    text = re.sub(' .ts', ' fits', text)
+    text = re.sub('di.ers', 'differs', text)
+    txt_arr = text.split('\n')
+    i = 0
+    for subtline in txt_arr:
+        log.info(subtline)
+        if len(subtline) < 5:
+            v -= 20 * point
+            i += 1
+            continue
+        if subtline.startswith("CONFIDENTIALITY NOTICE:"):
+            break
+        if subtline.endswith(":"):
+            c.setFont("Helvetica-Bold", 10 * point)
+            c.drawString(1 * inch, v, subtline)
+        elif subtline.startswith("CCSS.ELA"):
+            v -= 40 * point
+            c.setFont("Helvetica", 14 * point)
+            c.drawString(1 * inch, v, subtline)
+        elif i + 1 < len(txt_arr) and txt_arr[i + 1].endswith(":"):
+            c.setFont("Helvetica", 14 * point)
+            if i - 1 >= 0 and not txt_arr[i - 1].startswith("CCSS.ELA"):
+                v -= 40 * point
+            c.drawString(1 * inch, v, subtline)
+            v -= 8 * point
+            c.line(1 * inch, v, width - 1 * inch, v)
+        else:
+            c.setFont("Helvetica", 10 * point)
+            c.drawString(1 * inch, v, "--" + subtline)
+        v -= 20 * point
+        i += 1
+
+    c.showPage()
+    c.save()
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def get_student_exam_stats(request, phone, testdate):
     if request.method == 'GET':
-        instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
-        log.warning("Get {} test results for user {}".format(len(instance), phone))
-        if not instance or len(instance) <= 0:
+        # instance = list(EarlyliteracySkillSetScores.objects.filter(phone_number=phone).order_by('-TestDate')[:3])
+        star_early = EarlyliteracySkillSetScores.objects.filter(phone_number=phone, TestDate=testdate).first()
+        if not star_early:
             return JsonResponse({"errorCode": "400",
                                  "executed": True,
-                                 "message": "User with phone {} does not have any test result!".format(phone),
+                                 "message": "User {} has no star early test on {}!".format(phone, testdate),
                                  "success": False}, status=200)
         else:
-            scaled_score = instance[0].ScaledScore
-            lexile_measure = instance[0].LexileMeasure
-            test_date = instance[0].TestDate
+            scaled_score = star_early.ScaledScore
+            lexile_measure = star_early.LexileMeasure
+            test_date = star_early.TestDate
 
-            sub_items_alphabetic_principle = [instance[0].AlphabeticKnowledge,
-                                              instance[0].AlphabeticSequence,
-                                              instance[0].LetterSounds,
-                                              instance[0].PrintConceptsWordLength,
-                                              instance[0].PrintConceptsWordBorders,
-                                              instance[0].PrintConceptsLettersAndWords,
-                                              instance[0].Letters,
-                                              instance[0].IdentificationAndWordMatching]
+            sub_items_alphabetic_principle = [star_early.AlphabeticKnowledge,
+                                              star_early.AlphabeticSequence,
+                                              star_early.LetterSounds,
+                                              star_early.PrintConceptsWordLength,
+                                              star_early.PrintConceptsWordBorders,
+                                              star_early.PrintConceptsLettersAndWords,
+                                              star_early.Letters,
+                                              star_early.IdentificationAndWordMatching]
 
-            sub_items_phonemic_awareness = [instance[0].RhymingAndWordFamilies,
-                                            instance[0].BlendingWordParts,
-                                            instance[0].BlendingPhonemes,
-                                            instance[0].InitialAndFinalPhonemes,
-                                            instance[0].ConsonantBlendsPA,
-                                            instance[0].MedialPhonemeDiscrimination,
-                                            instance[0].PhonemeIsolationORManipulation,
-                                            instance[0].PhonemeSegmentation]
+            sub_items_phonemic_awareness = [star_early.RhymingAndWordFamilies,
+                                            star_early.BlendingWordParts,
+                                            star_early.BlendingPhonemes,
+                                            star_early.InitialAndFinalPhonemes,
+                                            star_early.ConsonantBlendsPA,
+                                            star_early.MedialPhonemeDiscrimination,
+                                            star_early.PhonemeIsolationORManipulation,
+                                            star_early.PhonemeSegmentation]
 
-            sub_items_phonics1 = [instance[0].ShortVowelSounds,
-                                  instance[0].InitialConsonantSounds,
-                                  instance[0].FinalConsonantSounds,
-                                  instance[0].LongVowelSounds,
-                                  instance[0].VariantVowelSounds,
-                                  instance[0].ConsonantBlendsPH]
+            sub_items_phonics1 = [star_early.ShortVowelSounds,
+                                  star_early.InitialConsonantSounds,
+                                  star_early.FinalConsonantSounds,
+                                  star_early.LongVowelSounds,
+                                  star_early.VariantVowelSounds,
+                                  star_early.ConsonantBlendsPH]
 
-            sub_items_phonics2 = [instance[0].ConsonantDigraphs,
-                                  instance[0].OtherVowelSounds,
-                                  instance[0].SoundSymbolCorrespondenceConsonants,
-                                  instance[0].WordBuilding,
-                                  instance[0].SoundSymbolCorrespondenceVowels,
-                                  instance[0].WordFamiliesOrRhyming]
+            sub_items_phonics2 = [star_early.ConsonantDigraphs,
+                                  star_early.OtherVowelSounds,
+                                  star_early.SoundSymbolCorrespondenceConsonants,
+                                  star_early.WordBuilding,
+                                  star_early.SoundSymbolCorrespondenceVowels,
+                                  star_early.WordFamiliesOrRhyming]
 
-            sub_items_structural_vocabulary = [instance[0].WordsWithAffixes,
-                                               instance[0].Syllabification,
-                                               instance[0].CompoundWords,
-                                               instance[0].WordFacility,
-                                               instance[0].Synonyms,
-                                               instance[0].Antonyms]
+            sub_items_structural_vocabulary = [star_early.WordsWithAffixes,
+                                               star_early.Syllabification,
+                                               star_early.CompoundWords,
+                                               star_early.WordFacility,
+                                               star_early.Synonyms,
+                                               star_early.Antonyms]
 
-            sub_items_other_domains = [instance[0].ComprehensionATtheSentenceLevel,
-                                       instance[0].ComprehensionOfParagraphs,
-                                       instance[0].NumberNamingAndNumberIdentification,
-                                       instance[0].NumberObjectCorrespondence,
-                                       instance[0].SequenceCompletion,
-                                       instance[0].ComposingAndDecomposing,
-                                       instance[0].Measurement]
+            sub_items_other_domains = [star_early.ComprehensionATtheSentenceLevel,
+                                       star_early.ComprehensionOfParagraphs,
+                                       star_early.NumberNamingAndNumberIdentification,
+                                       star_early.NumberObjectCorrespondence,
+                                       star_early.SequenceCompletion,
+                                       star_early.ComposingAndDecomposing,
+                                       star_early.Measurement]
 
-            # sub_domain_score = [instance[0].AlphabeticPrinciple, instance[0].ConceptOfWord,
-            #                     instance[0].VisualDiscrimination,
-            #                     instance[0].Phonics, instance[0].StructuralAnalysis, instance[0].Vocabulary,
-            #                     instance[0].SentenceLevelComprehension, instance[0].PhonemicAwareness,
-            #                     instance[0].ParagraphLevelComprehension, instance[0].EarlyNumeracy]
+            # sub_domain_score = [star_early.AlphabeticPrinciple, star_early.ConceptOfWord,
+            #                     star_early.VisualDiscrimination,
+            #                     star_early.Phonics, star_early.StructuralAnalysis, star_early.Vocabulary,
+            #                     star_early.SentenceLevelComprehension, star_early.PhonemicAwareness,
+            #                     star_early.ParagraphLevelComprehension, star_early.EarlyNumeracy]
 
-            sub_domain_score_trend_date = []
-            sub_domain_score_trend_value = []
+            # sub_domain_score_trend_date = []
+            # sub_domain_score_trend_value = []
 
-            for result in reversed(instance):
-                sub_domain_score_trend_date.append(result.TestDate)
-                sub_domain_score_data = [
-                    round((result.AlphabeticPrinciple + result.ConceptOfWord + result.VisualDiscrimination) / 3, 1),
-                    result.PhonemicAwareness, result.Phonics, (result.StructuralAnalysis + result.Vocabulary) / 2,
-                    round((
-                              result.SentenceLevelComprehension + result.ParagraphLevelComprehension + result.EarlyNumeracy) / 3,
-                          1)]
-                sub_domain_score_trend_value.append(sub_domain_score_data)
+            # sub_domain_score_trend_date.append(star_early.TestDate)
+            # sub_domain_score_data = [
+            #     round((star_early.AlphabeticPrinciple + star_early.ConceptOfWord + star_early.VisualDiscrimination) / 3,
+            #           1),
+            #     star_early.PhonemicAwareness, star_early.Phonics,
+            #     (star_early.StructuralAnalysis + star_early.Vocabulary) / 2,
+            #     round((
+            #               star_early.SentenceLevelComprehension + star_early.ParagraphLevelComprehension + star_early.EarlyNumeracy) / 3,
+            #           1)]
+            # sub_domain_score_trend_value.append(sub_domain_score_data)
 
-            return JsonResponse({
-                "test_date": test_date,
-                "lexile_measure": lexile_measure,
-                "scaled_score": scaled_score,
-                "sub_items_alphabetic_principle": sub_items_alphabetic_principle,
-                "sub_items_phonemic_awareness": sub_items_phonemic_awareness,
-                "sub_items_phonics1": sub_items_phonics1,
-                "sub_items_phonics2": sub_items_phonics2,
-                "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
-                "sub_items_other_domains": sub_items_other_domains,
-                "sub_domain_score_trend_date": sub_domain_score_trend_date,
-                "sub_domain_score_trend_value": sub_domain_score_trend_value,
-                "errorCode": "200",
-                "executed": True,
-                "message": "Succeed to get latest test result of user {}!".format(phone),
-                "success": True
-            }, status=200)
+        return JsonResponse({
+            "test_date": test_date,
+            "lexile_measure": lexile_measure,
+            "scaled_score": scaled_score,
+            "sub_items_alphabetic_principle": sub_items_alphabetic_principle,
+            "sub_items_phonemic_awareness": sub_items_phonemic_awareness,
+            "sub_items_phonics1": sub_items_phonics1,
+            "sub_items_phonics2": sub_items_phonics2,
+            "sub_items_structural_vocabulary": sub_items_structural_vocabulary,
+            "sub_items_other_domains": sub_items_other_domains,
+            # "sub_domain_score_trend_date": sub_domain_score_trend_date,
+            # "sub_domain_score_trend_value": sub_domain_score_trend_value,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get star early test of user {} on {}!".format(phone, testdate),
+            "success": True
+        }, status=200)
 
-@login_required
-@ensure_csrf_cookie
-# @csrf_exempt
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
 def ccss_items_management(request, pk=None):
     if request.method == 'GET':
         items = list(MapTestCheckItem.objects.values().order_by('-id'))

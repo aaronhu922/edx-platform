@@ -961,6 +961,8 @@ def extract_map_data(data, phonenumber):
     stu_map_pro, created = MapStudentProfile.objects.update_or_create(phone_number=phonenumber,
                                                                       TestDate=extract_data_dict_ready2_my_sql_model[
                                                                           'TestDate'],
+                                                                      Growth=extract_data_dict_ready2_my_sql_model[
+                                                                          'Growth'],
                                                                       defaults=extract_data_dict_ready2_my_sql_model)
 
     if not created:
