@@ -236,7 +236,11 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub('re.ects', 'reflects', text)
     text = re.sub('con.icting', 'conflicting', text)
     text = re.sub(' .ts', ' fits', text)
+    text = re.sub('A.xes', 'Affixes', text)
     text = re.sub('di.ers', 'differs', text)
+    text = re.sub('pre.x', 'prefix', text)
+    text = re.sub('de.ned', 'defined', text)
+
     txt_arr = text.split('\n')
     i = 0
     for subtline in txt_arr:
