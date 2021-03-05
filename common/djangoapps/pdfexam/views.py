@@ -18,6 +18,7 @@ from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
+from .star_reading_parse_helper import parse_star_reading_data
 from .star_reading_table import draw_star_reading_table
 from student.models import UserProfile
 from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
@@ -49,6 +50,36 @@ def handle_growth_pic_data(stu_map_pro, growth_pic_file):
     stu_map_pro.map_growth_pic_url = settings.MEDIA_URL + pic_name
 
 
+def handle_star_reading_report(request, phone_number):
+    context = {}
+    main_file = request.FILES.get('myfile')
+    ext_file = request.FILES.get('ext_file')
+    if main_file:
+        pdffilestored = os.path.join(settings.MEDIA_ROOT, main_file.name)
+        with open(pdffilestored, 'wb+') as temp_file:
+            for chunk in main_file.chunks():
+                temp_file.write(chunk)
+        temp_file.close()
+
+        with pdfplumber.open(pdffilestored) as pdf:
+            content = ''
+            # len(pdf.pages)为PDF文档页数
+            for i in range(len(pdf.pages)):
+                # pdf.pages[i] 是读取PDF文档第i+1页
+                page = pdf.pages[i]
+                # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
+                content = content + page.extract_text()
+        pdf.close()
+        content = content.replace('\n', ' ')
+        os.remove(pdffilestored)
+        star_reading_obj = parse_star_reading_data(content, phone_number)
+        context["message"] = "用户{}，上传的报告： {}。".format(phone_number, main_file.name)
+        return render(request, 'pdf2MySQL/show_success.html', context)
+    else:
+        context["message"] = "pdf不能为空。"
+        return render(request, 'pdf2MySQL/show_failed.html', context)
+
+
 @csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
@@ -73,6 +104,8 @@ def handle_pdf_data(request):
         return render(request, 'pdf2MySQL/show_failed.html', context)
 
     if request.method == 'POST':  # 请求方法为POST时，进行处理
+        if test_type == "star_reading":
+            return handle_star_reading_report(request, phonenumber)
         try:
             myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
         except MultiValueDictKeyError as err:
@@ -153,8 +186,6 @@ def handle_pdf_data(request):
                 if growth_pic_file:
                     handle_growth_pic_data(stu_map_pro, growth_pic_file)
                 stu_map_pro.save()
-            elif test_type == "star_reading":
-                draw_star_reading_table()
             else:
                 context["message"] = "类型暂不支持！"
                 return render(request, 'pdf2MySQL/show_failed.html', context)

@@ -198,3 +198,49 @@ class MapProfileExtResults(models.Model):
 
     class Meta:
         unique_together = ('map_student_profile', 'check_item')
+
+
+class StarReadingTestInfo(models.Model):
+    phone_number = models.CharField(blank=False, null=False, max_length=50)
+    stu_name = models.CharField(max_length=50, default="")
+    date_range = models.CharField(max_length=40, default="")
+    benchmark_type = models.CharField(max_length=40, default="")
+    stu_id = models.CharField(max_length=60, default="")
+    grade = models.CharField(max_length=10, default="")
+    school = models.CharField(max_length=40, default="")
+    test_date = models.DateField()
+    teacher = models.CharField(max_length=40, default="")
+    class_group = models.CharField(max_length=40, default="")
+    scaled_score = models.IntegerField(null=True, blank=True, default=0)
+    percentile_rank = models.IntegerField(null=True, blank=True, default=0)
+    grade_equivalent = models.CharField(max_length=10, default="")
+    instructional_reading_level = models.FloatField(null=True, blank=True, default=0.0)
+    estimated_oral_fluency = models.IntegerField(null=True, blank=True, default=0)
+    literature_key_ideas_and_details = models.IntegerField(null=True, blank=True, default=0)
+    literature_craft_and_structure = models.IntegerField(null=True, blank=True, default=0)
+    literature_range_of_reading_and_text_complexity = models.IntegerField(null=True, blank=True, default=0)
+    information_text_key_ideas_and_details = models.IntegerField(null=True, blank=True, default=0)
+    information_text_craft_and_structure = models.IntegerField(null=True, blank=True, default=0)
+    information_text_integration_of_knowledge_and_ideas = models.IntegerField(null=True, blank=True, default=0)
+    information_text_range_of_reading_and_text_complexity = models.IntegerField(null=True, blank=True, default=0)
+    language_vocabulary_acquisition_and_use = models.IntegerField(null=True, blank=True, default=0)
+    lexile_range = models.CharField(max_length=20, default="")
+    test_duration = models.CharField(max_length=40, default="")
+    demographics = models.CharField(max_length=20, default="")
+    scale_type = models.CharField(max_length=20, default="")
+
+    class Meta:
+        unique_together = ('phone_number', 'test_date')
+
+
+class StarReadingTestInfoReport(models.Model):
+    star_reading_test_info = models.ForeignKey(StarReadingTestInfo, db_index=True, related_name="star_reading_report",
+                                               on_delete=models.CASCADE)
+    item_score = models.IntegerField(null=True, blank=True, default=0)
+    ccss_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="ccss_items",
+                                  on_delete=models.CASCADE)
+    item_desc = models.CharField(max_length=256, default="")
+    domain_name = models.CharField(max_length=100, default="")
+
+    class Meta:
+        unique_together = ('star_reading_test_info', 'ccss_item')
