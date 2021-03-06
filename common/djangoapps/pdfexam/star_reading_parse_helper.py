@@ -132,5 +132,54 @@ def parse_star_reading_data(content, phone_number):
     star_reading_obj, created = StarReadingTestInfo.objects.update_or_create(phone_number=phone_number,
                                                                              test_date=star_reading_model["test_date"],
                                                                              defaults=star_reading_model)
-    log.info("created star reading object {}".format(star_reading_obj))
+    if not created:
+        log.warning(
+            "Updated star reading test {} {}, need to clear pre report info.".format(phone_number, test_date))
+        StarReadingTestInfoReport.objects.filter(star_reading_test_info=star_reading_obj).delete()
+    else:
+        log.info("created star reading test {} {}".format(phone_number, test_date))
     return star_reading_obj
+
+
+def parse_star_reading_report(item_table, star_reading_obj):
+    domain_name = ""
+    for page_info in item_table:
+        for ccss_items in page_info:
+            if "CCSS.ELA-Literacy" in ccss_items[0]:
+                # it is item.
+                desc = ccss_items[0]
+                value = re.findall("CCSS.ELA-Literacy.[\w.]+", desc)
+
+                item_name = value[0]
+                desc = desc.replace(item_name, "")
+                desc = desc.replace("Cra\x00", "Craft")
+                desc = desc.replace("\x00", "ff")
+                if item_name[-1].isalpha():
+                    item_name = (item_name[18:-1] + "." + item_name[-1]).upper()
+                else:
+                    item_name = item_name[18:].upper()
+
+                # item = {
+                #     "star_reading_test_info": star_reading_obj,
+                #     "domain_name": domain_name,
+                #     "item_desc": desc,
+                #     "item_score": ccss_items[2]
+                # }
+                if ccss_items[2].isdigit():
+                    item_score = ccss_items[2]
+                else:
+                    item_score = 0
+                report_item = StarReadingTestInfoReport(star_reading_test_info=star_reading_obj,
+                                                        domain_name=domain_name, item_desc=desc,
+                                                        item_score=item_score)
+                check_item = MapTestCheckItem.objects.filter(item_name=item_name).first()
+
+                if check_item:
+                    report_item.ccss_item = check_item
+                    # log.info("item {} {}, score {}".format(item_name, desc, item_score))
+                    report_item.save()
+                else:
+                    log.warning("there is no ccss item {}, with item {}".format(item_name, report_item))
+            else:
+                domain_name = ccss_items[0]
+                domain_name = domain_name.replace("Cra\x00", "Craft")

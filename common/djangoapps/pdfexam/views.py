@@ -18,7 +18,7 @@ from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
-from .star_reading_parse_helper import parse_star_reading_data
+from .star_reading_parse_helper import parse_star_reading_data, parse_star_reading_report
 from .star_reading_table import draw_star_reading_table
 from student.models import UserProfile
 from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
@@ -61,19 +61,32 @@ def handle_star_reading_report(request, phone_number):
                 temp_file.write(chunk)
         temp_file.close()
 
+        content = ''
         with pdfplumber.open(pdffilestored) as pdf:
-            content = ''
             # len(pdf.pages)为PDF文档页数
             for i in range(len(pdf.pages)):
-                # pdf.pages[i] 是读取PDF文档第i+1页
                 page = pdf.pages[i]
-                # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
                 content = content + page.extract_text()
-        pdf.close()
+            pdf.close()
         content = content.replace('\n', ' ')
         os.remove(pdffilestored)
         star_reading_obj = parse_star_reading_data(content, phone_number)
-        context["message"] = "用户{}，上传的报告： {}。".format(phone_number, main_file.name)
+        if ext_file:
+            pdffilestored = os.path.join(settings.MEDIA_ROOT, ext_file.name)
+            with open(pdffilestored, 'wb+') as temp_file:
+                for chunk in ext_file.chunks():
+                    temp_file.write(chunk)
+            temp_file.close()
+
+            item_table = []
+            with pdfplumber.open(pdffilestored) as pdf:
+                # len(pdf.pages)为PDF文档页数
+                for i in range(len(pdf.pages)):
+                    page = pdf.pages[i]
+                    item_table.append(page.extract_table())
+                pdf.close()
+            parse_star_reading_report(item_table, star_reading_obj)
+            context["message"] = "用户{}，上传的报告： {}, {}。".format(phone_number, main_file.name, ext_file.name)
         return render(request, 'pdf2MySQL/show_success.html', context)
     else:
         context["message"] = "pdf不能为空。"
