@@ -399,6 +399,18 @@ def get_student_exam_stats(request, phone, testdate):
             "message": "Succeed to get star early test of user {} on {}!".format(phone, testdate),
             "success": True
         }, status=200)
+    elif request.method == 'DELETE':
+        star_early = EarlyliteracySkillSetScores.objects.filter(phone_number=phone, TestDate=testdate).first()
+        if not star_early:
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User {} has no star early test on {}!".format(phone, testdate),
+                                 "success": False}, status=200)
+        star_early.delete()
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted star early report on {} of user {}!".format(testdate, phone),
+                             "success": True}, status=200)
 
 
 # @login_required
