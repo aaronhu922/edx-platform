@@ -288,6 +288,7 @@ def make_pdf_file(output_filename, text, up_right):
 
     txt_arr = text.split('\n')
     i = 0
+    l2_domain_next = False
     for subtline in txt_arr:
         log.info(subtline)
         if len(subtline) < 5:
@@ -310,6 +311,27 @@ def make_pdf_file(output_filename, text, up_right):
             c.drawString(1 * inch, v, subtline)
             v -= 8 * point
             c.line(1 * inch, v, width - 1 * inch, v)
+        elif subtline[-1].isdigit():
+            if "±" in subtline:
+                v += 5
+                c.setFont("Helvetica", 10 * point)
+                c.drawString(width - 1 * inch - 40, v, subtline)
+                l2_domain_next = True
+            else:
+                v -= 40 * point
+                c.setFont("Helvetica", 16 * point)
+                c.drawString(1 * inch - 10, v, subtline[:-4])
+                c.drawString(width - 1 * inch - 40, v, subtline[-3:])
+        elif l2_domain_next:
+            if subtline.startswith("There are no Learning"):
+                c.setFont("Helvetica", 10 * point)
+                c.drawString(1 * inch, v, "--" + subtline)
+            else:
+                c.setFont("Helvetica", 14 * point)
+                c.drawString(inch - 10, v, subtline)
+                v -= 8 * point
+                c.rect(inch - 10, v, width - 2 * inch + 10, 2, fill=1)
+            l2_domain_next = False
         else:
             c.setFont("Helvetica", 10 * point)
             c.drawString(1 * inch, v, "--" + subtline)
@@ -421,6 +443,18 @@ def get_student_exam_stats(request, phone, testdate):
             "message": "Succeed to get star early test of user {} on {}!".format(phone, testdate),
             "success": True
         }, status=200)
+    elif request.method == 'DELETE':
+        star_early = EarlyliteracySkillSetScores.objects.filter(phone_number=phone, TestDate=testdate).first()
+        if not star_early:
+            return JsonResponse({"errorCode": "400",
+                                 "executed": True,
+                                 "message": "User {} has no star early test on {}!".format(phone, testdate),
+                                 "success": False}, status=200)
+        star_early.delete()
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted star early report on {} of user {}!".format(testdate, phone),
+                             "success": True}, status=200)
 
 
 # @login_required
