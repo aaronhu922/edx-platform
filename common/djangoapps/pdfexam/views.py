@@ -244,6 +244,7 @@ def make_pdf_file(output_filename, text, up_right):
 
     txt_arr = text.split('\n')
     i = 0
+    l2_domain_next = False
     for subtline in txt_arr:
         log.info(subtline)
         if len(subtline) < 5:
@@ -266,6 +267,27 @@ def make_pdf_file(output_filename, text, up_right):
             c.drawString(1 * inch, v, subtline)
             v -= 8 * point
             c.line(1 * inch, v, width - 1 * inch, v)
+        elif subtline[-1].isdigit():
+            if "±" in subtline:
+                v += 5
+                c.setFont("Helvetica", 10 * point)
+                c.drawString(width - 1 * inch - 40, v, subtline)
+                l2_domain_next = True
+            else:
+                v -= 40 * point
+                c.setFont("Helvetica", 16 * point)
+                c.drawString(1 * inch - 10, v, subtline[:-4])
+                c.drawString(width - 1 * inch - 40, v, subtline[-3:])
+        elif l2_domain_next:
+            if subtline.startswith("There are no Learning"):
+                c.setFont("Helvetica", 10 * point)
+                c.drawString(1 * inch, v, "--" + subtline)
+            else:
+                c.setFont("Helvetica", 14 * point)
+                c.drawString(inch - 10, v, subtline)
+                v -= 8 * point
+                c.rect(inch - 10, v, width - 2 * inch + 10, 2, fill=1)
+            l2_domain_next = False
         else:
             c.setFont("Helvetica", 10 * point)
             c.drawString(1 * inch, v, "--" + subtline)
