@@ -4,6 +4,7 @@ Student Views
 
 import datetime
 import logging
+import os
 import uuid
 from collections import namedtuple
 
@@ -1104,10 +1105,16 @@ def students_management(request, pk=None):
     "web_accelerator_link": "http://47.114.176.127/test.pac",
     """
     if request.method == 'GET':
-        test_obj = UserProfile.objects.all().order_by('id')
+        count = UserProfile.objects.count()
+        if not pk:
+            pk = 1
+        log.info("page is {}".format(pk))
+        page = int(pk)
+        test_obj = UserProfile.objects.all().order_by('-id')[(page - 1) * 10: page * 10]
         serializer = StudentSerializer(test_obj, many=True)
         return JsonResponse({
             "data_list": serializer.data,
+            "count": count,
             "errorCode": "200",
             "executed": True,
             "message": "Succeed to get all the students!",
@@ -1173,7 +1180,7 @@ def students_management(request, pk=None):
     elif request.method == 'DELETE':
         instance = User.objects.filter(id=pk)
         ret = instance.delete()
-        log.warning(ret)
+        log.info(ret)
         return JsonResponse({"errorCode": "200",
                              "executed": True,
                              "message": "Deleted a student account!",
@@ -1355,6 +1362,7 @@ def my_map_test_info(request, phone, name):
             growth_goals_date = map_pro.growth_goals_date
             map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
             map_growth_pic_url = map_pro.map_growth_pic_url
+            grade = map_pro.Grade
 
             # map_score_trend_date = []
             # map_score_trend_value = []
@@ -1450,6 +1458,7 @@ def my_map_test_info(request, phone, name):
                 "map_pdf_url": map_pdf_url,
                 "map_instructional_report_pdf_url": map_instructional_report_pdf_url,
                 "map_growth_pic_url": map_growth_pic_url,
+                "grade": grade,
                 "errorCode": "200",
                 "executed": True,
                 "message": "Succeed to get map result for user {} of {}!".format(phone, name),
@@ -1536,11 +1545,49 @@ def stu_map_test_info(request, id, name):
 
 # @login_required
 # @ensure_csrf_cookie
+def delete_stu_map_report(phone, name):
+    testDate = name[:10]
+    growth = name[11:]
+    map_pro = MapStudentProfile.objects.filter(phone_number=phone, TestDate=testDate, Growth=growth).first()
+    if not map_pro:
+        log.error("No {} test for user {} on {}.".format(growth, phone, testDate))
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No {} test for user {} on {}.".format(growth, phone, testDate),
+                             "success": False}, status=200)
+    else:
+        map_pdf_url = map_pro.map_pdf_url
+        map_pdf_url_all_items = map_pro.map_pdf_url_all_items
+        map_pdf_url_all_items_no_txt = map_pro.map_pdf_url_all_items_no_txt
+        map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
+        map_growth_pic_url = map_pro.map_growth_pic_url
+        report_files = [map_pdf_url, map_pdf_url_all_items, map_pdf_url_all_items_no_txt,
+                        map_instructional_report_pdf_url, map_growth_pic_url]
+        for file_name in report_files:
+            if file_name:
+                base_name = os.path.basename(file_name)
+                file_path = os.path.join(settings.MEDIA_ROOT, base_name)
+                log.info("going to delete {}".format(file_path))
+                try:
+                    os.remove(file_path)
+                except FileNotFoundError as err:
+                    log.warning(
+                        "Failed to delete file {} of {}'s {}, with error: {}".format(file_path, phone, name, err))
+        ret = map_pro.delete()
+        log.info("Removed map report: {}".format(ret))
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted map report {} {} of user {}!".format(testDate, growth, phone),
+                             "success": True}, status=200)
+
+
 @csrf_exempt
 def stu_map_info_phone(request, phone, name):
     if request.method == 'GET':
         log.info("user id {}, phone is {}".format(id, phone))
         return getStudioMapStats(phone, name)
+    elif request.method == 'DELETE':
+        return delete_stu_map_report(phone, name)
 
 
 def getStudioMapStats(phone, name):
@@ -1566,6 +1613,7 @@ def getStudioMapStats(phone, name):
         growth_goals_date = map_pro.growth_goals_date
         map_instructional_report_pdf_url = map_pro.map_pdf_url_instructional_area
         map_growth_pic_url = map_pro.map_growth_pic_url
+        grade = map_pro.Grade
         # map_score_trend_date = []
         # map_score_trend_value = []
         # for result in reversed(map_pro):
@@ -1656,6 +1704,7 @@ def getStudioMapStats(phone, name):
         "flesch_kincaid_grade_level": flesch_kincaid_grade_level,
         "growth_goals_date": growth_goals_date,
         "sub_domains_info": sub_domains_info,
+        "grade": grade,
         "pdf1": map_pdf_url,
         "pdf2": map_pdf_url_all_items,
         "pdf3": map_pdf_url_all_items_no_txt,
