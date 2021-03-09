@@ -68,6 +68,7 @@ def draw_reading_2_5_map_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
     plt.clf()
+    # plt.close()
 
 
 def set_color_for_table(colors_dict, the_table, table_indexes):
@@ -135,7 +136,7 @@ def draw_reading_2_5_in_all_table(map_pro, colors_dict):
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             map_pro.map_pdf_url_all_items))
+                                                                                           map_pro.map_pdf_url_all_items))
     plt.clf()
 
 
