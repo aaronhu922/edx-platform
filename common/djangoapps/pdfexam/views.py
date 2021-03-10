@@ -210,7 +210,7 @@ def handle_pdf_data(request):
                 context["message"] = "类型暂不支持！"
                 return render(request, 'pdf2MySQL/show_failed.html', context)
         except Exception as err:
-            log.error(err)
+            log.exception(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
             context["message"] = "解析错误，请选择正确的文件类型！" + str(err)
             return render(request, 'pdf2MySQL/show_failed.html', context)
