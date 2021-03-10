@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.conf import settings
 
-from .reading_2_5_template import short_columns, reading_2_5_no_txt, reading_2_5_indexes, reading_2_5_cells_color, reading_2_5_items_name
+from .reading_2_5_template import short_columns, reading_2_5_no_txt, reading_2_5_indexes, reading_2_5_cells_color, \
+    reading_2_5_items_name
 from .map_table_tmplate import all_map_indexes_dict, all_map_cell_text, all_cells_no_text
-from .reading_k_2_template import reading_k_2_indexes, reading_k_2_cell_no_text, reading_k_2_cells_color, reading_k_2_items_array
-from .lanuage_2_12_template import language_2_12_indexes, language_2_12_simple_no_txt, map_2_12_columns, language_2_12_cells_color, language_2_12_items_array
+from .reading_k_2_template import reading_k_2_indexes, reading_k_2_cell_no_text, reading_k_2_cells_color, \
+    reading_k_2_items_array
+from .lanuage_2_12_template import language_2_12_indexes, language_2_12_simple_no_txt, map_2_12_columns, \
+    language_2_12_cells_color, language_2_12_items_array
 from .map_2_12_table_template import map_2_12_simple_table, map_2_12_table, map_2_12_table_indexes
 
 # from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
@@ -40,8 +43,6 @@ def draw_map_table(map_pro):
         log.info("Wrong map type {}".format(map_pro.Growth))
         raise ValueError("上传了不支持的测试类型 {}，生成pdf发生了错误！".format(map_pro.Growth))
 
-    # map_pro.save()
-
 
 def draw_reading_2_5_map_table(map_pro, colors_dict):
     phone_number = map_pro.phone_number
@@ -68,7 +69,8 @@ def draw_reading_2_5_map_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
     plt.clf()
-    # plt.close()
+    plt.cla()
+    plt.close('all')
 
 
 def set_color_for_table(colors_dict, the_table, table_indexes):
@@ -136,8 +138,10 @@ def draw_reading_2_5_in_all_table(map_pro, colors_dict):
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                           map_pro.map_pdf_url_all_items))
+                                                                                             map_pro.map_pdf_url_all_items))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_reading_2_5_no_txt_all_table(map_pro, colors_dict):
@@ -161,10 +165,12 @@ def draw_reading_2_5_no_txt_all_table(map_pro, colors_dict):
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
-    # map_pro.save()
+    #
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_reading_k_2_simple_map_table(map_pro, colors_dict):
@@ -196,6 +202,8 @@ def draw_reading_k_2_simple_map_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_reading_k_2_in_all_table(map_pro, colors_dict):
@@ -222,6 +230,8 @@ def draw_reading_k_2_in_all_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_reading_k_2_no_txt_all_table(map_pro, colors_dict):
@@ -245,10 +255,12 @@ def draw_reading_k_2_no_txt_all_table(map_pro, colors_dict):
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
-    # map_pro.save()
+    #
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
-    # plt.clf()
+    plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_language_2_12_simple_map_table(map_pro, colors_dict):
@@ -276,6 +288,8 @@ def draw_language_2_12_simple_map_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_language_2_12_in_all_table(map_pro, colors_dict):
@@ -306,6 +320,8 @@ def draw_language_2_12_in_all_table(map_pro, colors_dict):
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items))
     plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_language_2_12_no_txt_all_table(map_pro, colors_dict):
@@ -328,7 +344,9 @@ def draw_language_2_12_no_txt_all_table(map_pro, colors_dict):
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
     map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
-    # map_pro.save()
+    #
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
     plt.clf()
+    plt.cla()
+    plt.close('all')

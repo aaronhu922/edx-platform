@@ -228,6 +228,8 @@ class StarReadingTestInfo(models.Model):
     test_duration = models.CharField(max_length=40, default="")
     demographics = models.CharField(max_length=20, default="")
     scale_type = models.CharField(max_length=20, default="")
+    main_pdf_url = models.CharField(max_length=100, null=True)
+    simple_pdf_url = models.CharField(max_length=100, null=True)
 
     class Meta:
         unique_together = ('phone_number', 'test_date')

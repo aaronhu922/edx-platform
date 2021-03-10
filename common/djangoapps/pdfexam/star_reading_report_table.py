@@ -15,7 +15,7 @@ plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 k_5_grade = ['k', '1st', '2nd', '3rd', '4th', '5th']
 
 
-def draw_map_table(star_reading_obj):
+def draw_star_reading_table(star_reading_obj):
     log.info("Start to drawing star reading table!")
     if star_reading_obj.grade in k_5_grade:
         colors_dict = create_table_colors_dict(star_reading_obj, star_reading_k_5_colors)
@@ -80,14 +80,14 @@ def draw_star_reading_k_5_report(star_reading_obj, colors_dict):
     the_table.auto_set_column_width(col=list(range(len(star_reading_k_5_columns))))
     the_table.scale(1, 0.24)
 
-    # set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
+    set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
 
-    file_name = phone_number + star_reading_obj.TestDate + '_star_reading.pdf'
+    file_name = phone_number + star_reading_obj.test_date + '_star_reading.pdf'
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    star_reading_obj.map_pdf_url_all_items = settings.MEDIA_URL + file_name
+    star_reading_obj.main_pdf_url = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             star_reading_obj.map_pdf_url_all_items))
+                                                                                             star_reading_obj.main_pdf_url))
     plt.clf()
     plt.cla()
     plt.close('all')
@@ -107,14 +107,14 @@ def draw_star_reading_k_5_report_no_name(star_reading_obj, colors_dict):
     the_table.auto_set_column_width(col=list(range(len(star_reading_k_5_columns))))
     the_table.scale(1, 0.24)
 
-    # set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
+    set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
 
-    file_name = phone_number + star_reading_obj.TestDate + '_star_reading_no_name.pdf'
+    file_name = phone_number + star_reading_obj.test_date + '_star_reading_no_name.pdf'
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    star_reading_obj.map_pdf_url_all_items = settings.MEDIA_URL + file_name
+    star_reading_obj.simple_pdf_url = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             star_reading_obj.map_pdf_url_all_items))
+                                                                                             star_reading_obj.simple_pdf_url))
     plt.clf()
     plt.cla()
     plt.close('all')
@@ -135,14 +135,14 @@ def draw_star_reading_6_12_report(star_reading_obj, colors_dict):
     the_table.auto_set_column_width(col=list(range(len(star_reading_6_12_columns))))
     the_table.scale(1, 0.32)
 
-    # set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
+    set_color_for_table(colors_dict, the_table, star_reading_6_12_indexes)
 
-    file_name = phone_number + star_reading_obj.TestDate + '_star_reading.pdf'
+    file_name = phone_number + star_reading_obj.test_date + '_star_reading.pdf'
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    star_reading_obj.map_pdf_url_all_items = settings.MEDIA_URL + file_name
+    star_reading_obj.main_pdf_url = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             star_reading_obj.map_pdf_url_all_items))
+                                                                                             star_reading_obj.main_pdf_url))
     plt.clf()
     plt.cla()
     plt.close('all')
@@ -163,14 +163,14 @@ def draw_star_reading_6_12_report_no_name(star_reading_obj, colors_dict):
     the_table.auto_set_column_width(col=list(range(len(star_reading_6_12_columns))))
     the_table.scale(1, 0.32)
 
-    # set_color_for_table(colors_dict, the_table, star_reading_k_5_indexes)
+    set_color_for_table(colors_dict, the_table, star_reading_6_12_indexes)
 
-    file_name = phone_number + star_reading_obj.TestDate + '_star_reading_no_name.pdf'
+    file_name = phone_number + star_reading_obj.test_date + '_star_reading_no_name.pdf'
     file_path = settings.MEDIA_ROOT + file_name
     plt.savefig(file_path, dpi=300)
-    star_reading_obj.map_pdf_url_all_items = settings.MEDIA_URL + file_name
+    star_reading_obj.simple_pdf_url = settings.MEDIA_URL + file_name
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
-                                                                                             star_reading_obj.map_pdf_url_all_items))
+                                                                                             star_reading_obj.simple_pdf_url))
     plt.clf()
     plt.cla()
     plt.close('all')
