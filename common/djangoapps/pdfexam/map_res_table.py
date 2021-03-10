@@ -248,7 +248,7 @@ def draw_reading_k_2_no_txt_all_table(map_pro, colors_dict):
     # map_pro.save()
     log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
                                                                                              map_pro.map_pdf_url_all_items_no_txt))
-    plt.clf()
+    # plt.clf()
 
 
 def draw_language_2_12_simple_map_table(map_pro, colors_dict):

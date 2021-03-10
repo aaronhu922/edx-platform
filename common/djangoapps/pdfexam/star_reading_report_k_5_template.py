@@ -1,4 +1,4 @@
-star_reading_columns_k_5 = (
+star_reading_k_5_columns = (
     'Number', 'Domain', 'Items', '  GK  ', '  G1  ', '  G2  ', '  G3  ', '  G4  ', '  G5  ')
 
 star_reading_k_5_template = [
