@@ -246,3 +246,11 @@ class StarReadingTestInfoReport(models.Model):
 
     class Meta:
         unique_together = ('star_reading_test_info', 'ccss_item')
+
+
+class StarReadingBenchmarkColors(models.Model):
+    grade = models.CharField(max_length=10, unique=True, null=False, blank=False)
+    red = models.FloatField(default=0.2)
+    yellow = models.FloatField(default=0.1)
+    blue = models.FloatField(default=0.1)
+    green = models.FloatField(default=0.6)

@@ -44,6 +44,8 @@ def set_color_for_table(colors_dict, the_table, table_indexes):
                 the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['yellow'])
             elif color == 2:
                 the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['red'])
+            elif color == 4:
+                the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['grey'])
             else:
                 the_table[indexes].set_facecolor(mcolors.CSS4_COLORS['lightgrey'])
 
@@ -61,6 +63,8 @@ def create_table_colors_dict(star_reading_obj, colors_dict_template):
             colors_dict[item_name] = 1
         elif 80 <= item_score:
             colors_dict[item_name] = 0
+        else:
+            colors_dict[item_name] = 4
     # log.info("map file {}'s color index after filling green is {}".format(star_reading_obj.Growth, colors_dict))
     return colors_dict
 
