@@ -18,7 +18,8 @@ from .models import EarlyliteracySkillSetScores, MapTestCheckItem
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from .parse_helper import ExtractStarData, extract_map_data, extract_map_ext_data
-from .star_reading_table import draw_star_reading_table
+from .star_reading_parse_helper import parse_star_reading_data, parse_star_reading_report
+from .star_reading_report_table import draw_star_reading_table
 from student.models import UserProfile
 from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
 from reportlab.pdfgen import canvas
@@ -49,6 +50,56 @@ def handle_growth_pic_data(stu_map_pro, growth_pic_file):
     stu_map_pro.map_growth_pic_url = settings.MEDIA_URL + pic_name
 
 
+def handle_star_reading_report(request, phone_number):
+    context = {}
+    main_file = request.FILES.get('myfile')
+    ext_file = request.FILES.get('ext_file')
+    try:
+        if main_file:
+            pdffilestored = os.path.join(settings.MEDIA_ROOT, main_file.name)
+            with open(pdffilestored, 'wb+') as temp_file:
+                for chunk in main_file.chunks():
+                    temp_file.write(chunk)
+            temp_file.close()
+
+            content = ''
+            with pdfplumber.open(pdffilestored) as pdf:
+                for i in range(len(pdf.pages)):
+                    page = pdf.pages[i]
+                    content = content + page.extract_text()
+                pdf.close()
+            content = content.replace('\n', ' ')
+            os.remove(pdffilestored)
+            star_reading_obj = parse_star_reading_data(content, phone_number)
+            if ext_file:
+                pdffilestored = os.path.join(settings.MEDIA_ROOT, ext_file.name)
+                with open(pdffilestored, 'wb+') as temp_file:
+                    for chunk in ext_file.chunks():
+                        temp_file.write(chunk)
+                temp_file.close()
+
+                item_table = []
+                with pdfplumber.open(pdffilestored) as pdf:
+                    for i in range(len(pdf.pages)):
+                        page = pdf.pages[i]
+                        item_table.append(page.extract_table())
+                    pdf.close()
+                parse_star_reading_report(item_table, star_reading_obj)
+                context["message"] = "用户{}，上传的报告： {}, {}。".format(phone_number, main_file.name, ext_file.name)
+
+            draw_star_reading_table(star_reading_obj)
+
+            return render(request, 'pdf2MySQL/show_success.html', context)
+        else:
+            context["message"] = "pdf不能为空。"
+            return render(request, 'pdf2MySQL/show_failed.html', context)
+    except Exception as err:
+        log.exception(err)
+        log.error("Upload pdf {} failed!".format(ext_file.name))
+        context["message"] = "辅助报告上传失败，错误原因：" + str(err)
+        return render(request, 'pdf2MySQL/show_failed.html', context)
+
+
 @csrf_exempt
 def handle_pdf_data(request):
     # request.Files['myfile']
@@ -73,6 +124,8 @@ def handle_pdf_data(request):
         return render(request, 'pdf2MySQL/show_failed.html', context)
 
     if request.method == 'POST':  # 请求方法为POST时，进行处理
+        if test_type == "star_reading":
+            return handle_star_reading_report(request, phonenumber)
         try:
             myFile = request.FILES['myfile']  # 获取上传的文件，如果没有文件，则默认为None
         except MultiValueDictKeyError as err:
@@ -153,13 +206,11 @@ def handle_pdf_data(request):
                 if growth_pic_file:
                     handle_growth_pic_data(stu_map_pro, growth_pic_file)
                 stu_map_pro.save()
-            elif test_type == "star_reading":
-                draw_star_reading_table()
             else:
                 context["message"] = "类型暂不支持！"
                 return render(request, 'pdf2MySQL/show_failed.html', context)
         except Exception as err:
-            log.error(err)
+            log.exception(err)
             log.error("Upload pdf {} failed!".format(myFile.name))
             context["message"] = "解析错误，请选择正确的文件类型！" + str(err)
             return render(request, 'pdf2MySQL/show_failed.html', context)
@@ -242,6 +293,7 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub('de.ned', 'defined', text)
     text = re.sub("su.x ", "suffix ", text)
     text = re.sub("Cra. ", "Craft ", text)
+    text = re.sub("e.ect ", "effect ", text)
 
     txt_arr = text.split('\n')
     i = 0

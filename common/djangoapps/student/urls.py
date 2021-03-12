@@ -36,7 +36,8 @@ urlpatterns = [
     url(r'^api/manage/courses$', views.course_overview_info, name='course_overview_info'),
     url(r'^api/manage/students/(?P<pk>[0-9]+)$', views.students_management, name='students_management_delete'),
     # url(r'^api/manage/students/(?P<page>[0-9]+)$', views.students_management, name='students_management_paged'),
-    url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)$', views.course_enrollment_info, name='course_enrollment_info'),
+    url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)$', views.course_enrollment_info,
+        name='course_enrollment_info'),
     url(r'^api/manage/courseenrollments/(?P<stu_id>[0-9]+)/(?P<id>[0-9]+)$', views.course_enrollment_info,
         name='delete_course_enrollment_info'),
     url(r'^api/manage/courses_ccss_items/(?P<cour_id>.+)$', views.course_overview_ccss_items_info,
@@ -58,5 +59,12 @@ urlpatterns = [
         name='stu_test_list_phone'),
     url(r'^api/manage/stu_test_list/(?P<id>[0-9]+)$', views.stu_test_list,
         name='stu_test_list'),
+    url(r'^api/front/star_reading_report/(?P<phone>[0-9]+)/(?P<name>.+)$', views.star_reading_info,
+        name='star_reading_info_front'),
+    url(r'^api/manage/star_reading_report/(?P<phone>[0-9]+)/(?P<name>.+)$', views.star_reading_info,
+        name='star_reading_info_manage'),
+
+    url(r'^api/manage/star_reading_color$', views.star_reading_benchmark_color_info,
+        name='star_reading_color_manage'),
 
 ]

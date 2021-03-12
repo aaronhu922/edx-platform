@@ -41,7 +41,8 @@ import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
-from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem, EarlyliteracySkillSetScores
+from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem, EarlyliteracySkillSetScores, \
+    StarReadingTestInfo, StarReadingTestInfoReport, StarReadingBenchmarkColors
 
 from common.djangoapps.student.serializers import StudentSerializer
 
@@ -1793,3 +1794,159 @@ def get_course_and_ccss_items_map(item_name):
     }
 
     return check_item_and_course_info
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def star_reading_info(request, phone, name):
+    if request.method == 'GET':
+
+        star_reading_obj = StarReadingTestInfo.objects.filter(phone_number=phone, test_date=name).first()
+        if not star_reading_obj:
+            log.error("No star reading test for user {} on {}.".format(phone, name))
+            return JsonResponse({"errorCode": "404",
+                                 "executed": True,
+                                 "message": "No star reading test for user {} on {}.".format(phone, name),
+                                 "success": False}, status=200)
+        else:
+            grade = star_reading_obj.grade
+            test_date = star_reading_obj.test_date
+            scaled_score = star_reading_obj.scaled_score
+            percentile_rank = star_reading_obj.percentile_rank
+            grade_equivalent = star_reading_obj.grade_equivalent
+            instructional_reading_level = star_reading_obj.instructional_reading_level
+            estimated_oral_fluency = star_reading_obj.estimated_oral_fluency
+            literature_key_ideas_and_details = star_reading_obj.literature_key_ideas_and_details
+            literature_craft_and_structure = star_reading_obj.literature_craft_and_structure
+            literature_range_of_reading_and_text_complexity = star_reading_obj.literature_range_of_reading_and_text_complexity
+            information_text_key_ideas_and_details = star_reading_obj.information_text_key_ideas_and_details
+            information_text_craft_and_structure = star_reading_obj.information_text_craft_and_structure
+            information_text_integration_of_knowledge_and_ideas = star_reading_obj.information_text_integration_of_knowledge_and_ideas
+            information_text_range_of_reading_and_text_complexity = star_reading_obj.information_text_range_of_reading_and_text_complexity
+            language_vocabulary_acquisition_and_use = star_reading_obj.language_vocabulary_acquisition_and_use
+            lexile_range = star_reading_obj.lexile_range
+            test_duration = star_reading_obj.test_duration
+            main_pdf_url = star_reading_obj.main_pdf_url
+            simple_pdf_url = star_reading_obj.simple_pdf_url
+            district_benchmark = []
+            if grade != "k":
+                color_obj = StarReadingBenchmarkColors.objects.filter(grade=grade).first()
+                district_benchmark = [color_obj.red, color_obj.yellow, color_obj.blue, color_obj.green]
+
+            star_reading_scores = {"scaled_score": scaled_score,
+                                   "percentile_rank": percentile_rank,
+                                   "grade_equivalent": grade_equivalent,
+                                   "instructional_reading_level": instructional_reading_level,
+                                   "estimated_oral_fluency": estimated_oral_fluency,
+                                   "lexile_range": lexile_range}
+            literature_scores = {}
+            if literature_key_ideas_and_details > 0:
+                literature_scores[
+                    "literature_key_ideas_and_details"] = literature_key_ideas_and_details
+            if literature_craft_and_structure > 0:
+                literature_scores["literature_craft_and_structure"] = literature_craft_and_structure
+            if literature_range_of_reading_and_text_complexity > 0:
+                literature_scores[
+                    "literature_range_of_reading_and_text_complexity"] = literature_range_of_reading_and_text_complexity
+
+            information_text_scores = {}
+            if information_text_key_ideas_and_details > 0:
+                information_text_scores[
+                    "information_text_key_ideas_and_details"] = information_text_key_ideas_and_details
+            if information_text_craft_and_structure > 0:
+                information_text_scores["information_text_craft_and_structure"] = information_text_craft_and_structure
+            if information_text_integration_of_knowledge_and_ideas > 0:
+                information_text_scores[
+                    "information_text_integration_of_knowledge_and_ideas"] = information_text_integration_of_knowledge_and_ideas
+            if information_text_range_of_reading_and_text_complexity > 0:
+                information_text_scores[
+                    "information_text_range_of_reading_and_text_complexity"] = information_text_range_of_reading_and_text_complexity
+
+            language_scores = {
+                "language_vocabulary_acquisition_and_use": language_vocabulary_acquisition_and_use
+            }
+
+            test_res = star_reading_obj.star_reading_report.all().order_by('id')
+            report_details = {}
+            for report_item in test_res:
+                domain_name = report_item.domain_name
+                if domain_name in report_details:
+                    report_details[domain_name].append({
+                        "item_desc": report_item.item_desc,
+                        "item_score": report_item.item_score
+                    })
+                else:
+                    report_details[domain_name] = [{
+                        "item_desc": report_item.item_desc,
+                        "item_score": report_item.item_score
+                    }]
+
+            return JsonResponse({
+                "grade": grade,
+                "test_date": test_date,
+                "test_duration": test_duration,
+                "star_reading_scores": star_reading_scores,
+                "literature_scores": literature_scores,
+                "information_text_scores": information_text_scores,
+                "language_scores": language_scores,
+                "main_pdf_url": main_pdf_url,
+                "simple_pdf_url": simple_pdf_url,
+                "district_benchmark": district_benchmark,
+                "report_details": report_details,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get star reading report for user {} of {}!".format(phone, name),
+                "success": True
+            }, status=200)
+
+
+# k_12_grades = ['k', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th']
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def star_reading_benchmark_color_info(request):
+    if request.method == 'GET':
+        colors_obj = StarReadingBenchmarkColors.objects.all()
+        list_grades_color = {}
+        for color_value in colors_obj:
+            list_grades_color[color_value.grade] = {"red": color_value.red,
+                                                    "yellow": color_value.yellow,
+                                                    "blue": color_value.blue,
+                                                    "green": color_value.green
+                                                    }
+        return JsonResponse({
+            "list_grades_color": list_grades_color,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of star reading benchmark colors!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        if data['grade']:
+            grade = data['grade']
+            StarReadingBenchmarkColors.objects.update_or_create(grade=grade,
+                                                                defaults=data)
+            return JsonResponse({
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to update star reading {} benchmark colors!".format(grade),
+                "success": True
+            }, safe=False)
+
+        return JsonResponse({"errorCode": "401",
+                             "executed": True,
+                             "message": "Failed to update star reading color.",
+                             "success": False}, status=401)
+    # elif request.method == 'DELETE':
+    #     instance = CustomerService.objects.get(id=pk)
+    #     ret = instance.delete()
+    #     log.warning(ret)
+    #     return JsonResponse({"errorCode": "200",
+    #                          "executed": True,
+    #                          "message": "Deleted a customer service record with id {}!".format(pk),
+    #                          "success": True}, status=200)
