@@ -19,20 +19,23 @@ def parse_star_reading_data(content, phone_number):
         temp_arr = value[0].split(" ")
         star_reading_model['school'] = temp_arr[0] + " " + temp_arr[1]
         star_reading_model['date_range'] = temp_arr[4]
+        stu_name = temp_arr[2] + temp_arr[3]
+        star_reading_model['stu_name'] = stu_name
 
     regex1 = 'Test Date Grade (.*?) Teacher Class/Group'
     value1 = re.findall(regex1, content)
     # ['Cooper, L 56d48a9e-1b50-49e4-ae17-3d852a012361  Jan 31, 2021, 2:50 AM  8th']
+    # ['n','newstar03,','newstar03', 'd115e9a9-e207-4394-9d32-1292f1321a', '', 'Jan', '29,', '2021,', '7:51', 'PM', '',
+    # '2nd']
     log.info("name - grade regex {}".format(regex1))
     if value1:
         log.info("name - grade: {}".format(value1[0]))
         name_list = value1[0].split(" ")
-        stu_name = name_list[0] + name_list[1]
-        date_string = name_list[4] + name_list[5] + name_list[6]
-        test_date = datetime.strptime(date_string, '%b%d,%Y,').strftime("%Y-%m-%d")
-        stu_id = name_list[2]
+        date_string = name_list[-7] + name_list[-6] + name_list[-5]
+        test_date = datetime.strptime(date_string.strip(','), '%b%d,%Y').strftime("%Y-%m-%d")
+        stu_id = name_list[-9]
         grade = name_list[-1]
-        star_reading_model['stu_name'] = stu_name
+
         star_reading_model['test_date'] = test_date
         star_reading_model['stu_id'] = stu_id
         star_reading_model['grade'] = grade
