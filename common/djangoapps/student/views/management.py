@@ -1830,42 +1830,86 @@ def star_reading_info(request, phone, name):
             main_pdf_url = star_reading_obj.main_pdf_url
             simple_pdf_url = star_reading_obj.simple_pdf_url
             district_benchmark = []
-            if grade != "k":
+            if grade != "K":
                 color_obj = StarReadingBenchmarkColors.objects.filter(grade=grade).first()
                 district_benchmark = [color_obj.red, color_obj.yellow, color_obj.blue, color_obj.green]
 
-            star_reading_scores = {"scaled_score": scaled_score,
-                                   "percentile_rank": percentile_rank,
-                                   "grade_equivalent": grade_equivalent,
-                                   "instructional_reading_level": instructional_reading_level,
-                                   "estimated_oral_fluency": estimated_oral_fluency,
-                                   "lexile_range": lexile_range}
-            literature_scores = {}
+            star_reading_scores = [
+                {
+                    "item_desc": "scaled_score",
+                    "item_score": scaled_score,
+                    "short_desc": "SS"
+                },
+                {
+                    "item_desc": "percentile_rank",
+                    "item_score": percentile_rank,
+                    "short_desc": "PR"
+                },
+                {
+                    "item_desc": "Grade_Equivalent",
+                    "item_score": grade_equivalent,
+                    "short_desc": "GE"
+                },
+                {
+                    "item_desc": "Instructional Reading Level",
+                    "item_score": instructional_reading_level,
+                    "short_desc": "IRL"
+                },
+                {
+                    "item_desc": "Lexile Range",
+                    "item_score": lexile_range
+                }
+            ]
+            if estimated_oral_fluency > 0:
+                star_reading_scores.append({
+                    "item_desc": "Estimated Oral Fluency",
+                    "item_score": estimated_oral_fluency,
+                    "short_desc": "Est.ORF"
+                })
+
+            literature_scores = []
             if literature_key_ideas_and_details > 0:
-                literature_scores[
-                    "literature_key_ideas_and_details"] = literature_key_ideas_and_details
+                literature_scores.append({
+                    "item_desc": "Key Ideas and Details",
+                    "item_score": literature_key_ideas_and_details
+                })
             if literature_craft_and_structure > 0:
-                literature_scores["literature_craft_and_structure"] = literature_craft_and_structure
+                literature_scores.append({
+                    "item_desc": "Craft and Structure",
+                    "item_score": literature_craft_and_structure
+                })
             if literature_range_of_reading_and_text_complexity > 0:
-                literature_scores[
-                    "literature_range_of_reading_and_text_complexity"] = literature_range_of_reading_and_text_complexity
+                literature_scores.append({
+                    "item_desc": "Range of Reading and Level of Text Complexity",
+                    "item_score": literature_range_of_reading_and_text_complexity
+                })
 
-            information_text_scores = {}
+            information_text_scores = []
             if information_text_key_ideas_and_details > 0:
-                information_text_scores[
-                    "information_text_key_ideas_and_details"] = information_text_key_ideas_and_details
+                information_text_scores.append({
+                    "item_desc": "Key Ideas and Details",
+                    "item_score": information_text_key_ideas_and_details
+                })
             if information_text_craft_and_structure > 0:
-                information_text_scores["information_text_craft_and_structure"] = information_text_craft_and_structure
+                information_text_scores.append({
+                    "item_desc": "Craft and Structure",
+                    "item_score": information_text_craft_and_structure
+                })
             if information_text_integration_of_knowledge_and_ideas > 0:
-                information_text_scores[
-                    "information_text_integration_of_knowledge_and_ideas"] = information_text_integration_of_knowledge_and_ideas
+                information_text_scores.append({
+                    "item_desc": "Integration of Knowledge and Ideas",
+                    "item_score": information_text_integration_of_knowledge_and_ideas
+                })
             if information_text_range_of_reading_and_text_complexity > 0:
-                information_text_scores[
-                    "information_text_range_of_reading_and_text_complexity"] = information_text_range_of_reading_and_text_complexity
+                information_text_scores.append({
+                    "item_desc": "Range of Reading and Level of Text Complexity",
+                    "item_score": information_text_range_of_reading_and_text_complexity
+                })
 
-            language_scores = {
-                "language_vocabulary_acquisition_and_use": language_vocabulary_acquisition_and_use
-            }
+            language_scores = [{
+                "item_desc": "Vocabulary Acquisition and Use",
+                "item_score": language_vocabulary_acquisition_and_use
+            }]
 
             test_res = star_reading_obj.star_reading_report.all().order_by('id')
             report_details = {}

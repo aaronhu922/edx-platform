@@ -12,7 +12,7 @@ from .star_reading_report_6_12_template import star_reading_6_12_columns, star_r
 
 log = logging.getLogger("edx.pdfexam")
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
-k_5_grade = ['k', '1st', '2nd', '3rd', '4th', '5th']
+k_5_grade = ['K', '1st', '2nd', '3rd', '4th', '5th']
 
 
 def draw_star_reading_table(star_reading_obj):
@@ -26,7 +26,7 @@ def draw_star_reading_table(star_reading_obj):
         colors_dict = create_table_colors_dict(star_reading_obj, star_reading_6_12_colors)
         draw_star_reading_6_12_report(star_reading_obj, colors_dict)
         draw_star_reading_6_12_report_no_name(star_reading_obj, colors_dict)
-        log.info("Map report type is {}, drew pdfs for report.".format(star_reading_obj.Growth))
+        log.info("Map report type is {}, drew pdfs for report.".format(star_reading_obj.grade))
     star_reading_obj.save()
 
 
