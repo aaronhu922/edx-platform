@@ -1912,19 +1912,26 @@ def star_reading_info(request, phone, name):
             }]
 
             test_res = star_reading_obj.star_reading_report.all().order_by('id')
-            report_details = {}
+            report_details_dict = {}
             for report_item in test_res:
                 domain_name = report_item.domain_name
-                if domain_name in report_details:
-                    report_details[domain_name].append({
+                if domain_name in report_details_dict:
+                    report_details_dict[domain_name].append({
                         "item_desc": report_item.item_desc,
                         "item_score": report_item.item_score
                     })
                 else:
-                    report_details[domain_name] = [{
+                    report_details_dict[domain_name] = [{
                         "item_desc": report_item.item_desc,
                         "item_score": report_item.item_score
                     }]
+
+            report_details = []
+            for domain_key in sorted(report_details_dict.keys()):
+                report_details.append({
+                    "title": domain_key,
+                    "data": report_details_dict[domain_key]
+                })
 
             return JsonResponse({
                 "grade": grade,
@@ -1954,13 +1961,14 @@ def star_reading_info(request, phone, name):
 def star_reading_benchmark_color_info(request):
     if request.method == 'GET':
         colors_obj = StarReadingBenchmarkColors.objects.all()
-        list_grades_color = {}
+        list_grades_color = []
         for color_value in colors_obj:
-            list_grades_color[color_value.grade] = {"red": color_value.red,
-                                                    "yellow": color_value.yellow,
-                                                    "blue": color_value.blue,
-                                                    "green": color_value.green
-                                                    }
+            list_grades_color.append({"red": color_value.red,
+                                      "yellow": color_value.yellow,
+                                      "blue": color_value.blue,
+                                      "green": color_value.green,
+                                      "grade": color_value.grade
+                                      })
         return JsonResponse({
             "list_grades_color": list_grades_color,
             "errorCode": "200",
