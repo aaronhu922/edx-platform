@@ -1522,8 +1522,13 @@ def get_all_test_info_list(phone):
     star_early_tests = []
     for star in star_early_list:
         star_early_tests.append(str(star[0]))
-    # TODO: star reading test
+
     star_reading_tests = []
+    star_reading_list = StarReadingTestInfo.objects.filter(phone_number=phone).order_by(
+        '-test_date').values_list('test_date')
+    for star_reading in star_reading_list:
+        star_reading_tests.append(str(star_reading[0]))
+
     return ccss_tests, star_early_tests, star_reading_tests
 
 
