@@ -1938,6 +1938,9 @@ def star_reading_info(request, phone, name):
                     "data": report_details_dict[domain_key]
                 })
 
+            if len(grade) > 2:
+                grade = grade[:-2]
+
             return JsonResponse({
                 "grade": grade,
                 "test_date": test_date,
@@ -1957,7 +1960,7 @@ def star_reading_info(request, phone, name):
             }, status=200)
 
 
-# k_12_grades = ['k', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th']
+# k_12_grades = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th']
 
 
 # @login_required
