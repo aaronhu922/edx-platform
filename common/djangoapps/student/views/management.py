@@ -3,6 +3,7 @@ Student Views
 """
 
 import datetime
+import glob
 import logging
 import os
 import uuid
@@ -1179,12 +1180,29 @@ def students_management(request, pk=None):
                                  "success": False}, status=401)
 
     elif request.method == 'DELETE':
-        instance = User.objects.filter(id=pk)
-        ret = instance.delete()
-        log.info(ret)
+        user_obj = User.objects.filter(id=pk)
+        phone_number = user_obj.first().profile.phone_number
+        ret = user_obj.delete()
+        log.info("delete student result: {}".format(ret))
+        # Delete all reports belong to this phone.
+        ret = MapStudentProfile.objects.filter(phone_number=phone_number).delete()
+        log.info("delete map test: {}".format(ret))
+        ret = StarReadingTestInfo.objects.filter(phone_number=phone_number).delete()
+        log.info("delete star reading test: {}".format(ret))
+        ret = EarlyliteracySkillSetScores.objects.filter(phone_number=phone_number).delete()
+        log.info("delete star early test: {}".format(ret))
+        file_path = os.path.join(settings.MEDIA_ROOT, phone_number + "*.pdf")
+        files = glob.glob(file_path)
+        for f in files:
+            try:
+                os.unlink(f)
+                log.info("remove report file: {}".format(f))
+            except OSError as e:
+                log.error("Error: %s : %s".format(f, e.strerror))
         return JsonResponse({"errorCode": "200",
                              "executed": True,
-                             "message": "Deleted a student account!",
+                             "message": "Deleted a student account {} and all the test reports of this phone!".format(
+                                 phone_number),
                              "success": True}, status=200)
 
 
@@ -1958,6 +1976,8 @@ def star_reading_info(request, phone, name):
                 "message": "Succeed to get star reading report for user {} of {}!".format(phone, name),
                 "success": True
             }, status=200)
+    elif request.method == 'DELETE':
+        return delete_star_reading_report(phone, name)
 
 
 # k_12_grades = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th']
@@ -2010,3 +2030,33 @@ def star_reading_benchmark_color_info(request):
     #                          "executed": True,
     #                          "message": "Deleted a customer service record with id {}!".format(pk),
     #                          "success": True}, status=200)
+
+
+def delete_star_reading_report(phone, name):
+    star_reading_obj = StarReadingTestInfo.objects.filter(phone_number=phone, test_date=name).first()
+    if not star_reading_obj:
+        log.error("No star reading test for user {} on {}.".format(phone, name))
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No star reading test for user {} on {}.".format(phone, name),
+                             "success": False}, status=200)
+    else:
+        main_pdf_url = star_reading_obj.main_pdf_url
+        simple_pdf_url = star_reading_obj.simple_pdf_url
+        report_files = [main_pdf_url, simple_pdf_url]
+        for file_name in report_files:
+            if file_name:
+                base_name = os.path.basename(file_name)
+                file_path = os.path.join(settings.MEDIA_ROOT, base_name)
+                log.info("going to delete {}".format(file_path))
+                try:
+                    os.remove(file_path)
+                except FileNotFoundError as err:
+                    log.warning(
+                        "Failed to delete file {} of {}'s {}, with error: {}".format(file_path, phone, name, err))
+        ret = star_reading_obj.delete()
+        log.info("Removed map report: {}".format(ret))
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted star reading report {} of user {}!".format(name, phone),
+                             "success": True}, status=200)
