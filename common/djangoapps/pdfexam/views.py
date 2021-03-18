@@ -294,6 +294,8 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub("su.x ", "suffix ", text)
     text = re.sub("Cra. ", "Craft ", text)
     text = re.sub("e.ect ", "effect ", text)
+    text = re.sub(".gurative ", "figurative ", text)
+    # text = re.sub(".y\d\d ", "effect ", text)
 
     txt_arr = text.split('\n')
     i = 0
