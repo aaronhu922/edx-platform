@@ -93,25 +93,26 @@ def create_table_colors_dict(map_pro, ccss_items_template, colors_dict_template)
     map_res = map_pro.map_ext_results.all()
     colors_dict = colors_dict_template.copy()
     # log.info("map file {}'s init color is {}".format(map_pro.Growth, colors_dict))
-    for item_result in map_res:
-        item_name = item_result.check_item.item_name
-        item_level = item_result.item_level
+    if map_res:
+        for item_result in map_res:
+            item_name = item_result.check_item.item_name
+            item_level = item_result.item_level
 
-        if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
-            colors_dict[item_name] = 2
-        elif item_level == "REINFORCE":
-            colors_dict[item_name] = 1
-    for item in ccss_items_template:
-        i = 0
-        green_back = True
-        while i < len(item):
-            if green_back and colors_dict[item[i]] == 0:
-                i += 1
-            else:
-                green_back = False
-                if colors_dict[item[i]] == 0:
-                    colors_dict[item[i]] = 2
-                i += 1
+            if item_level == "DEVELOP" or item_level == "REINFORCE_DEVELOP":
+                colors_dict[item_name] = 2
+            elif item_level == "REINFORCE":
+                colors_dict[item_name] = 1
+        for item in ccss_items_template:
+            i = 0
+            green_back = True
+            while i < len(item):
+                if green_back and colors_dict[item[i]] == 0:
+                    i += 1
+                else:
+                    green_back = False
+                    if colors_dict[item[i]] == 0:
+                        colors_dict[item[i]] = 2
+                    i += 1
     # log.info("map file {}'s color index after filling green is {}".format(map_pro.Growth, colors_dict))
     return colors_dict
 
