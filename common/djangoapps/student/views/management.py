@@ -3,6 +3,7 @@ Student Views
 """
 
 import datetime
+import glob
 import logging
 import os
 import uuid
@@ -41,7 +42,8 @@ import track.views
 from bulk_email.models import Optout
 from course_modes.models import CourseMode
 
-from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem, EarlyliteracySkillSetScores
+from pdfexam.models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem, EarlyliteracySkillSetScores, \
+    StarReadingTestInfo, StarReadingTestInfoReport, StarReadingBenchmarkColors
 
 from common.djangoapps.student.serializers import StudentSerializer
 
@@ -1178,12 +1180,29 @@ def students_management(request, pk=None):
                                  "success": False}, status=401)
 
     elif request.method == 'DELETE':
-        instance = User.objects.filter(id=pk)
-        ret = instance.delete()
-        log.info(ret)
+        user_obj = User.objects.filter(id=pk)
+        phone_number = user_obj.first().profile.phone_number
+        ret = user_obj.delete()
+        log.info("delete student result: {}".format(ret))
+        # Delete all reports belong to this phone.
+        ret = MapStudentProfile.objects.filter(phone_number=phone_number).delete()
+        log.info("delete map test: {}".format(ret))
+        ret = StarReadingTestInfo.objects.filter(phone_number=phone_number).delete()
+        log.info("delete star reading test: {}".format(ret))
+        ret = EarlyliteracySkillSetScores.objects.filter(phone_number=phone_number).delete()
+        log.info("delete star early test: {}".format(ret))
+        file_path = os.path.join(settings.MEDIA_ROOT, phone_number + "*.pdf")
+        files = glob.glob(file_path)
+        for f in files:
+            try:
+                os.unlink(f)
+                log.info("remove report file: {}".format(f))
+            except OSError as e:
+                log.error("Error: %s : %s".format(f, e.strerror))
         return JsonResponse({"errorCode": "200",
                              "executed": True,
-                             "message": "Deleted a student account!",
+                             "message": "Deleted a student account {} and all the test reports of this phone!".format(
+                                 phone_number),
                              "success": True}, status=200)
 
 
@@ -1521,8 +1540,13 @@ def get_all_test_info_list(phone):
     star_early_tests = []
     for star in star_early_list:
         star_early_tests.append(str(star[0]))
-    # TODO: star reading test
+
     star_reading_tests = []
+    star_reading_list = StarReadingTestInfo.objects.filter(phone_number=phone).order_by(
+        '-test_date').values_list('test_date')
+    for star_reading in star_reading_list:
+        star_reading_tests.append(str(star_reading[0]))
+
     return ccss_tests, star_early_tests, star_reading_tests
 
 
@@ -1793,3 +1817,246 @@ def get_course_and_ccss_items_map(item_name):
     }
 
     return check_item_and_course_info
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def star_reading_info(request, phone, name):
+    if request.method == 'GET':
+
+        star_reading_obj = StarReadingTestInfo.objects.filter(phone_number=phone, test_date=name).first()
+        if not star_reading_obj:
+            log.error("No star reading test for user {} on {}.".format(phone, name))
+            return JsonResponse({"errorCode": "404",
+                                 "executed": True,
+                                 "message": "No star reading test for user {} on {}.".format(phone, name),
+                                 "success": False}, status=200)
+        else:
+            grade = star_reading_obj.grade
+            test_date = star_reading_obj.test_date
+            scaled_score = star_reading_obj.scaled_score
+            percentile_rank = star_reading_obj.percentile_rank
+            grade_equivalent = star_reading_obj.grade_equivalent
+            instructional_reading_level = star_reading_obj.instructional_reading_level
+            estimated_oral_fluency = star_reading_obj.estimated_oral_fluency
+            literature_key_ideas_and_details = star_reading_obj.literature_key_ideas_and_details
+            literature_craft_and_structure = star_reading_obj.literature_craft_and_structure
+            literature_range_of_reading_and_text_complexity = star_reading_obj.literature_range_of_reading_and_text_complexity
+            information_text_key_ideas_and_details = star_reading_obj.information_text_key_ideas_and_details
+            information_text_craft_and_structure = star_reading_obj.information_text_craft_and_structure
+            information_text_integration_of_knowledge_and_ideas = star_reading_obj.information_text_integration_of_knowledge_and_ideas
+            information_text_range_of_reading_and_text_complexity = star_reading_obj.information_text_range_of_reading_and_text_complexity
+            language_vocabulary_acquisition_and_use = star_reading_obj.language_vocabulary_acquisition_and_use
+            lexile_range = star_reading_obj.lexile_range
+            test_duration = star_reading_obj.test_duration
+            main_pdf_url = star_reading_obj.main_pdf_url
+            simple_pdf_url = star_reading_obj.simple_pdf_url
+            district_benchmark = []
+            if grade != "K":
+                color_obj = StarReadingBenchmarkColors.objects.filter(grade=grade).first()
+                district_benchmark = [color_obj.red, color_obj.yellow, color_obj.blue, color_obj.green]
+
+            star_reading_scores = [
+                {
+                    "item_desc": "scaled_score",
+                    "item_score": scaled_score,
+                    "short_desc": "SS"
+                },
+                {
+                    "item_desc": "percentile_rank",
+                    "item_score": percentile_rank,
+                    "short_desc": "PR"
+                },
+                {
+                    "item_desc": "Grade_Equivalent",
+                    "item_score": grade_equivalent,
+                    "short_desc": "GE"
+                },
+                {
+                    "item_desc": "Instructional Reading Level",
+                    "item_score": instructional_reading_level,
+                    "short_desc": "IRL"
+                },
+                {
+                    "item_desc": "Lexile Range",
+                    "item_score": lexile_range
+                }
+            ]
+            if estimated_oral_fluency > 0:
+                star_reading_scores.append({
+                    "item_desc": "Estimated Oral Fluency",
+                    "item_score": estimated_oral_fluency,
+                    "short_desc": "Est.ORF"
+                })
+
+            literature_scores = []
+            if literature_key_ideas_and_details > 0:
+                literature_scores.append({
+                    "item_desc": "Key Ideas and Details",
+                    "item_score": literature_key_ideas_and_details
+                })
+            if literature_craft_and_structure > 0:
+                literature_scores.append({
+                    "item_desc": "Craft and Structure",
+                    "item_score": literature_craft_and_structure
+                })
+            if literature_range_of_reading_and_text_complexity > 0:
+                literature_scores.append({
+                    "item_desc": "Range of Reading and Level of Text Complexity",
+                    "item_score": literature_range_of_reading_and_text_complexity
+                })
+
+            information_text_scores = []
+            if information_text_key_ideas_and_details > 0:
+                information_text_scores.append({
+                    "item_desc": "Key Ideas and Details",
+                    "item_score": information_text_key_ideas_and_details
+                })
+            if information_text_craft_and_structure > 0:
+                information_text_scores.append({
+                    "item_desc": "Craft and Structure",
+                    "item_score": information_text_craft_and_structure
+                })
+            if information_text_integration_of_knowledge_and_ideas > 0:
+                information_text_scores.append({
+                    "item_desc": "Integration of Knowledge and Ideas",
+                    "item_score": information_text_integration_of_knowledge_and_ideas
+                })
+            if information_text_range_of_reading_and_text_complexity > 0:
+                information_text_scores.append({
+                    "item_desc": "Range of Reading and Level of Text Complexity",
+                    "item_score": information_text_range_of_reading_and_text_complexity
+                })
+
+            language_scores = [{
+                "item_desc": "Vocabulary Acquisition and Use",
+                "item_score": language_vocabulary_acquisition_and_use
+            }]
+
+            test_res = star_reading_obj.star_reading_report.all().order_by('id')
+            report_details_dict = {}
+            for report_item in test_res:
+                domain_name = report_item.domain_name
+                if domain_name in report_details_dict:
+                    report_details_dict[domain_name].append({
+                        "item_desc": report_item.item_desc,
+                        "item_score": report_item.item_score
+                    })
+                else:
+                    report_details_dict[domain_name] = [{
+                        "item_desc": report_item.item_desc,
+                        "item_score": report_item.item_score
+                    }]
+
+            report_details = []
+            for domain_key in sorted(report_details_dict.keys()):
+                report_details.append({
+                    "title": domain_key,
+                    "data": report_details_dict[domain_key]
+                })
+
+            if len(grade) > 2:
+                grade = grade[:-2]
+
+            return JsonResponse({
+                "grade": grade,
+                "test_date": test_date,
+                "test_duration": test_duration,
+                "star_reading_scores": star_reading_scores,
+                "literature_scores": literature_scores,
+                "information_text_scores": information_text_scores,
+                "language_scores": language_scores,
+                "main_pdf_url": main_pdf_url,
+                "simple_pdf_url": simple_pdf_url,
+                "district_benchmark": district_benchmark,
+                "report_details": report_details,
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to get star reading report for user {} of {}!".format(phone, name),
+                "success": True
+            }, status=200)
+    elif request.method == 'DELETE':
+        return delete_star_reading_report(phone, name)
+
+
+# k_12_grades = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th']
+
+
+# @login_required
+# @ensure_csrf_cookie
+@csrf_exempt
+def star_reading_benchmark_color_info(request):
+    if request.method == 'GET':
+        colors_obj = StarReadingBenchmarkColors.objects.all()
+        list_grades_color = []
+        for color_value in colors_obj:
+            list_grades_color.append({"red": color_value.red,
+                                      "yellow": color_value.yellow,
+                                      "blue": color_value.blue,
+                                      "green": color_value.green,
+                                      "grade": color_value.grade
+                                      })
+        return JsonResponse({
+            "list_grades_color": list_grades_color,
+            "errorCode": "200",
+            "executed": True,
+            "message": "Succeed to get list of star reading benchmark colors!",
+            "success": True
+        }, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        if data['grade']:
+            grade = data['grade']
+            StarReadingBenchmarkColors.objects.update_or_create(grade=grade,
+                                                                defaults=data)
+            return JsonResponse({
+                "errorCode": "200",
+                "executed": True,
+                "message": "Succeed to update star reading {} benchmark colors!".format(grade),
+                "success": True
+            }, safe=False)
+
+        return JsonResponse({"errorCode": "401",
+                             "executed": True,
+                             "message": "Failed to update star reading color.",
+                             "success": False}, status=401)
+    # elif request.method == 'DELETE':
+    #     instance = CustomerService.objects.get(id=pk)
+    #     ret = instance.delete()
+    #     log.warning(ret)
+    #     return JsonResponse({"errorCode": "200",
+    #                          "executed": True,
+    #                          "message": "Deleted a customer service record with id {}!".format(pk),
+    #                          "success": True}, status=200)
+
+
+def delete_star_reading_report(phone, name):
+    star_reading_obj = StarReadingTestInfo.objects.filter(phone_number=phone, test_date=name).first()
+    if not star_reading_obj:
+        log.error("No star reading test for user {} on {}.".format(phone, name))
+        return JsonResponse({"errorCode": "404",
+                             "executed": True,
+                             "message": "No star reading test for user {} on {}.".format(phone, name),
+                             "success": False}, status=200)
+    else:
+        main_pdf_url = star_reading_obj.main_pdf_url
+        simple_pdf_url = star_reading_obj.simple_pdf_url
+        report_files = [main_pdf_url, simple_pdf_url]
+        for file_name in report_files:
+            if file_name:
+                base_name = os.path.basename(file_name)
+                file_path = os.path.join(settings.MEDIA_ROOT, base_name)
+                log.info("going to delete {}".format(file_path))
+                try:
+                    os.remove(file_path)
+                except FileNotFoundError as err:
+                    log.warning(
+                        "Failed to delete file {} of {}'s {}, with error: {}".format(file_path, phone, name, err))
+        ret = star_reading_obj.delete()
+        log.info("Removed map report: {}".format(ret))
+        return JsonResponse({"errorCode": "200",
+                             "executed": True,
+                             "message": "Deleted star reading report {} of user {}!".format(name, phone),
+                             "success": True}, status=200)
