@@ -1458,7 +1458,7 @@ def my_map_test_info(request, phone, name):
                     domain_index = int(item)
                     if domain_index < 12:
                         sub_domains_info_list[domain_index]["focus_strength_info"] = "Relative Strength"
-            if map_pro.Growth.startswith('Reading 2-5'):
+            if map_pro.Growth.startswith('Reading 2-5') or map_pro.Growth.startswith('Reading 6+'):
                 sub_domains_info = sub_domains_info_list[:5]
             elif map_pro.Growth.startswith('Reading K-2'):
                 sub_domains_info = sub_domains_info_list[5:9]
@@ -1712,7 +1712,7 @@ def getStudioMapStats(phone, name):
                 domain_index = int(item)
                 if domain_index < 12:
                     sub_domains_info_list[domain_index]["focus_strength_info"] = "Relative Strength"
-        if map_pro.Growth.startswith('Reading 2-5'):
+        if map_pro.Growth.startswith('Reading 2-5') or map_pro.Growth.startswith('Reading 6+'):
             sub_domains_info = sub_domains_info_list[:5]
         elif map_pro.Growth.startswith('Reading K-2'):
             sub_domains_info = sub_domains_info_list[5:9]

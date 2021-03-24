@@ -12,6 +12,9 @@ from .reading_k_2_template import reading_k_2_indexes, reading_k_2_cell_no_text,
 from .lanuage_2_12_template import language_2_12_indexes, language_2_12_simple_no_txt, map_2_12_columns, \
     language_2_12_cells_color, language_2_12_items_array
 from .map_2_12_table_template import map_2_12_simple_table, map_2_12_table, map_2_12_table_indexes
+from .reading_6plus_template import reading_6plus_full_no_text, reading_6plus_simple_no_text, \
+    reading_6plus_full_template, reading_6plus_columns, reading_6plus_full_indexes, \
+    reading_6plus_simple_colors, reading_6plus_simple_indexes, reading_6plus_color_template_array
 
 # from .models import MapStudentProfile, MapProfileExtResults, MapTestCheckItem
 
@@ -39,9 +42,101 @@ def draw_map_table(map_pro):
         draw_language_2_12_in_all_table(map_pro, colors_dict)
         draw_language_2_12_no_txt_all_table(map_pro, colors_dict)
         log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
+    elif map_pro.Growth.startswith('Reading 6+'):
+        colors_dict = create_table_colors_dict(map_pro, reading_6plus_color_template_array, reading_6plus_simple_colors)
+        draw_reading_6plus_simple(map_pro, colors_dict)
+        draw_reading_6plus_full(map_pro, colors_dict)
+        draw_reading_6plus_full_no_text(map_pro, colors_dict)
+        log.info("Map report type is {}, drew pdfs for report.".format(map_pro.Growth))
     else:
         log.info("Wrong map type {}".format(map_pro.Growth))
         raise ValueError("上传了不支持的测试类型 {}，生成pdf发生了错误！".format(map_pro.Growth))
+
+
+def draw_reading_6plus_simple(map_pro, colors_dict):
+    phone_number = map_pro.phone_number
+
+    fig, ax = plt.subplots()
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = ax.table(cellText=reading_6plus_simple_no_text, cellColours=None,
+                         colLabels=reading_6plus_columns, loc='center', cellLoc='center')
+
+    fig.set_size_inches(12, 10)
+    the_table.auto_set_font_size(False)
+    the_table.set_fontsize(9)
+    the_table.auto_set_column_width(col=list(range(len(reading_6plus_columns))))
+    the_table.scale(1, 0.85)
+
+    set_color_for_table(colors_dict, the_table, reading_6plus_simple_indexes)
+
+    file_name = phone_number + map_pro.TestDate + '_reading6plus_simple.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
+    plt.savefig(file_path, dpi=300)
+    map_pro.map_pdf_url = settings.MEDIA_URL + file_name
+
+    log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
+                                                                                             map_pro.map_pdf_url))
+    plt.clf()
+    plt.cla()
+    plt.close('all')
+
+
+def draw_reading_6plus_full(map_pro, colors_dict):
+    phone_number = map_pro.phone_number
+
+    fig, ax = plt.subplots()
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = ax.table(cellText=reading_6plus_full_template, cellColours=None,
+                         colLabels=reading_6plus_columns, loc='center', cellLoc='center')
+    fig.set_size_inches(14, 30)
+    the_table.auto_set_font_size(True)
+    the_table.set_fontsize(9)
+    the_table.auto_set_column_width(col=list(range(len(reading_6plus_columns))))
+    the_table.scale(1, 0.23)
+
+    set_color_for_table(colors_dict, the_table, reading_6plus_full_indexes)
+
+    file_name = phone_number + map_pro.TestDate + '_reading6plus_all.pdf'
+    file_path = settings.MEDIA_ROOT + file_name
+    plt.savefig(file_path, dpi=300)
+    map_pro.map_pdf_url_all_items = settings.MEDIA_URL + file_name
+    log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
+                                                                                             map_pro.map_pdf_url_all_items))
+    plt.clf()
+    plt.cla()
+    plt.close('all')
+
+
+def draw_reading_6plus_full_no_text(map_pro, colors_dict):
+    phone_number = map_pro.phone_number
+
+    fig, ax = plt.subplots()
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = ax.table(cellText=reading_6plus_full_no_text, cellColours=None,
+                         colLabels=reading_6plus_columns, loc='center', cellLoc='center')
+
+    fig.set_size_inches(12, 30)
+    the_table.auto_set_font_size(True)
+    the_table.set_fontsize(9)
+    the_table.auto_set_column_width(col=list(range(len(reading_6plus_columns))))
+    the_table.scale(1, 0.23)
+
+    set_color_for_table(colors_dict, the_table, reading_6plus_full_indexes)
+
+    file_name = phone_number + map_pro.TestDate + '_reading6plus_all_no_txt.pdf'
+
+    file_path = settings.MEDIA_ROOT + file_name
+    plt.savefig(file_path, dpi=300)
+    map_pro.map_pdf_url_all_items_no_txt = settings.MEDIA_URL + file_name
+    #
+    log.info("Successfully create the table for {}'s map test to file {}, url is {}.".format(phone_number, file_path,
+                                                                                             map_pro.map_pdf_url_all_items_no_txt))
+    plt.clf()
+    plt.cla()
+    plt.close('all')
 
 
 def draw_reading_2_5_map_table(map_pro, colors_dict):

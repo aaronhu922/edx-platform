@@ -157,7 +157,7 @@ class MapStudentProfile(models.Model):
     Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR = models.CharField(max_length=16)
     Literary_Text_Key_Ideas_and_Details_SCORE = models.CharField(max_length=10)
     Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR = models.CharField(max_length=16)
-    map_pdf_url = models.TextField(null=True)
+    map_pdf_url = models.CharField(max_length=100, null=True)
     vocabulary_use_and_function = models.CharField(max_length=10, default="")
     foundational_skills = models.CharField(max_length=10, default="")
     language_and_writing = models.CharField(max_length=10, default="")
@@ -194,7 +194,7 @@ class MapProfileExtResults(models.Model):
     item_level = models.CharField(max_length=50)
     check_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="checked_items",
                                    on_delete=models.CASCADE)
-    recommend_description = models.TextField(null=True)
+    recommend_description = models.CharField(max_length=1000, null=True)
 
     class Meta:
         unique_together = ('map_student_profile', 'check_item')
@@ -241,7 +241,7 @@ class StarReadingTestInfoReport(models.Model):
     item_score = models.IntegerField(null=True, blank=True, default=0)
     ccss_item = models.ForeignKey(MapTestCheckItem, db_index=True, related_name="ccss_items",
                                   on_delete=models.CASCADE)
-    item_desc = models.CharField(max_length=256, default="")
+    item_desc = models.CharField(max_length=1500, default="")
     domain_name = models.CharField(max_length=100, default="")
 
     class Meta:

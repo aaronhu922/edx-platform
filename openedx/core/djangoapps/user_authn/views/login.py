@@ -582,16 +582,20 @@ def login_user_json(request):
         set_custom_attribute('login_user_auth_failed_error', False)
         set_custom_attribute('login_user_response_status', response.status_code)
         set_custom_attribute('login_user_redirect_url', redirect_url)
+        log.info("return response: {}".format(response))
         return response
     except AuthFailedError as error:
         response_content = error.get_response()
         response_content['executed'] = True
+        response_content['errorCode'] = 400
+        response_content['message'] = response_content['value']
         log.exception(response_content)
         if response_content.get('error_code') == 'inactive-user':
             response_content['phone_number'] = request.POST.get('phone_number')
-        response = JsonResponse(response_content, status=400)
+        response = JsonResponse(response_content, status=200)
         set_custom_attribute('login_user_auth_failed_error', True)
         set_custom_attribute('login_user_response_status', response.status_code)
+        # log.info("return response: {}".format(response))
         return response
 
 
