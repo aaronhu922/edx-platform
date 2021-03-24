@@ -1956,8 +1956,8 @@ def star_reading_info(request, phone, name):
                     "data": report_details_dict[domain_key]
                 })
 
-            if len(grade) > 2:
-                grade = grade[:-2]
+            # if len(grade) > 2:
+            #     grade = grade[:-2]
 
             return JsonResponse({
                 "grade": grade,
