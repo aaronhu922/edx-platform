@@ -35,6 +35,8 @@ def parse_star_reading_data(content, phone_number):
         test_date = datetime.strptime(date_string.strip(','), '%b%d,%Y').strftime("%Y-%m-%d")
         stu_id = name_list[-9]
         grade = name_list[-1]
+        if len(grade) > 2:
+            grade = grade[:-2]
 
         star_reading_model['test_date'] = test_date
         star_reading_model['stu_id'] = stu_id

@@ -125,14 +125,8 @@ def _check_excessive_login_attempts(user):
 def _generate_locked_out_error_message():
 
     locked_out_period_in_sec = settings.MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS
-    raise AuthFailedError(Text(_('To protect your account, it’s been temporarily '
-                                 'locked. Try again in {locked_out_period} minutes.'
-                                 '{li_start}To be on the safe side, you can reset your '
-                                 'password {link_start}here{link_end} before you try again.')).format(
-        link_start=HTML('<a "#login" class="form-toggle" data-type="password-reset">'),
-        link_end=HTML('</a>'),
-        li_start=HTML('<li>'),
-        li_end=HTML('</li>'),
+    raise AuthFailedError(Text(_('此帐号暂时被锁定，{locked_out_period}分钟之后再登录。 '
+                                 '为了你的账户安全，请重置你的密码')).format(
         locked_out_period=int(locked_out_period_in_sec / 60)))
 
 
@@ -222,22 +216,17 @@ def _handle_failed_authentication(user, authenticated_user):
             if not LoginFailures.is_user_locked_out(user):
                 max_failures_allowed = settings.MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED
                 remaining_attempts = max_failures_allowed - failure_count
-                raise AuthFailedError(Text(_('Phone or password is incorrect.'
-                                             '{li_start}You have {remaining_attempts} more sign-in '
-                                             'attempts before your account is temporarily locked.{li_end}'
-                                             '{li_start}If you\'ve forgotten your password, click '
-                                             '{link_start}here{link_end} to reset.{li_end}'
+                raise AuthFailedError(Text(_('电话号码或者密码不正确。 如果你再输错{remaining_attempts}次,\n'
+                                             '帐号就会被暂时锁定。 如果忘记密码，请重置密码或者联系管理员。'
                                              ))
                                       .format(
                     link_start=HTML('<a http="#login" class="form-toggle" data-type="password-reset">'),
                     link_end=HTML('</a>'),
-                    li_start=HTML('<li>'),
-                    li_end=HTML('</li>'),
                     remaining_attempts=remaining_attempts))
             else:
                 _generate_locked_out_error_message()
 
-    raise AuthFailedError(_('Phone or password is incorrect.'))
+    raise AuthFailedError(_('电话或者密码不正确。'))
 
 
 def _handle_successful_authentication_and_login(user, request):
