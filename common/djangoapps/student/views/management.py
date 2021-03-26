@@ -1854,6 +1854,8 @@ def star_reading_info(request, phone, name):
             simple_pdf_url = star_reading_obj.simple_pdf_url
             district_benchmark = []
             if grade != "K":
+                if len(grade) > 2:
+                    grade = grade[:-2]
                 color_obj = StarReadingBenchmarkColors.objects.filter(grade=grade).first()
                 district_benchmark = [color_obj.red, color_obj.yellow, color_obj.blue, color_obj.green]
 
@@ -1955,9 +1957,6 @@ def star_reading_info(request, phone, name):
                     "title": domain_key,
                     "data": report_details_dict[domain_key]
                 })
-
-            # if len(grade) > 2:
-            #     grade = grade[:-2]
 
             return JsonResponse({
                 "grade": grade,
