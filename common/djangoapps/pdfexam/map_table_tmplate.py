@@ -423,3 +423,16 @@ domain_full_name_list = ['Literary Text: Key Ideas and Details',
                          'Language: Understand, Edit for Mechanics',
                          'Language: Understand, Edit for Grammar, Usage'
                          ]
+domain_name_field_list = ['Literary_Text_Key_Ideas_and_Details_SCORE',
+                          'Informational_Text_Language_Craft_and_Structure_SCORE',
+                          'Literary_Text_Language_Craft_and_Structure_SCORE',
+                          'Vocabulary_Acquisition_and_Use_SCORE',
+                          'Informational_Text_Key_Ideas_and_Details_SCORE',
+                          'vocabulary_use_and_function',
+                          'language_and_writing',
+                          'foundational_skills',
+                          'literature_and_informational_text',
+                          'writing_write_revise_texts_for_purpose_and_audience',
+                          'language_understand_edit_for_mechanics',
+                          'language_understand_edit_for_grammar_usage'
+                          ]
