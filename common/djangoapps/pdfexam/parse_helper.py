@@ -2,7 +2,7 @@ import logging
 import re
 import datetime
 from .models import MapStudentProfile, EarlyliteracySkillSetScores, MapProfileExtResults, MapTestCheckItem
-from .map_table_tmplate import domain_full_name_list, domain_name_reg_list
+from .map_table_tmplate import domain_name_field_list, domain_name_reg_list
 
 log = logging.getLogger("edx.pdfexam")
 
@@ -640,21 +640,22 @@ def extract_map_data(data, phonenumber):
                                         'Rapid-Guessing %', 'Est. Impact of Rapid-Guessing % on RIT', 'Growth', \
                                         'Semester', 'Score', 'LANGUAGE USAGE', 'HIGHLIGHTS', 'Group by', 'Grade(s)',
                                         # 'Concepts to', \
-                                        'Informational Text: Key Ideas and Details SCORE', \
-                                        'Informational Text: Key Ideas and Details STANDARD ERROR', \
-                                        'Vocabulary: Acquisition and Use SCORE', \
-                                        'Vocabulary: Acquisition and Use STANDARD ERROR', \
-                                        'Informational Text: Language, Craft, and Structure SCORE', \
-                                        'Informational Text: Language, Craft, and Structure STANDARD ERROR', \
-                                        'Literary Text: Language, Craft, and Structure SCORE', \
-                                        'Literary Text: Language, Craft, and Structure STANDARD ERROR', \
-                                        'Literary Text: Key Ideas and Details SCORE', \
-                                        'Literary Text: Key Ideas and Details STANDARD ERROR',
-                                        'Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
-                                        'Literature and Informational Text',
-                                        'Writing: Write, Revise Texts for Purpose and Audience',
-                                        'Language: Understand, Edit for Grammar, Usage',
-                                        'Language: Understand, Edit for Mechanics']
+                                        # 'Informational Text: Key Ideas and Details SCORE', \
+                                        # 'Informational Text: Key Ideas and Details STANDARD ERROR', \
+                                        # 'Vocabulary: Acquisition and Use SCORE', \
+                                        # 'Vocabulary: Acquisition and Use STANDARD ERROR', \
+                                        # 'Informational Text: Language, Craft, and Structure SCORE', \
+                                        # 'Informational Text: Language, Craft, and Structure STANDARD ERROR', \
+                                        # 'Literary Text: Language, Craft, and Structure SCORE', \
+                                        # 'Literary Text: Language, Craft, and Structure STANDARD ERROR', \
+                                        # 'Literary Text: Key Ideas and Details SCORE', \
+                                        # 'Literary Text: Key Ideas and Details STANDARD ERROR',
+                                        # 'Vocabulary Use and Functions', 'Foundational Skills', 'Language and Writing',
+                                        # 'Literature and Informational Text',
+                                        # 'Writing: Write, Revise Texts for Purpose and Audience',
+                                        # 'Language: Understand, Edit for Grammar, Usage',
+                                        # 'Language: Understand, Edit for Mechanics'
+                                        ]
 
     mapnwea_student_profile_summary_info_dict = {}
 
@@ -717,50 +718,50 @@ def extract_map_data(data, phonenumber):
             extract_regex = tempSource + "\s\:\s" + "(.*?)" + "\s" + "Concepts to :"
         # elif source == "Concepts to":
         #     ExtractRegex = source + "\s\:\s" + "(.*?)" + "\s" + "Informational Text"
-        elif source == "Informational Text: Key Ideas and Details SCORE":
-            temp_source = "Informational Text: Key Ideas and Details"
-            extract_regex = "(?<=" + temp_source + ")\s\d{1,3}"
-        elif source == "Informational Text: Key Ideas and Details STANDARD ERROR":
-            temp_source0 = "Informational Text: Key Ideas and Details"
-            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
-        elif source == "Vocabulary: Acquisition and Use SCORE":
-            temp_source = "Vocabulary: Acquisition and Use"
-            extract_regex = "(?<=" + temp_source + ")\s+\d{3}"
-        elif source == "Vocabulary: Acquisition and Use STANDARD ERROR":
-            temp_source0 = "Vocabulary: Acquisition and Use"
-            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
-        elif source == "Informational Text: Language, Craft, and Structure SCORE":
-            temp_source = "Informational Text: Language, Craft, and Structure"
-            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
-        elif source == "Informational Text: Language, Craft, and Structure STANDARD ERROR":
-            temp_source0 = "Informational Text: Language, Craft, and Structure"
-            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
-        elif source == "Literary Text: Language, Craft, and Structure SCORE":
-            temp_source = "Literary Text: Language, Craft, and Structure"
-            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
-        elif source == "Literary Text: Language, Craft, and Structure STANDARD ERROR":
-            temp_source0 = "Literary Text: Language, Craft, and Structure"
-            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
-        elif source == "Literary Text: Key Ideas and Details SCORE":
-            temp_source = "Literary Text: Key Ideas and Details"
-            extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
-        elif source == "Literary Text: Key Ideas and Details STANDARD ERROR":
-            temp_source0 = "Literary Text: Key Ideas and Details"
-            extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
-        elif source == "Vocabulary Use and Functions":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Foundational Skills":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Language and Writing":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Literature and Informational Text":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Writing: Write, Revise Texts for Purpose and Audience":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Language: Understand, Edit for Grammar, Usage":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
-        elif source == "Language: Understand, Edit for Mechanics":
-            extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Informational Text: Key Ideas and Details SCORE":
+        #     temp_source = "Informational Text: Key Ideas and Details"
+        #     extract_regex = "(?<=" + temp_source + ")\s\d{1,3}"
+        # elif source == "Informational Text: Key Ideas and Details STANDARD ERROR":
+        #     temp_source0 = "Informational Text: Key Ideas and Details"
+        #     extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
+        # elif source == "Vocabulary: Acquisition and Use SCORE":
+        #     temp_source = "Vocabulary: Acquisition and Use"
+        #     extract_regex = "(?<=" + temp_source + ")\s+\d{3}"
+        # elif source == "Vocabulary: Acquisition and Use STANDARD ERROR":
+        #     temp_source0 = "Vocabulary: Acquisition and Use"
+        #     extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
+        # elif source == "Informational Text: Language, Craft, and Structure SCORE":
+        #     temp_source = "Informational Text: Language, Craft, and Structure"
+        #     extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
+        # elif source == "Informational Text: Language, Craft, and Structure STANDARD ERROR":
+        #     temp_source0 = "Informational Text: Language, Craft, and Structure"
+        #     extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
+        # elif source == "Literary Text: Language, Craft, and Structure SCORE":
+        #     temp_source = "Literary Text: Language, Craft, and Structure"
+        #     extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
+        # elif source == "Literary Text: Language, Craft, and Structure STANDARD ERROR":
+        #     temp_source0 = "Literary Text: Language, Craft, and Structure"
+        #     extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
+        # elif source == "Literary Text: Key Ideas and Details SCORE":
+        #     temp_source = "Literary Text: Key Ideas and Details"
+        #     extract_regex = "(?<=" + temp_source + ")\s+\d{1,3}"
+        # elif source == "Literary Text: Key Ideas and Details STANDARD ERROR":
+        #     temp_source0 = "Literary Text: Key Ideas and Details"
+        #     extract_regex = "(?<=" + temp_source0 + ")\s+\d{1,3}\s±\s[\d\.]+"
+        # elif source == "Vocabulary Use and Functions":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Foundational Skills":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Language and Writing":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Literature and Informational Text":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Writing: Write, Revise Texts for Purpose and Audience":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Language: Understand, Edit for Grammar, Usage":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
+        # elif source == "Language: Understand, Edit for Mechanics":
+        #     extract_regex = "(?<=" + source + ")\s+\d{1,3}"
         else:
             pass
         logging.info("-----regex of {}-----{}---".format(source, extract_regex))
@@ -901,59 +902,59 @@ def extract_map_data(data, phonenumber):
             extract_data_dict_ready2_my_sql_model['Grades'] = mapnwea_student_profile_summary_info_dict[KeyItem]
         elif KeyItem == 'Concepts to':
             extract_data_dict_ready2_my_sql_model['Concepts_to'] = 'Reinforce, Develop'
-        elif KeyItem == 'Informational Text: Key Ideas and Details SCORE':
-            extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_SCORE'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Informational Text: Key Ideas and Details STANDARD ERROR':
-            extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Vocabulary: Acquisition and Use SCORE':
-            extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_SCORE'] = \
-                mapnwea_student_profile_summary_info_dict[
-                    KeyItem]
-        elif KeyItem == 'Vocabulary: Acquisition and Use STANDARD ERROR':
-            extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_STANDARD_ERROR'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Informational Text: Language, Craft, and Structure SCORE':
-            extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_SCORE'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Informational Text: Language, Craft, and Structure STANDARD ERROR':
-            extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Literary Text: Language, Craft, and Structure SCORE':
-            extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_SCORE'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Literary Text: Language, Craft, and Structure STANDARD ERROR':
-            extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Literary Text: Key Ideas and Details SCORE':
-            extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_SCORE'] = \
-                mapnwea_student_profile_summary_info_dict[
-                    KeyItem]
-        elif KeyItem == 'Literary Text: Key Ideas and Details STANDARD ERROR':
-            extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Vocabulary Use and Functions':
-            extract_data_dict_ready2_my_sql_model['vocabulary_use_and_function'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Foundational Skills':
-            extract_data_dict_ready2_my_sql_model['foundational_skills'] = mapnwea_student_profile_summary_info_dict[
-                KeyItem]
-        elif KeyItem == 'Language and Writing':
-            extract_data_dict_ready2_my_sql_model['language_and_writing'] = mapnwea_student_profile_summary_info_dict[
-                KeyItem]
-        elif KeyItem == 'Literature and Informational Text':
-            extract_data_dict_ready2_my_sql_model['literature_and_informational_text'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Writing: Write, Revise Texts for Purpose and Audience':
-            extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Language: Understand, Edit for Grammar, Usage':
-            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_grammar_usage'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
-        elif KeyItem == 'Language: Understand, Edit for Mechanics':
-            extract_data_dict_ready2_my_sql_model['language_understand_edit_for_mechanics'] = \
-                mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Informational Text: Key Ideas and Details SCORE':
+        #     extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_SCORE'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Informational Text: Key Ideas and Details STANDARD ERROR':
+        #     extract_data_dict_ready2_my_sql_model['Informational_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Vocabulary: Acquisition and Use SCORE':
+        #     extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_SCORE'] = \
+        #         mapnwea_student_profile_summary_info_dict[
+        #             KeyItem]
+        # elif KeyItem == 'Vocabulary: Acquisition and Use STANDARD ERROR':
+        #     extract_data_dict_ready2_my_sql_model['Vocabulary_Acquisition_and_Use_STANDARD_ERROR'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Informational Text: Language, Craft, and Structure SCORE':
+        #     extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_SCORE'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Informational Text: Language, Craft, and Structure STANDARD ERROR':
+        #     extract_data_dict_ready2_my_sql_model['Informational_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Literary Text: Language, Craft, and Structure SCORE':
+        #     extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_SCORE'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Literary Text: Language, Craft, and Structure STANDARD ERROR':
+        #     extract_data_dict_ready2_my_sql_model['Literary_Text_Language_Craft_and_Structure_STANDARD_ERROR'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Literary Text: Key Ideas and Details SCORE':
+        #     extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_SCORE'] = \
+        #         mapnwea_student_profile_summary_info_dict[
+        #             KeyItem]
+        # elif KeyItem == 'Literary Text: Key Ideas and Details STANDARD ERROR':
+        #     extract_data_dict_ready2_my_sql_model['Literary_Text_Key_Ideas_and_Details_STANDARD_ERROR'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Vocabulary Use and Functions':
+        #     extract_data_dict_ready2_my_sql_model['vocabulary_use_and_function'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Foundational Skills':
+        #     extract_data_dict_ready2_my_sql_model['foundational_skills'] = mapnwea_student_profile_summary_info_dict[
+        #         KeyItem]
+        # elif KeyItem == 'Language and Writing':
+        #     extract_data_dict_ready2_my_sql_model['language_and_writing'] = mapnwea_student_profile_summary_info_dict[
+        #         KeyItem]
+        # elif KeyItem == 'Literature and Informational Text':
+        #     extract_data_dict_ready2_my_sql_model['literature_and_informational_text'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Writing: Write, Revise Texts for Purpose and Audience':
+        #     extract_data_dict_ready2_my_sql_model['writing_write_revise_texts_for_purpose_and_audience'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Language: Understand, Edit for Grammar, Usage':
+        #     extract_data_dict_ready2_my_sql_model['language_understand_edit_for_grammar_usage'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
+        # elif KeyItem == 'Language: Understand, Edit for Mechanics':
+        #     extract_data_dict_ready2_my_sql_model['language_understand_edit_for_mechanics'] = \
+        #         mapnwea_student_profile_summary_info_dict[KeyItem]
         else:
             pass
 
@@ -1030,6 +1031,11 @@ def extract_map_ext_data(ext_data, map_pro):
             name = re.sub("&[\\d&]*", " ", domain).strip()
             strength_str = strength_str + str(i) + ','
             log.info("Strength item index: {}, domain name: {}".format(i, name))
+        reg_score = '(\d+)[& ]*' + domain_name_reg_list[i]
+        score = re.findall(reg_score, ext_data)
+        if score:
+            log.info("Domain name: {}, score: {}".format(domain_name_reg_list[i], score[0]))
+            setattr(map_pro, domain_name_field_list[i], score[0])
     map_pro.suggested_area_of_focus_list = focus_str.strip(',')
     map_pro.relative_strength_list = strength_str.strip(',')
     map_pro.save()
