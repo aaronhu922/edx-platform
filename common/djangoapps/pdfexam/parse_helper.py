@@ -1036,6 +1036,13 @@ def extract_map_ext_data(ext_data, map_pro):
         if score:
             log.info("Domain name: {}, score: {}".format(domain_name_reg_list[i], score[0]))
             setattr(map_pro, domain_name_field_list[i], score[0])
+        else:
+            score = re.findall(domain_name_reg_list[i], ext_data)
+            if score:
+                score_mid = re.findall("\d+", score[0])
+                if score_mid:
+                    setattr(map_pro, domain_name_field_list[i], score_mid[0])
+                    log.info("Domain name: {}, score: {}".format(domain_name_reg_list[i], score_mid[0]))
     map_pro.suggested_area_of_focus_list = focus_str.strip(',')
     map_pro.relative_strength_list = strength_str.strip(',')
     map_pro.save()
