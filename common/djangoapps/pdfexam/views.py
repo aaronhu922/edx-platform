@@ -235,10 +235,22 @@ def create_instructional_report(stu_map_pro, instructional_file):
     instruct_pdffilestored = os.path.join(settings.MEDIA_ROOT, instructional_file.name)
     pdf_writer = PdfFileWriter()
     original_report = PdfFileReader(open(instruct_pdffilestored, "rb"))
+    final_name = phonenumber + stu_map_pro.TestDate + stu_map_pro.Growth + "_instruction.pdf"
+    final_page = os.path.join(settings.MEDIA_ROOT, final_name)
     pages_num = len(original_report.pages)
     first_page = original_report.getPage(0)
     up_right = first_page.mediaBox.upperRight
     first_page.mediaBox.upperLeft = (0, up_right[1] - 380)
+
+    # if only one page, return croped page.
+    if pages_num == 1:
+        log.info("only has one page of develop report.")
+        first_page.mediaBox.lowerLeft = (0, 180)
+        pdf_writer.addPage(first_page)
+        with Path(final_page).open(mode="wb") as output_file:
+            pdf_writer.write(output_file)
+        return final_name
+
     pdf_writer.addPage(first_page)
     first_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_0.pdf")
     last_page_new = os.path.join(settings.MEDIA_ROOT, phonenumber + "_1.pdf")
@@ -256,8 +268,7 @@ def create_instructional_report(stu_map_pro, instructional_file):
     merger.append(input_first)
     merger.append(fileobj=original_report, pages=(1, pages_num - 1))
     merger.append(input_last)
-    final_name = phonenumber + stu_map_pro.TestDate + stu_map_pro.Growth + "_instruction.pdf"
-    final_page = os.path.join(settings.MEDIA_ROOT, final_name)
+
     output = open(final_page, "wb")
     merger.write(output)
     merger.close()
@@ -295,6 +306,9 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub("Cra. ", "Craft ", text)
     text = re.sub("e.ect ", "effect ", text)
     text = re.sub(".gurative ", "figurative ", text)
+    fly = re.findall('(.y)\d+', text)
+    text = text.replace(fly[0], 'fly')
+
     # text = re.sub(".y\d\d ", "effect ", text)
 
     txt_arr = text.split('\n')
