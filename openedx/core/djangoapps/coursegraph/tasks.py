@@ -11,8 +11,9 @@ from django.conf import settings
 from django.utils import six, timezone
 from edx_django_utils.cache import RequestCache
 from opaque_keys.edx.keys import CourseKey
-from py2neo import Graph, Node, Relationship, authenticate, NodeSelector
+from py2neo import Graph, Node, Relationship, NodeSelector
 from py2neo.compat import integer, string
+# from rest_framework import authentication
 
 
 log = logging.getLogger(__name__)
@@ -387,13 +388,17 @@ def authenticate_and_create_graph(credentials):
     neo4j_user = credentials['user']
     neo4j_password = credentials['password']
 
-    authenticate(
-        "{host}:{port}".format(
-            host=host, port=https_port if secure else http_port
-        ),
-        neo4j_user,
-        neo4j_password,
-    )
+    # authenticate(
+    #     "{host}:{port}".format(
+    #         host=host, port=https_port if secure else http_port
+    #     ),
+    #     neo4j_user,
+    #     neo4j_password,
+    # )
+    #
+    # authentication.BaseAuthentication
+
+    # graph = Graph(host=HOST, auth=(USER, PASS))
 
     graph = Graph(
         bolt=True,
