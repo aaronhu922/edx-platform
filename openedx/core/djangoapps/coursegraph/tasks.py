@@ -11,7 +11,7 @@ from django.conf import settings
 from django.utils import six, timezone
 from edx_django_utils.cache import RequestCache
 from opaque_keys.edx.keys import CourseKey
-from py2neo import Graph, Node, Relationship, NodeSelector
+from py2neo import Graph, Node, Relationship, NodeMatcher
 from py2neo.compat import integer, string
 # from rest_framework import authentication
 
@@ -111,7 +111,7 @@ def get_command_last_run(course_key, graph):
     Returns: The datetime that the command was last run, converted into
         text, or None, if there's no record of this command last being run.
     """
-    selector = NodeSelector(graph)
+    selector = NodeMatcher(graph)
     course_node = selector.select(
         "course",
         course_key=six.text_type(course_key)
