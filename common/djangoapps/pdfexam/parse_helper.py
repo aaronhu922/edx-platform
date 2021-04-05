@@ -1014,9 +1014,12 @@ def extract_map_ext_data(ext_data, map_pro):
         log.info("Regex {}, value {}.".format(regex3, value))
         map_pro.lexile_score = value[0]
     value = re.findall(regex4, ext_data)
-    if len(value) > 0:
+    if value:
         log.info("Regex {}, value {}.".format(regex4, value))
-        map_pro.growth_goals_date = value[0]
+        if len(value[0]) > 15:
+            map_pro.growth_goals_date = "No Goals"
+        else:
+            map_pro.growth_goals_date = value[0]
 
     focus_str = ''
     strength_str = ''
