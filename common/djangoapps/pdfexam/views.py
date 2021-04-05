@@ -307,7 +307,8 @@ def make_pdf_file(output_filename, text, up_right):
     text = re.sub("e.ect ", "effect ", text)
     text = re.sub(".gurative ", "figurative ", text)
     fly = re.findall('(.y)\d+', text)
-    text = text.replace(fly[0], 'fly')
+    if fly:
+        text = text.replace(fly[0], 'fly')
 
     # text = re.sub(".y\d\d ", "effect ", text)
 
